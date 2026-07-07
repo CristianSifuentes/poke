@@ -8,4 +8,9 @@ import { Component, signal } from '@angular/core';
 })
 export class App {
   protected readonly title = signal('poke');
+  protected readonly isMenuOpen = signal(false);
+
+  protected toggleMenu(): void {
+    this.isMenuOpen.update((open) => !open);
+  }
 }
