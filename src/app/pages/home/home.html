@@ -8,10 +8,10 @@
     <article
       *ngFor="let pokemon of pokemons; trackBy: trackByPokemonId"
       class="dex-card dex-card--{{ pokemon.bento }}"
-      [style.--accent]="pokemon.types[0].color"
+      [style.--accent]="pokemon.types[0] | pokemonTypeColor"
       [attr.tabindex]="pokemon.bento === 'regular' ? 0 : null"
     >
-      <span class="dex-card__id">#{{ paddedId(pokemon.id) }}</span>
+      <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
 
       <div class="dex-card__art">
         <img [src]="pokemon.image" [alt]="pokemon.name" loading="lazy" />
@@ -25,9 +25,9 @@
           <li
             *ngFor="let type of pokemon.types"
             class="dex-card__type"
-            [style.background]="type.color"
+            [style.background]="type | pokemonTypeColor"
           >
-            {{ type.name }}
+            {{ type }}
           </li>
         </ul>
       </div>

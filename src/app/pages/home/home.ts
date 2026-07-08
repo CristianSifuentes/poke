@@ -1,10 +1,5 @@
 import { Component } from '@angular/core';
 
-interface PokemonType {
-  name: string;
-  color: string;
-}
-
 type BentoSize = 'hero' | 'wide' | 'tall' | 'regular';
 
 interface DommiePokemon {
@@ -12,33 +7,8 @@ interface DommiePokemon {
   name: string;
   nickname: string;
   image: string;
-  types: PokemonType[];
+  types: string[];
   bento: BentoSize;
-}
-
-const TYPE_COLORS: Record<string, string> = {
-  normal: '#a8a878',
-  fire: '#f08030',
-  water: '#6890f0',
-  electric: '#f8d030',
-  grass: '#78c850',
-  ice: '#98d8d8',
-  fighting: '#c03028',
-  poison: '#a040a0',
-  ground: '#e0c068',
-  flying: '#a890f0',
-  psychic: '#f85888',
-  bug: '#a8b820',
-  rock: '#b8a038',
-  ghost: '#705898',
-  dragon: '#7038f8',
-  dark: '#705848',
-  steel: '#b8b8d0',
-  fairy: '#ee99ac',
-};
-
-function pokemonTypes(...names: string[]): PokemonType[] {
-  return names.map((name) => ({ name, color: TYPE_COLORS[name] }));
 }
 
 function artwork(id: number): string {
@@ -60,7 +30,7 @@ export class Home {
       name: 'Pikachu',
       nickname: 'Sparky',
       image: artwork(25),
-      types: pokemonTypes('electric'),
+      types: ['electric'],
       bento: 'hero',
     },
     {
@@ -68,7 +38,7 @@ export class Home {
       name: 'Charizard',
       nickname: 'Blaze',
       image: artwork(6),
-      types: pokemonTypes('fire', 'flying'),
+      types: ['fire', 'flying'],
       bento: 'wide',
     },
     {
@@ -76,7 +46,7 @@ export class Home {
       name: 'Lucario',
       nickname: 'Aura',
       image: artwork(448),
-      types: pokemonTypes('fighting', 'steel'),
+      types: ['fighting', 'steel'],
       bento: 'tall',
     },
     {
@@ -84,7 +54,7 @@ export class Home {
       name: 'Gengar',
       nickname: 'Shadow',
       image: artwork(94),
-      types: pokemonTypes('ghost', 'poison'),
+      types: ['ghost', 'poison'],
       bento: 'regular',
     },
     {
@@ -92,7 +62,7 @@ export class Home {
       name: 'Umbreon',
       nickname: 'Luna',
       image: artwork(197),
-      types: pokemonTypes('dark'),
+      types: ['dark'],
       bento: 'regular',
     },
     {
@@ -100,7 +70,7 @@ export class Home {
       name: 'Greninja',
       nickname: 'Kunai',
       image: artwork(658),
-      types: pokemonTypes('water', 'dark'),
+      types: ['water', 'dark'],
       bento: 'regular',
     },
     {
@@ -108,7 +78,7 @@ export class Home {
       name: 'Gardevoir',
       nickname: 'Aria',
       image: artwork(282),
-      types: pokemonTypes('psychic', 'fairy'),
+      types: ['psychic', 'fairy'],
       bento: 'regular',
     },
     {
@@ -116,7 +86,7 @@ export class Home {
       name: 'Dragonite',
       nickname: 'Rex',
       image: artwork(149),
-      types: pokemonTypes('dragon', 'flying'),
+      types: ['dragon', 'flying'],
       bento: 'wide',
     },
     {
@@ -124,7 +94,7 @@ export class Home {
       name: 'Bulbasaur',
       nickname: 'Sprout',
       image: artwork(1),
-      types: pokemonTypes('grass', 'poison'),
+      types: ['grass', 'poison'],
       bento: 'regular',
     },
     {
@@ -132,7 +102,7 @@ export class Home {
       name: 'Squirtle',
       nickname: 'Puddle',
       image: artwork(7),
-      types: pokemonTypes('water'),
+      types: ['water'],
       bento: 'regular',
     },
     {
@@ -140,7 +110,7 @@ export class Home {
       name: 'Eevee',
       nickname: 'Clover',
       image: artwork(133),
-      types: pokemonTypes('normal'),
+      types: ['normal'],
       bento: 'regular',
     },
     {
@@ -148,7 +118,7 @@ export class Home {
       name: 'Snorlax',
       nickname: 'Boulder',
       image: artwork(143),
-      types: pokemonTypes('normal'),
+      types: ['normal'],
       bento: 'tall',
     },
     {
@@ -156,7 +126,7 @@ export class Home {
       name: 'Mewtwo',
       nickname: 'Genome',
       image: artwork(150),
-      types: pokemonTypes('psychic'),
+      types: ['psychic'],
       bento: 'wide',
     },
     {
@@ -164,7 +134,7 @@ export class Home {
       name: 'Jigglypuff',
       nickname: 'Melody',
       image: artwork(39),
-      types: pokemonTypes('normal', 'fairy'),
+      types: ['normal', 'fairy'],
       bento: 'regular',
     },
     {
@@ -172,7 +142,7 @@ export class Home {
       name: 'Alakazam',
       nickname: 'Cipher',
       image: artwork(65),
-      types: pokemonTypes('psychic'),
+      types: ['psychic'],
       bento: 'regular',
     },
     {
@@ -180,16 +150,12 @@ export class Home {
       name: 'Tyranitar',
       nickname: 'Quake',
       image: artwork(248),
-      types: pokemonTypes('rock', 'dark'),
+      types: ['rock', 'dark'],
       bento: 'regular',
     },
   ];
 
   trackByPokemonId(_index: number, pokemon: DommiePokemon): number {
     return pokemon.id;
-  }
-
-  paddedId(id: number): string {
-    return id.toString().padStart(3, '0');
   }
 }
