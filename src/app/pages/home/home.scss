@@ -210,11 +210,17 @@
   }
 
   // Regular tiles stay quiet by default — a name, a nickname, a whisper of
-  // type — and only reveal their portrait when a precise pointer lingers.
+  // type — and only reveal their portrait once appRevealOnInteraction says
+  // to. The directive knows whether this device can even hover
+  // (`.can-hover`) and toggles `.is-revealed` on pointer/focus, so on a
+  // precise pointer the art hides behind the text until summoned, while a
+  // touch device — which the directive marks revealed from the start and
+  // never marks `.can-hover` — simply keeps art and text stacked and always
+  // visible, exactly as it would with no directive at all.
   &--regular {
     justify-content: center;
 
-    @media (hover: hover) and (pointer: fine) {
+    &.can-hover {
       .dex-card__id {
         position: relative;
         z-index: 3;
@@ -237,8 +243,7 @@
         transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
       }
 
-      &:hover,
-      &:focus-within {
+      &.is-revealed {
         .dex-card__art {
           opacity: 1;
           transform: scale(1);
@@ -276,7 +281,9 @@
   // grid — every regular tile settles instead, portrait resting above its
   // name, always in view, given the extra row it needs to hold both without
   // crowding.
-  .dex-card--regular {
+  .dex-card--regular,
+  .dex-card--regular.can-hover,
+  .dex-card--regular.can-hover.is-revealed {
     grid-row: span 2;
     justify-content: flex-start;
 
