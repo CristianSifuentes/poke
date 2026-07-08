@@ -16,4 +16,8 @@ export class Header {
     this.isMenuOpen.update((open) => !open);
   }
 
+  protected closeMenu(): void {
+    this.isMenuOpen.set(false);
+  }
+
 }
