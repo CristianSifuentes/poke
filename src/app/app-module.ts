@@ -4,12 +4,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { App } from './app';
 import { CoreModule } from './core/core-module';
 import { AppRoutingModule } from './app-routing-module';
-import { HomeModule } from './pages/home/home-module';
-import { SearchModule } from './pages/search/search-module';
-import { FavoritesModule } from './pages/favorites/favorites-module';
-
-import { AboutModule } from './pages/about/about-module';
-
 
 @NgModule({
   declarations: [App],
@@ -19,12 +13,8 @@ import { AboutModule } from './pages/about/about-module';
     //own modules
     CoreModule,
 
-    //no home routing module because it is lazy loaded
-    HomeModule,
-    SearchModule,
-    FavoritesModule,
-    AboutModule,
-
+    // feature modules are lazy-loaded via loadChildren in AppRoutingModule —
+    // importing them here too would double-register their routes
     AppRoutingModule,
   ],
   providers: [provideBrowserGlobalErrorListeners()],
