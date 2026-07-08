@@ -1,8 +1,43 @@
-<p>home works!</p>
+<section class="dex">
+  <header class="dex__header">
+    <h1>{{ trainerName }}'s Pokémon</h1>
+    <p>A hand-picked squad, ready to battle.</p>
+  </header>
 
-<button type="button" routerLink="/home/detail">
-    Go to home detail
-</button>
+  <div class="dex__grid">
+    <article
+      *ngFor="let pokemon of pokemons; trackBy: trackByPokemonId"
+      class="dex-card dex-card--{{ pokemon.bento }}"
+      [style.--accent]="pokemon.types[0].color"
+      [attr.tabindex]="pokemon.bento === 'regular' ? 0 : null"
+    >
+      <span class="dex-card__id">#{{ paddedId(pokemon.id) }}</span>
 
+      <div class="dex-card__art">
+        <img [src]="pokemon.image" [alt]="pokemon.name" loading="lazy" />
+      </div>
+
+      <div class="dex-card__body">
+        <h2 class="dex-card__name">{{ pokemon.name }}</h2>
+        <p class="dex-card__nickname">&ldquo;{{ pokemon.nickname }}&rdquo;</p>
+
+        <ul class="dex-card__types">
+          <li
+            *ngFor="let type of pokemon.types"
+            class="dex-card__type"
+            [style.background]="type.color"
+          >
+            {{ type.name }}
+          </li>
+        </ul>
+      </div>
+    </article>
+  </div>
+
+  <a class="dex__more" routerLink="/home/detail">
+    See Pokémon detail
+    <span aria-hidden="true">&rarr;</span>
+  </a>
 
   <router-outlet/>
+</section>
