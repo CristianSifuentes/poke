@@ -13,6 +13,12 @@ const routes: Routes = [
   }, {
     path: 'search',
     redirectTo: 'search'
+  }, {
+    path: 'favorites',
+    redirectTo: 'favorites'
+  }, {
+    path: 'about',
+    redirectTo: 'about'
   }
 ];
 

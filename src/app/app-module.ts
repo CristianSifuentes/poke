@@ -6,6 +6,10 @@ import { CoreModule } from './core/core-module';
 import { AppRoutingModule } from './app-routing-module';
 import { HomeModule } from './pages/home/home-module';
 import { SearchModule } from './pages/search/search-module';
+import { FavoritesModule } from './pages/favorites/favorites-module';
+
+import { AboutModule } from './pages/about/about-module';
+
 
 @NgModule({
   declarations: [App],
@@ -18,8 +22,9 @@ import { SearchModule } from './pages/search/search-module';
     //no home routing module because it is lazy loaded
     HomeModule,
     SearchModule,
+    FavoritesModule,
+    AboutModule,
 
-    
     AppRoutingModule,
   ],
   providers: [provideBrowserGlobalErrorListeners()],

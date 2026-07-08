@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  padding: 2rem 1.5rem;
+}
+
+.favorites {
+  max-width: 720px;
+  margin: 0 auto;
+
+  &__header {
+    margin-bottom: 1.5rem;
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      color: #6e6e73;
+    }
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 3rem 1.5rem;
+    border: 1px dashed #e5e5ea;
+    border-radius: 0.75rem;
+    text-align: center;
+    color: #6e6e73;
+  }
+
+  &__empty-icon {
+    font-size: 2rem;
+    color: #ee1515;
+  }
+}
