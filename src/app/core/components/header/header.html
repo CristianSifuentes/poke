@@ -1,0 +1,26 @@
+<header class="navbar">
+  <a class="navbar__brand" href="#" aria-label="{{ title() }} home">
+    <span class="navbar__logo" aria-hidden="true"></span>
+    <span class="navbar__title">{{ title() }}</span>
+  </a>
+
+  <button
+    class="navbar__toggle"
+    type="button"
+    aria-label="Toggle navigation menu"
+    [attr.aria-expanded]="isMenuOpen()"
+    (click)="toggleMenu()"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <nav class="navbar__nav" [class.navbar__nav--open]="isMenuOpen()" aria-label="Main navigation">
+    <a class="navbar__link navbar__link--active" href="#">Home</a>
+    <a class="navbar__link" href="#">Pokédex</a>
+    <a class="navbar__link" href="#">Favorites</a>
+    <a class="navbar__link" href="#">About</a>
+  </nav>
+</header>
+
