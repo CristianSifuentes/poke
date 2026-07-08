@@ -271,6 +271,38 @@
   .dex-card--hero {
     grid-column: span 2;
   }
+
+  // At two columns the coy hover-reveal no longer suits the rhythm of the
+  // grid — every regular tile settles instead, portrait resting above its
+  // name, always in view, given the extra row it needs to hold both without
+  // crowding.
+  .dex-card--regular {
+    grid-row: span 2;
+    justify-content: flex-start;
+
+    .dex-card__id {
+      position: static;
+      align-self: flex-end;
+    }
+
+    .dex-card__art {
+      position: static;
+      inset: auto;
+      z-index: auto;
+      flex: 1;
+      width: 100%;
+      padding: 0;
+      background: transparent;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .dex-card__body {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 @media screen and (max-width: 560px) {
@@ -282,7 +314,8 @@
   .dex-card,
   .dex-card--hero,
   .dex-card--wide,
-  .dex-card--tall {
+  .dex-card--tall,
+  .dex-card--regular {
     grid-column: span 1;
     grid-row: span 1;
   }
