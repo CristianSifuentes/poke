@@ -1,5 +1,5 @@
 <header class="navbar">
-  <a class="navbar__brand" href="#" aria-label="{{ title() }} home">
+  <a class="navbar__brand" routerLink="/home" aria-label="{{ title() }} home">
     <span class="navbar__logo" aria-hidden="true"></span>
     <span class="navbar__title">{{ title() }}</span>
   </a>
@@ -16,11 +16,27 @@
     <span></span>
   </button>
 
-  <nav class="navbar__nav" [class.navbar__nav--open]="isMenuOpen()" aria-label="Main navigation">
-    <a class="navbar__link navbar__link--active" href="#">Home</a>
-    <a class="navbar__link" href="#">Pokédex</a>
-    <a class="navbar__link" href="#">Favorites</a>
-    <a class="navbar__link" href="#">About</a>
+  <nav class="navbar__nav" [class.navbar__nav--open]="isMenuOpen()" aria-label="Main navigation" (click)="closeMenu()">
+    <a
+      class="navbar__link"
+      routerLink="/home"
+      routerLinkActive="navbar__link--active"
+    >Home</a>
+    <a
+      class="navbar__link"
+      routerLink="/search"
+      routerLinkActive="navbar__link--active"
+    >Pokédex</a>
+    <a
+      class="navbar__link"
+      routerLink="/favorites"
+      routerLinkActive="navbar__link--active"
+    >Favorites</a>
+    <a
+      class="navbar__link"
+      routerLink="/about"
+      routerLinkActive="navbar__link--active"
+    >About</a>
   </nav>
 </header>
 
