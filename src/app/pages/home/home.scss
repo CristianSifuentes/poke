@@ -177,14 +177,25 @@
   &--wide {
     grid-column: span 2;
     flex-direction: row;
-    align-items: center;
+    align-items: stretch;
 
+    // A square thumbnail keyed to the row's own height, not a percentage
+    // of the row's width — so it holds its shape whether "wide" is
+    // spanning two columns of four (desktop) or two of two (tablet),
+    // instead of stretching thin as the row widens.
     .dex-card__art {
-      flex: 0 0 40%;
+      flex: 0 0 auto;
+      align-self: stretch;
+      width: auto;
+      aspect-ratio: 1 / 1;
+      max-height: 100%;
+      min-height: 0;
     }
 
     .dex-card__body {
       flex: 1;
+      min-width: 0;
+      align-self: center;
     }
 
     .dex-card__id {
@@ -282,7 +293,15 @@
 
     .dex-card__art {
       flex: 0 0 auto;
-      min-height: 140px;
+      align-self: stretch;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: none;
+      min-height: 0;
+    }
+
+    .dex-card__body {
+      align-self: stretch;
     }
 
     .dex-card__id {
