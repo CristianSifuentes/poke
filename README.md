@@ -20,6 +20,7 @@
   - [Current Folder Tree](#current-folder-tree)
   - [Folder Responsibilities](#folder-responsibilities)
 - [Naming & Coding Conventions](#naming--coding-conventions)
+- [UI Pattern Spotlight: The Home Bento Grid](#ui-pattern-spotlight-the-home-bento-grid)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -111,9 +112,15 @@ poke/
 │   │       ├── home/
 │   │       │   ├── home-module.ts        # Feature NgModule — lazy-loaded target
 │   │       │   ├── home-routing-module.ts# path: '' (relative to /home segment)
-│   │       │   ├── home.ts
+│   │       │   ├── home.ts               # "Dommie's Pokémon" — bento-grid dataset + view logic
 │   │       │   ├── home.html
-│   │       │   └── home.scss
+│   │       │   ├── home.scss             # Bento CSS Grid — see UI Pattern Spotlight below
+│   │       │   ├── home-detail/          # Nested view, declared in HomeModule
+│   │       │   │   ├── home-detail.ts
+│   │       │   │   ├── home-detail.html
+│   │       │   │   └── home-detail.scss
+│   │       │   ├── home-card/            # Reserved — empty scaffold, not yet extracted
+│   │       │   └── home-card-container/  # Reserved — empty scaffold, not yet extracted
 │   │       ├── search/                   # Pokédex search — lazy-loaded target
 │   │       │   ├── search-module.ts
 │   │       │   ├── search-routing-module.ts # path: '' (relative to /search segment)
@@ -161,6 +168,17 @@ poke/
 - **SCSS colocation** — every component owns its own `.scss`; cross-cutting tokens (colors, spacing) are promoted to `styles.scss` only once genuinely shared by 2+ components.
 - **Signals over manual subscriptions** for local component state (see `Header`'s `isMenuOpen` signal, toggled/closed via a mobile hamburger menu).
 - **Navigation stays declarative** — `Header` uses `routerLink` + `routerLinkActive` (with `[routerLinkActiveOptions]="{ exact: true }"` so a link only highlights on an exact path match, not a prefix) for all four primary routes; no imperative `Router.navigate()` calls for top-level nav.
+
+## UI Pattern Spotlight: The Home Bento Grid
+
+`pages/home` is the first feature to move past scaffolding, and it doubles as a worked example of every styling convention above. It renders "Dommie's Pokémon" — a typed roster (`DommiePokemon[]` in `home.ts`) — as a **Bento-style CSS Grid**, and is a reference for four reusable patterns:
+
+1. **Size-driven dense packing.** Each Pokémon carries a `bento: 'hero' | 'wide' | 'tall' | 'regular'` field. `home.scss` maps each variant to a `grid-column`/`grid-row` span on a `grid-auto-flow: dense` container, so the mosaic look comes entirely from data, not hand-placed markup — adding a Pokémon is a one-object addition to the array, never a template edit.
+2. **Component-local design tokens.** Like `Header`, `Home` declares its own `--poke-red` / `--poke-ink` / `--poke-gray` / `--poke-border` / `--poke-bg` custom properties on `:host` rather than reading from a shared file (there isn't one yet — see [Growth Path](#growth-path)). Per-card accents (`--accent`, bound to each Pokémon's type color) are set inline via `[style.--accent]` and consumed by `border`, `box-shadow`, and `::before` rules.
+3. **Hover-reveal, gated by real input capability.** `regular`-sized tiles hide their artwork by default and only reveal it — a crossfade + scale, eased with `cubic-bezier(0.16, 1, 0.3, 1)` — inside `@media (hover: hover) and (pointer: fine)`, so touch devices simply always show the artwork instead of hitting a dead-end tap target. The same tiles get `tabindex="0"` + `:focus-within` so keyboard users get equivalent access, and every transition collapses under `@media (prefers-reduced-motion: reduce)`.
+4. **Responsive art bound to the stable dimension.** Both the `hero` and `wide` variants scale their Pokémon artwork by `aspect-ratio` against whichever box dimension stays predictable across breakpoints — `hero` sizes from the grid row's height (via `aspect-ratio: 1 / 1` + `max-height`) until its row height goes indeterminate at the single-column breakpoint, where it switches to sizing from width instead; `wide` sizes its thumbnail from the row's own height (`align-self: stretch` + `aspect-ratio: 1 / 1`) rather than a percentage of the row's width, so the image holds its shape whether the tile spans 2 of 4 columns (desktop) or 2 of 2 (tablet). `object-fit: contain` guarantees the artwork is always shown whole, never cropped, at every size.
+
+None of this required a new dependency — it's `grid-auto-flow: dense`, `aspect-ratio`, CSS custom properties, and media queries, matching the "additive, framework-idiomatic" spirit of the rest of the app. The same four patterns are the intended starting point once `search` and `favorites` grow past their current placeholder state.
 
 ## Getting Started
 
@@ -291,13 +309,14 @@ src/app/
 | ✅ 1  | Root `AppRoutingModule` (`redirectTo: 'home'` + `**` wildcard) wired into `AppModule` |
 | ✅ 2  | Four routed features (`home`, `search`, `favorites`, `about`) with a shell `Header` linking all of them |
 | ✅ 3  | All four features fully **lazy-loaded** via `loadChildren`; `AppModule` only imports `CoreModule` + `AppRoutingModule` — verified by `ng build` emitting one lazy `chunk-*.js` per feature |
-| 🔜 4  | `SharedModule` for reusable presentational components                      |
-| 🔜 5  | Typed `PokemonApiService` in `core/services`, backed by the [PokéAPI](https://pokeapi.co/) — to back `search` and `favorites` |
-| 🔜 6  | `models/` for strongly-typed domain entities                               |
-| 🔜 7  | HTTP interceptors (loading state, error normalization) in `core/interceptors` |
-| 🔜 8  | Route-level `preloadingStrategy` (e.g. `PreloadAllModules`) once enough features exist that first-navigation lazy-load latency is noticeable |
-| 🔜 9  | State management (Signals-based store, or NgRx if complexity demands it) — likely needed once `favorites` persists selections |
-| 🔜 10 | E2E test suite (Playwright/Cypress) alongside the existing Vitest unit tests |
+| ✅ 4  | `pages/home` moved past scaffolding: a responsive **Bento CSS Grid** ("Dommie's Pokémon") establishing the size-driven dense-packing, component-local token, hover-reveal, and aspect-ratio patterns — see [UI Pattern Spotlight](#ui-pattern-spotlight-the-home-bento-grid) |
+| 🔜 5  | `SharedModule` for reusable presentational components — the Home grid's card markup is the first extraction candidate (the empty `home-card` / `home-card-container` scaffolds mark where it was expected to land) |
+| 🔜 6  | Typed `PokemonApiService` in `core/services`, backed by the [PokéAPI](https://pokeapi.co/) — to replace `home.ts`'s hand-authored roster and back `search`/`favorites` |
+| 🔜 7  | `models/` for strongly-typed domain entities (promoting `home.ts`'s local `DommiePokemon`/`PokemonType` interfaces into a shared model) |
+| 🔜 8  | HTTP interceptors (loading state, error normalization) in `core/interceptors` |
+| 🔜 9  | Route-level `preloadingStrategy` (e.g. `PreloadAllModules`) once enough features exist that first-navigation lazy-load latency is noticeable |
+| 🔜 10 | State management (Signals-based store, or NgRx if complexity demands it) — likely needed once `favorites` persists selections |
+| 🔜 11 | E2E test suite (Playwright/Cypress) alongside the existing Vitest unit tests |
 
 Each stage is purely **additive**: new folders, new modules, new lazy routes — existing features never need to change shape to accommodate the next one.
 
