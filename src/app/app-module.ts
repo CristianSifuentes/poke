@@ -6,7 +6,13 @@ import { CoreModule } from "./core/core-module";
 
 @NgModule({
   declarations: [App],
-  imports: [BrowserModule, CoreModule],
+  imports: [
+    BrowserModule, 
+
+    //own modules
+    CoreModule
+  
+  ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
