@@ -10,6 +10,9 @@ const routes: Routes = [
   {
     path: '**',
     redirectTo: 'home'
+  }, {
+    path: 'search',
+    redirectTo: 'search'
   }
 ];
 

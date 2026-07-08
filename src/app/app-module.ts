@@ -18,6 +18,8 @@ import { SearchModule } from './pages/search/search-module';
     //no home routing module because it is lazy loaded
     HomeModule,
     SearchModule,
+
+    
     AppRoutingModule,
   ],
   providers: [provideBrowserGlobalErrorListeners()],
