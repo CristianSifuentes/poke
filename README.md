@@ -103,11 +103,13 @@ poke/
 │   │   │
 │   │   ├── core/                        # Singleton, app-wide concerns
 │   │   │   ├── core-module.ts            # Imported once by AppModule
-│   │   │   └── components/
-│   │   │       └── header/               # App shell navbar — links to every page below
-│   │   │           ├── header.ts
-│   │   │           ├── header.html
-│   │   │           └── header.scss
+│   │   │   ├── components/
+│   │   │   │   └── header/               # App shell navbar — links to every page below
+│   │   │   │       ├── header.ts
+│   │   │   │       ├── header.html
+│   │   │   │       └── header.scss
+│   │   │   └── pipes/
+│   │   │       └── custom-pipe-pipe.ts   # Scaffold stub — see Shared Pipes below
 │   │   │
 │   │   ├── pages/                        # Routed, feature-scoped modules
 │   │       ├── home/
@@ -162,6 +164,7 @@ poke/
 | --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `app/core/`                 | App shell UI, singleton services, guards, interceptors — loaded **once**        | Adding `services/`, `guards/`, `interceptors/` subfolders |
 | `app/core/components/`      | Structural UI rendered once per app (header, footer, side-nav)                  | One new component folder per shell element         |
+| `app/core/pipes/`           | Transforms that only ever make sense wrapped around the app shell itself — currently just the unimplemented `customPipe` stub (see [Shared Pipes](#shared-pipes-pure-transformations-not-template-methods)) | Fold into `shared/pipes/` instead unless the transform is genuinely shell-only |
 | `app/pages/<feature>/`      | One routed feature: its module, routing, components, and page-local styles      | One new sibling folder per feature — never touches other features |
 | `app/shared/`               | Reusable, stateless building blocks used by 2+ features — today, `pokedexId` and `pokemonTypeColor` pipes | New component/pipe/directive, declared + exported from `SharedModule`, imported by whichever feature module needs it |
 | `app/models/` *(planned)*   | TypeScript interfaces/types for domain data (e.g., `Pokemon`, `PokemonListItem`) | New `*.model.ts` file per domain entity            |
@@ -203,6 +206,8 @@ This is a small change with an outsized architectural payoff:
 - **One color palette, not one per feature.** `POKEMON_TYPE_COLORS` previously lived inside `home.ts`; now it's the only copy in the repo. When `search` and `favorites` render real Pokémon, they `import { SharedModule }` and get the same badge colors for free — no re-deriving, no drift.
 - **The data model got simpler, not more abstract.** `DommiePokemon.types` shrank from `{ name: string; color: string }[]` to plain `string[]` — the component's job is to hold *what* a Pokémon is, not *how* its type should be painted. That question now has exactly one answer, in exactly one file.
 - **Declared where the "planned" `SharedModule` in [Folder Responsibilities](#folder-responsibilities) said it would be.** `shared-module.ts` declares and exports both pipes; `HomeModule` imports `SharedModule` alongside `CommonModule` and `HomeRoutingModule` — the same "one new import, zero existing files rewritten" shape as every other addition in this app.
+
+**A second, `core`-scoped pipe exists too, and it's a useful contrast.** `core/pipes/custom-pipe-pipe.ts` declares `customPipe`, generated as a scaffold and registered directly in `CoreModule` — its `transform()` currently just returns `null` and it isn't referenced from any template yet. Its location is the tell: `core/` is for the app shell and singleton concerns ([Guiding Principle #2](#guiding-principles)), so a pipe declared there is implicitly saying "this only ever makes sense wrapped around shell-level UI, not feature data." Neither `pokedexId` nor `pokemonTypeColor` fit that description — they're Pokémon-domain transforms any feature might need — which is exactly why they live in `shared/`, not `core/`, instead. Until `customPipe` is implemented and given a real, shell-specific job, treat it the same as the empty `home-card` / `home-card-container` folders: a placeholder marking an intention, not a pattern to copy.
 
 ## Getting Started
 
