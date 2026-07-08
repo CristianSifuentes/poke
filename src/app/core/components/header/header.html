@@ -21,21 +21,25 @@
       class="navbar__link"
       routerLink="/home"
       routerLinkActive="navbar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >Home</a>
     <a
       class="navbar__link"
       routerLink="/search"
       routerLinkActive="navbar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >Pokédex</a>
     <a
       class="navbar__link"
       routerLink="/favorites"
       routerLinkActive="navbar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >Favorites</a>
     <a
       class="navbar__link"
       routerLink="/about"
       routerLinkActive="navbar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >About</a>
   </nav>
 </header>
