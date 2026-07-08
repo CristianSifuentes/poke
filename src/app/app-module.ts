@@ -2,11 +2,17 @@ import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { App } from './app';
-import { Home } from './pages/home/home';
+import { CoreModule } from "./core/core-module";
 
 @NgModule({
-  declarations: [App, Home],
-  imports: [BrowserModule],
+  declarations: [App],
+  imports: [
+    BrowserModule, 
+
+    //own modules
+    CoreModule
+  
+  ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
