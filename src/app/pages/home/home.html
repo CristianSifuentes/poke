@@ -9,6 +9,7 @@
       *ngFor="let pokemon of pokemons; trackBy: trackByPokemonId"
       class="dex-card dex-card--{{ pokemon.bento }}"
       [style.--accent]="pokemon.types[0].color"
+      [attr.tabindex]="pokemon.bento === 'regular' ? 0 : null"
     >
       <span class="dex-card__id">#{{ paddedId(pokemon.id) }}</span>
 

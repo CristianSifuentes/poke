@@ -85,6 +85,11 @@
     box-shadow: 0 12px 24px -12px rgba(28, 28, 30, 0.25);
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--accent, var(--poke-red));
+    outline-offset: 2px;
+  }
+
   &__id {
     align-self: flex-end;
     font-size: 0.75rem;
@@ -182,6 +187,59 @@
 
   &--tall {
     grid-row: span 2;
+  }
+
+  // Regular tiles stay quiet by default — a name, a nickname, a whisper of
+  // type — and only reveal their portrait when a precise pointer lingers.
+  &--regular {
+    justify-content: center;
+
+    @media (hover: hover) and (pointer: fine) {
+      .dex-card__id {
+        position: relative;
+        z-index: 3;
+      }
+
+      .dex-card__art {
+        position: absolute;
+        inset: 4px 0 0 0;
+        z-index: 2;
+        padding: 1.75rem 1.25rem 1.25rem;
+        background: var(--poke-bg);
+        opacity: 0;
+        transform: scale(0.86);
+        transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+      }
+
+      .dex-card__body {
+        transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
+      }
+
+      &:hover,
+      &:focus-within {
+        .dex-card__art {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .dex-card__body {
+          opacity: 0;
+          transform: translateY(4px);
+          transition-delay: 0s;
+        }
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dex-card,
+  .dex-card__art,
+  .dex-card__body,
+  .dex__more span {
+    transition: none !important;
   }
 }
 
