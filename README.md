@@ -157,7 +157,7 @@ poke/
 - **One module per feature folder**, colocated with its routing module (`<feature>-routing-module.ts`).
 - **SCSS colocation** — every component owns its own `.scss`; cross-cutting tokens (colors, spacing) are promoted to `styles.scss` only once genuinely shared by 2+ components.
 - **Signals over manual subscriptions** for local component state (see `Header`'s `isMenuOpen` signal, toggled/closed via a mobile hamburger menu).
-- **Navigation stays declarative** — `Header` uses `routerLink` + `routerLinkActive` for all four primary routes; no imperative `Router.navigate()` calls for top-level nav.
+- **Navigation stays declarative** — `Header` uses `routerLink` + `routerLinkActive` (with `[routerLinkActiveOptions]="{ exact: true }"` so a link only highlights on an exact path match, not a prefix) for all four primary routes; no imperative `Router.navigate()` calls for top-level nav.
 
 ## Getting Started
 

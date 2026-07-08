@@ -4,8 +4,9 @@ import { Home } from './home';
 
 const routes: Routes = [
   {
-    path: 'home',
-    component: Home
+    path: '',
+    component: Home,
+     
   }
 ];
 
