@@ -264,6 +264,10 @@
 
   &--tall {
     grid-row: span 2;
+
+    .dex-card__art img {
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
 
   // Regular tiles stay quiet by default — a name, a nickname, a whisper of
@@ -327,6 +331,26 @@
   .dex-card {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+@media screen and (min-width: 901px) {
+  // Tall cells are the one shape that keeps its full two-row height at
+  // every column count down to this breakpoint — a whole column's width,
+  // a whole column's worth of story. Give the portrait real room instead
+  // of letting it float in the default padding, then answer a hovering
+  // pointer the way you'd answer stepping too close to a painting: ease
+  // back half a step, rather than the hero's confident zoom-in.
+  .dex-card--tall {
+    .dex-card__art {
+      padding: 0.375rem 0.5rem;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover .dex-card__art img {
+        transform: scale(0.9);
+      }
+    }
   }
 }
 
