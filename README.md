@@ -21,6 +21,7 @@
   - [Folder Responsibilities](#folder-responsibilities)
 - [Naming & Coding Conventions](#naming--coding-conventions)
 - [UI Pattern Spotlight: The Home Bento Grid](#ui-pattern-spotlight-the-home-bento-grid)
+- [Shared Directives: Behavior That Doesn't Belong in a Component](#shared-directives-behavior-that-doesnt-belong-in-a-component)
 - [Shared Pipes: Pure Transformations, Not Template Methods](#shared-pipes-pure-transformations-not-template-methods)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -144,10 +145,17 @@ poke/
 │   │           └── about.scss
 │   │
 │   │   └── shared/                       # Reusable, stateless — imported by any feature that needs it
-│   │       ├── shared-module.ts          # Declares + exports every shared pipe
-│   │       └── pipes/
-│   │           ├── pokedex-id-pipe.ts        # number → '#025'
-│   │           └── pokemon-type-color-pipe.ts # type name → its brand color
+│   │       ├── shared-module.ts          # Declares + exports every shared pipe AND directive
+│   │       ├── pipes/
+│   │       │   ├── pokedex-id-pipe.ts        # number → '#025'
+│   │       │   └── pokemon-type-color-pipe.ts # type name → its brand color
+│   │       ├── directives/                   # Reusable behavior — see Shared Directives below
+│   │       │   ├── type-color-directive.ts       # appTypeColor — type → --accent or background
+│   │       │   ├── reveal-on-interaction-directive.ts # appRevealOnInteraction — hover/focus reveal
+│   │       │   ├── entrance-reveal-directive.ts  # appEntranceReveal — IntersectionObserver entrance
+│   │       │   └── magnetic-tilt-directive.ts    # appMagneticTilt — pointer-follow 3D tilt + glow
+│   │       └── utils/
+│   │           └── pokemon-type-colors.ts    # POKEMON_TYPE_COLORS map — single source for the pipe AND the directive
 │   │
 │   ├── index.html
 │   ├── main.ts                 # Bootstraps AppModule via platformBrowser
@@ -166,7 +174,7 @@ poke/
 | `app/core/components/`      | Structural UI rendered once per app (header, footer, side-nav)                  | One new component folder per shell element         |
 | `app/core/pipes/`           | Transforms that only ever make sense wrapped around the app shell itself — currently just the unimplemented `customPipe` stub (see [Shared Pipes](#shared-pipes-pure-transformations-not-template-methods)) | Fold into `shared/pipes/` instead unless the transform is genuinely shell-only |
 | `app/pages/<feature>/`      | One routed feature: its module, routing, components, and page-local styles      | One new sibling folder per feature — never touches other features |
-| `app/shared/`               | Reusable, stateless building blocks used by 2+ features — today, `pokedexId` and `pokemonTypeColor` pipes | New component/pipe/directive, declared + exported from `SharedModule`, imported by whichever feature module needs it |
+| `app/shared/`               | Reusable, stateless building blocks used by 2+ features — today, 2 pipes (`pokedexId`, `pokemonTypeColor`) and 4 directives (`appTypeColor`, `appRevealOnInteraction`, `appEntranceReveal`, `appMagneticTilt`) | New component/pipe/directive, declared + exported from `SharedModule`, imported by whichever feature module needs it |
 | `app/models/` *(planned)*   | TypeScript interfaces/types for domain data (e.g., `Pokemon`, `PokemonListItem`) | New `*.model.ts` file per domain entity            |
 | `src/styles.scss`           | Global resets, base typography — **not** component-specific rules               | Rare edits; prefer component SCSS instead          |
 
@@ -179,17 +187,37 @@ poke/
 - **Signals over manual subscriptions** for local component state (see `Header`'s `isMenuOpen` signal, toggled/closed via a mobile hamburger menu).
 - **Navigation stays declarative** — `Header` uses `routerLink` + `routerLinkActive` (with `[routerLinkActiveOptions]="{ exact: true }"` so a link only highlights on an exact path match, not a prefix) for all four primary routes; no imperative `Router.navigate()` calls for top-level nav.
 - **Pipes are named and filed like every other Angular building block here** — `name` in camelCase (`pokedexId`, `pokemonTypeColor`), class name is the PascalCase name + `Pipe` suffix, file name is the kebab-case name + `-pipe.ts` (`pokedex-id-pipe.ts`), matching the same "role-suffix, no dot-bracket" convention used for modules and routing modules. `angular.json` defaults `standalone: false` for pipes too, so they're declared in `SharedModule` rather than a component's own `imports`.
+- **Directives follow the same shape, prefixed `app`.** Selector is `appCamelCase` (`appTypeColor`, `appEntranceReveal`), class name is the PascalCase name + `Directive` suffix, file name is the kebab-case name + `-directive.ts` (`type-color-directive.ts`) — one more instance of "role-suffix, no dot-bracket," and, like the pipes, declared in `SharedModule` rather than any single feature.
 
 ## UI Pattern Spotlight: The Home Bento Grid
 
-`pages/home` is the first feature to move past scaffolding, and it doubles as a worked example of every styling convention above. It renders "Dommie's Pokémon" — a typed roster (`DommiePokemon[]` in `home.ts`) — as a **Bento-style CSS Grid**, and is a reference for four reusable patterns:
+`pages/home` is the first feature to move past scaffolding, and it doubles as a worked example of every styling convention above. It renders "Dommie's Pokémon" — a typed roster (`DommiePokemon[]` in `home.ts`) — as a **Bento-style CSS Grid**, and is a reference for five reusable patterns:
 
 1. **Size-driven dense packing.** Each Pokémon carries a `bento: 'hero' | 'wide' | 'tall' | 'regular'` field. `home.scss` maps each variant to a `grid-column`/`grid-row` span on a `grid-auto-flow: dense` container, so the mosaic look comes entirely from data, not hand-placed markup — adding a Pokémon is a one-object addition to the array, never a template edit.
-2. **Component-local design tokens.** Like `Header`, `Home` declares its own `--poke-red` / `--poke-ink` / `--poke-gray` / `--poke-border` / `--poke-bg` custom properties on `:host` rather than reading from a shared file (there isn't one yet — see [Growth Path](#growth-path)). Per-card accents (`--accent`) are set inline via `[style.--accent]="pokemon.types[0] | pokemonTypeColor"` — the type-to-color mapping itself lives in `shared/pipes`, not in `home.ts` (see [Shared Pipes](#shared-pipes-pure-transformations-not-template-methods) below), and is consumed by `border`, `box-shadow`, and `::before` rules.
-3. **Hover-reveal, gated by real input capability.** `regular`-sized tiles hide their artwork by default and only reveal it — a crossfade + scale, eased with `cubic-bezier(0.16, 1, 0.3, 1)` — inside `@media (hover: hover) and (pointer: fine)`, so touch devices simply always show the artwork instead of hitting a dead-end tap target. The same tiles get `tabindex="0"` + `:focus-within` so keyboard users get equivalent access, and every transition collapses under `@media (prefers-reduced-motion: reduce)`.
-4. **Responsive art bound to the stable dimension.** Both the `hero` and `wide` variants scale their Pokémon artwork by `aspect-ratio` against whichever box dimension stays predictable across breakpoints — `hero` sizes from the grid row's height (via `aspect-ratio: 1 / 1` + `max-height`) until its row height goes indeterminate at the single-column breakpoint, where it switches to sizing from width instead; `wide` sizes its thumbnail from the row's own height (`align-self: stretch` + `aspect-ratio: 1 / 1`) rather than a percentage of the row's width, so the image holds its shape whether the tile spans 2 of 4 columns (desktop) or 2 of 2 (tablet). `object-fit: contain` guarantees the artwork is always shown whole, never cropped, at every size.
+2. **Behavior lives in directives, not in bindings scattered across the template.** Per-card accents used to be an inline `[style.--accent]="pokemon.types[0] | pokemonTypeColor"`; today every card carries `[appTypeColor]="pokemon.types[0]"` instead, and every type badge carries `[appTypeColor]="type" appTypeColorMode="fill"`. Same underlying color lookup, but the "what property does this value go on" decision now lives in one directive (see [Shared Directives](#shared-directives-behavior-that-doesnt-belong-in-a-component)) instead of being re-decided at each call site. `Home` still declares its own `--poke-red` / `--poke-ink` / `--poke-gray` / `--poke-border` / `--poke-bg` tokens on `:host`, same as `Header` — no shared token file yet (see [Growth Path](#growth-path)).
+3. **Hover-reveal, formalized as a directive, not left as a CSS side-effect.** `regular`-sized tiles hide their artwork by default and only reveal it — a crossfade + scale, eased with `cubic-bezier(0.16, 1, 0.3, 1)` — via `[appRevealOnInteraction]="pokemon.bento === 'regular'"`. The directive is what actually knows whether the device can hover at all (`matchMedia('(hover: hover) and (pointer: fine)')`, exposed as a `.can-hover` host class) and manages `tabindex` itself, so touch devices simply always show the artwork instead of hitting a dead-end tap target, and there's no hand-written `[attr.tabindex]` ternary left in the template to keep in sync. Every transition still collapses under `@media (prefers-reduced-motion: reduce)`.
+4. **An organic entrance and a pointer-follow tilt, both opt-in per card.** `appEntranceReveal` (every card) uses `IntersectionObserver` to fade + settle each tile into place the first time it crosses the viewport, staggered by grid position via an `[ngStyle]` `transition-delay`; `appMagneticTilt` (`hero`/`wide` only, where the surface area earns it) reads pointer position against the card's own `getBoundingClientRect()` and drives a few degrees of 3D tilt plus a cursor-follow radial glow. Both are gated behind hover-capability and `prefers-reduced-motion`, and both need the host's real DOM node — the reason they're directives (`ElementRef` + `inject()`) and not template bindings.
+5. **Responsive art bound to the stable dimension, resilient to the network.** `hero` and `wide` scale their artwork by `aspect-ratio` against whichever box dimension stays predictable across breakpoints; `tall` cells now answer a hovering pointer by easing their artwork down to `scale(0.9)` at ≥901px — the same courtesy as stepping back from a painting, a deliberate mirror of `hero`'s zoom-in. `object-fit: contain` guarantees artwork is always shown whole, never cropped. Underneath all of it, `home.ts`'s `artwork()` helper points at jsDelivr's CDN mirror of the PokeAPI sprite repo rather than `raw.githubusercontent.com` (which isn't meant for production hotlinking and intermittently rate-limits/resets under load); a failed load retries once against a cache-busted URL, then falls back to a same-domain inline SVG silhouette, so a persistent failure never surfaces the browser's broken-image icon.
 
-None of this required a new dependency — it's `grid-auto-flow: dense`, `aspect-ratio`, CSS custom properties, and media queries, matching the "additive, framework-idiomatic" spirit of the rest of the app. The same four patterns are the intended starting point once `search` and `favorites` grow past their current placeholder state.
+None of this required a new dependency — it's `grid-auto-flow: dense`, `aspect-ratio`, `IntersectionObserver`, CSS custom properties, and media queries, matching the "additive, framework-idiomatic" spirit of the rest of the app. The same patterns are the intended starting point once `search` and `favorites` grow past their current placeholder state.
+
+## Shared Directives: Behavior That Doesn't Belong in a Component
+
+Pipes transform a value for display. Directives are for the other half of "presentational logic" — the part that needs a DOM node, an event, or a piece of interaction state, none of which a `{{ }}` interpolation can hold. `app/shared/directives/` has four, all `standalone: false`, all declared + exported from `SharedModule`, all currently exercised by `home.html`:
+
+| Directive | Selector | What it replaces |
+| --- | --- | --- |
+| `appTypeColor` | `[appTypeColor]="type"` + optional `appTypeColorMode="accent" \| "fill"` | An inline `[style.--accent]`/`[style.background]` binding, repeated at every call site, each re-deciding how to apply the same color lookup |
+| `appRevealOnInteraction` | `[appRevealOnInteraction]="condition"` | A CSS-only `:hover`/`:focus-within` pair plus a hand-written `[attr.tabindex]="cond ? 0 : null"` ternary in the template |
+| `appEntranceReveal` | `appEntranceReveal` (no binding — always on) | Nothing existed before it; new organic-entrance behavior, not a refactor of prior code |
+| `appMagneticTilt` | `[appMagneticTilt]="condition"` | Nothing existed before it either — a pointer-follow tilt/glow scoped to the grid's largest cells |
+
+A few things worth knowing about how they're built:
+
+- **`ElementRef` + `inject()`, only where DOM geometry is actually needed.** `appEntranceReveal` and `appMagneticTilt` inject `ElementRef` because `IntersectionObserver` and `getBoundingClientRect()` need the host's real node — that's the dividing line between "this could've been a `[class.x]`/`[style.x]` binding on the component" and "this had to be a directive." `appTypeColor` and `appRevealOnInteraction` need no `ElementRef` at all; they only read `@Input()`s and write host bindings.
+- **Every interaction directive is capability-gated, not just device-width-gated.** `appRevealOnInteraction` and `appMagneticTilt` both check `matchMedia('(hover: hover) and (pointer: fine)')` before doing anything pointer-driven, and both directives (plus `appEntranceReveal`) back off under `prefers-reduced-motion`. A touch device or a user with motion sensitivity gets the same information, presented plainly, instead of a broken or nauseating version of the effect.
+- **`appTypeColor` is `resolvePokemonTypeColor()` wearing a host binding.** The actual type→color map lives in `shared/utils/pokemon-type-colors.ts` — one lookup, consumed by both the directive and the `pokemonTypeColor` pipe below, so they can never drift apart into two different palettes.
+- **They're exported, not embedded in `home`.** Nothing about any of the four mentions `DommiePokemon` or the bento layout by name — `SharedModule` exports them the same way it exports the pipes, so `search`/`favorites` inherit all four the moment those pages import `SharedModule` and render real Pokémon.
 
 ## Shared Pipes: Pure Transformations, Not Template Methods
 
@@ -198,7 +226,7 @@ None of this required a new dependency — it's `grid-auto-flow: dense`, `aspect
 | Pipe | Input → Output | Used as |
 | --- | --- | --- |
 | `pokedexId` | `25` → `"#025"` | `{{ pokemon.id \| pokedexId }}` |
-| `pokemonTypeColor` | `"electric"` → `"#f8d030"` | `[style.background]="type \| pokemonTypeColor"` |
+| `pokemonTypeColor` | `"electric"` → `"#f8d030"` | Not currently bound in any template — see note below |
 
 This is a small change with an outsized architectural payoff:
 
@@ -206,6 +234,7 @@ This is a small change with an outsized architectural payoff:
 - **One color palette, not one per feature.** `POKEMON_TYPE_COLORS` previously lived inside `home.ts`; now it's the only copy in the repo. When `search` and `favorites` render real Pokémon, they `import { SharedModule }` and get the same badge colors for free — no re-deriving, no drift.
 - **The data model got simpler, not more abstract.** `DommiePokemon.types` shrank from `{ name: string; color: string }[]` to plain `string[]` — the component's job is to hold *what* a Pokémon is, not *how* its type should be painted. That question now has exactly one answer, in exactly one file.
 - **Declared where the "planned" `SharedModule` in [Folder Responsibilities](#folder-responsibilities) said it would be.** `shared-module.ts` declares and exports both pipes; `HomeModule` imports `SharedModule` alongside `CommonModule` and `HomeRoutingModule` — the same "one new import, zero existing files rewritten" shape as every other addition in this app.
+- **`pokemonTypeColor` isn't dead code, even though `home.html` no longer calls it.** `home` moved to the `appTypeColor` [directive](#shared-directives-behavior-that-doesnt-belong-in-a-component) for its own template bindings, but the pipe stays: both it and the directive delegate to the same `resolvePokemonTypeColor()`, so the pipe remains the way to get a plain color *value* (in a test, in a future non-template context) rather than a host binding. One lookup, two thin adapters over it — not two competing implementations.
 
 **A second, `core`-scoped pipe exists too, and it's a useful contrast.** `core/pipes/custom-pipe-pipe.ts` declares `customPipe`, generated as a scaffold and registered directly in `CoreModule` — its `transform()` currently just returns `null` and it isn't referenced from any template yet. Its location is the tell: `core/` is for the app shell and singleton concerns ([Guiding Principle #2](#guiding-principles)), so a pipe declared there is implicitly saying "this only ever makes sense wrapped around shell-level UI, not feature data." Neither `pokedexId` nor `pokemonTypeColor` fit that description — they're Pokémon-domain transforms any feature might need — which is exactly why they live in `shared/`, not `core/`, instead. Until `customPipe` is implemented and given a real, shell-specific job, treat it the same as the empty `home-card` / `home-card-container` folders: a placeholder marking an intention, not a pattern to copy.
 
@@ -313,9 +342,11 @@ src/app/
 │   └── interceptors/        # errorInterceptor, loadingInterceptor…
 │
 ├── shared/
-│   ├── components/          # app-button, app-card, app-badge…
-│   ├── pipes/                # capitalizeType, statBar…
-│   └── directives/           # appLazyImage…
+│   ├── components/          # app-button, app-card, app-badge… — still planned
+│   ├── pipes/                # pokedexId, pokemonTypeColor — done; capitalizeType, statBar… next
+│   ├── directives/           # appTypeColor, appRevealOnInteraction, appEntranceReveal,
+│   │                         # appMagneticTilt — done; appLazyImage… next
+│   └── utils/                 # pokemon-type-colors.ts — done, the shared color source
 │
 ├── models/
 │   └── pokemon.model.ts      # Domain types shared across features
@@ -340,6 +371,7 @@ src/app/
 | ✅ 3  | All four features fully **lazy-loaded** via `loadChildren`; `AppModule` only imports `CoreModule` + `AppRoutingModule` — verified by `ng build` emitting one lazy `chunk-*.js` per feature |
 | ✅ 4  | `pages/home` moved past scaffolding: a responsive **Bento CSS Grid** ("Dommie's Pokémon") establishing the size-driven dense-packing, component-local token, hover-reveal, and aspect-ratio patterns — see [UI Pattern Spotlight](#ui-pattern-spotlight-the-home-bento-grid) |
 | ✅ 5  | `SharedModule` introduced with its first two exports, `pokedexId` and `pokemonTypeColor` — see [Shared Pipes](#shared-pipes-pure-transformations-not-template-methods). Reusable **components** (buttons, the card layout itself) are still pending — the empty `home-card` / `home-card-container` scaffolds mark where that extraction is expected to land |
+| ✅ 5.1 | `SharedModule` grew four attribute directives (`appTypeColor`, `appRevealOnInteraction`, `appEntranceReveal`, `appMagneticTilt`) — see [Shared Directives](#shared-directives-behavior-that-doesnt-belong-in-a-component). The bento grid's per-card accent, hover-reveal, viewport entrance, and pointer-tilt behavior all moved out of inline template bindings and CSS-only tricks into reusable, capability-gated directives |
 | 🔜 6  | Typed `PokemonApiService` in `core/services`, backed by the [PokéAPI](https://pokeapi.co/) — to replace `home.ts`'s hand-authored roster and back `search`/`favorites` |
 | 🔜 7  | `models/` for strongly-typed domain entities (promoting `home.ts`'s local `DommiePokemon` interface into a shared model) |
 | 🔜 8  | HTTP interceptors (loading state, error normalization) in `core/interceptors` |
