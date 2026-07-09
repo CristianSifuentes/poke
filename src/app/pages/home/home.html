@@ -6,10 +6,16 @@
 
   <div class="dex__grid">
     <article
-      *ngFor="let pokemon of pokemons; trackBy: trackByPokemonId"
+      *ngFor="let pokemon of pokemons; let i = index; trackBy: trackByPokemonId"
       class="dex-card dex-card--{{ pokemon.bento }}"
       [appTypeColor]="pokemon.types[0]"
       [appRevealOnInteraction]="pokemon.bento === 'regular'"
+      [appMagneticTilt]="pokemon.bento === 'hero' || pokemon.bento === 'wide'"
+      appEntranceReveal
+      [ngStyle]="{
+        'transition-delay': (i * 45) + 'ms',
+        '--enter-shift': i % 2 === 0 ? '-1' : '1'
+      }"
     >
       <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
 
@@ -23,8 +29,9 @@
 
         <ul class="dex-card__types">
           <li
-            *ngFor="let type of pokemon.types"
+            *ngFor="let type of pokemon.types; let isPrimary = first"
             class="dex-card__type"
+            [ngClass]="{ 'dex-card__type--primary': isPrimary }"
             [appTypeColor]="type"
             appTypeColorMode="fill"
           >
