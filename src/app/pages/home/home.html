@@ -20,7 +20,12 @@
       <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
 
       <div class="dex-card__art">
-        <img [src]="pokemon.image" [alt]="pokemon.name" loading="lazy" />
+        <img
+          [src]="pokemon.image"
+          [alt]="pokemon.name"
+          loading="lazy"
+          (error)="onArtworkError($event)"
+        />
       </div>
 
       <div class="dex-card__body">
