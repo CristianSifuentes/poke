@@ -6,15 +6,26 @@
 
   <div class="dex__grid">
     <article
-      *ngFor="let pokemon of pokemons; trackBy: trackByPokemonId"
+      *ngFor="let pokemon of pokemons; let i = index; trackBy: trackByPokemonId"
       class="dex-card dex-card--{{ pokemon.bento }}"
-      [style.--accent]="pokemon.types[0] | pokemonTypeColor"
-      [attr.tabindex]="pokemon.bento === 'regular' ? 0 : null"
+      [appTypeColor]="pokemon.types[0]"
+      [appRevealOnInteraction]="pokemon.bento === 'regular'"
+      [appMagneticTilt]="pokemon.bento === 'hero' || pokemon.bento === 'wide'"
+      appEntranceReveal
+      [ngStyle]="{
+        'transition-delay': (i * 45) + 'ms',
+        '--enter-shift': i % 2 === 0 ? '-1' : '1'
+      }"
     >
       <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
 
       <div class="dex-card__art">
-        <img [src]="pokemon.image" [alt]="pokemon.name" loading="lazy" />
+        <img
+          [src]="pokemon.image"
+          [alt]="pokemon.name"
+          loading="lazy"
+          (error)="onArtworkError($event)"
+        />
       </div>
 
       <div class="dex-card__body">
@@ -23,9 +34,11 @@
 
         <ul class="dex-card__types">
           <li
-            *ngFor="let type of pokemon.types"
+            *ngFor="let type of pokemon.types; let isPrimary = first"
             class="dex-card__type"
-            [style.background]="type | pokemonTypeColor"
+            [ngClass]="{ 'dex-card__type--primary': isPrimary }"
+            [appTypeColor]="type"
+            appTypeColorMode="fill"
           >
             {{ type }}
           </li>
