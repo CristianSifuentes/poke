@@ -9,11 +9,10 @@
       *ngFor="let pokemon of pokemons; let i = index; trackBy: trackByPokemonId"
       class="dex-card dex-card--{{ pokemon.bento }}"
       [appTypeColor]="pokemon.types[0]"
-      [appRevealOnInteraction]="pokemon.bento === 'regular'"
       [appMagneticTilt]="pokemon.bento === 'hero' || pokemon.bento === 'wide'"
       appEntranceReveal
       [ngStyle]="{
-        'transition-delay': (i * 45) + 'ms',
+        '--enter-delay': (i * 45) + 'ms',
         '--enter-shift': i % 2 === 0 ? '-1' : '1'
       }"
     >

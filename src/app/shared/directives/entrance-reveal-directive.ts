@@ -1,53 +1,19 @@
-import { Directive, ElementRef, HostBinding, OnDestroy, OnInit, inject } from '@angular/core';
+import { Directive, HostBinding } from '@angular/core';
 
-// Gives a grid item an organic "rise into view" entrance the moment it
-// crosses the viewport, instead of the whole bento mosaic slamming onto
-// screen at once. ElementRef is the reason this can't just be a
-// [class.x]/[style.x] binding on the component: the directive needs the
-// host's real DOM node to hand to IntersectionObserver, which is
-// per-element viewport geometry no template expression can express.
+// Marks a grid item for the bento mosaic's entrance bloom. The actual
+// animation lives in CSS as a @keyframes rule (see .pending-reveal in
+// home.scss) rather than a class-toggling transition driven from here —
+// keyframe animations play their whole timeline the instant the class
+// exists in the DOM, so there is no "did the browser paint the before-state
+// in time" race to lose against page bootstrap, image loads, or anything
+// else competing for the first frame. prefers-reduced-motion is likewise
+// handled declaratively in CSS, so this directive has nothing left to do
+// at runtime beyond flagging the host as a participant.
 @Directive({
   selector: '[appEntranceReveal]',
   standalone: false,
 })
-export class EntranceRevealDirective implements OnInit, OnDestroy {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private observer?: IntersectionObserver;
-
-  // Set only once JS confirms it can animate the reveal — if this never
-  // flips true, the host stays in its normal, fully visible resting state.
+export class EntranceRevealDirective {
   @HostBinding('class.pending-reveal')
-  pending = false;
-
-  @HostBinding('class.is-in-view')
-  inView = false;
-
-  ngOnInit(): void {
-    const canAnimate =
-      typeof matchMedia === 'function' &&
-      !matchMedia('(prefers-reduced-motion: reduce)').matches &&
-      typeof IntersectionObserver === 'function';
-
-    if (!canAnimate) {
-      return;
-    }
-
-    this.pending = true;
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            this.inView = true;
-            this.observer?.disconnect();
-          }
-        }
-      },
-      { threshold: 0.2, rootMargin: '0px 0px -40px 0px' },
-    );
-    this.observer.observe(this.elementRef.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.observer?.disconnect();
-  }
+  readonly pending = true;
 }
