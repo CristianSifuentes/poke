@@ -10,6 +10,23 @@
   padding: 2rem 1.5rem;
 }
 
+// A slow bloom out of grayscale and shadow, like a memory resolving into
+// focus, rather than a snap into existence. Defined once, applied per-card
+// by .pending-reveal below.
+@keyframes dex-card-bloom {
+  from {
+    opacity: 0;
+    filter: grayscale(1) brightness(0.85);
+    transform: translate(calc(var(--enter-shift, 0) * 12px), 18px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    filter: grayscale(0) brightness(1);
+    transform: none;
+  }
+}
+
 .dex {
   max-width: 1080px;
   margin: 0 auto;
@@ -71,20 +88,23 @@
   box-shadow: 0 1px 2px rgba(28, 28, 30, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
-  // appEntranceReveal's resting state: invisible until JS confirms it can
-  // animate, then transitions in on its own systematic rhythm — a gentle
-  // alternating left/right settle (--enter-shift, set per-item via
-  // [ngStyle]) rather than every tile sliding up from the same direction.
+  // appEntranceReveal's resting state — a gentle alternating left/right
+  // settle (--enter-shift) and per-item stagger (--enter-delay), both set
+  // via [ngStyle] in the template, so every tile arrives on its own beat
+  // instead of the whole mosaic sliding up from one direction at once.
+  //
+  // This is a @keyframes animation, deliberately not a transition. A
+  // transition needs the browser to *paint* the "before" style before the
+  // "after" style is applied, or it just jumps straight to the end state —
+  // which is exactly what was happening here: the JS that flipped the
+  // class was racing page bootstrap and losing, so the grayscale bloom
+  // never got a frame to render before landing on full color. A keyframe
+  // animation has no such race: the instant this class exists in the DOM,
+  // the browser owns and plays its entire timeline, guaranteed, on every
+  // load — direct navigation, hard refresh, or otherwise.
   &.pending-reveal {
-    opacity: 0;
-    transform: translate(calc(var(--enter-shift, 0) * 12px), 18px) scale(0.97);
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  &.is-in-view {
-    opacity: 1;
-    transform: none;
+    animation: dex-card-bloom 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--enter-delay, 0ms);
   }
 
   &::before {
@@ -270,52 +290,23 @@
     }
   }
 
-  // Regular tiles stay quiet by default — a name, a nickname, a whisper of
-  // type — and only reveal their portrait once appRevealOnInteraction says
-  // to. The directive knows whether this device can even hover
-  // (`.can-hover`) and toggles `.is-revealed` on pointer/focus, so on a
-  // precise pointer the art hides behind the text until summoned, while a
-  // touch device — which the directive marks revealed from the start and
-  // never marks `.can-hover` — simply keeps art and text stacked and always
-  // visible, exactly as it would with no directive at all.
+  // Regular tiles used to stay quiet by default, hiding their portrait
+  // behind a name and nickname until a pointer came close enough to summon
+  // it. That courted a real cost: nothing on the card was visible without a
+  // mouse. Now every tile carries its full identity — portrait and name
+  // together — the instant it settles into view; the only thing left to
+  // "reveal" is the slow color-bloom of appEntranceReveal above.
   &--regular {
-    justify-content: center;
+    grid-row: span 2;
+    justify-content: flex-start;
 
-    &.can-hover {
-      .dex-card__id {
-        position: relative;
-        z-index: 3;
-      }
+    .dex-card__id {
+      align-self: flex-end;
+    }
 
-      .dex-card__art {
-        position: absolute;
-        inset: 4px 0 0 0;
-        z-index: 2;
-        padding: 1.75rem 1.25rem 1.25rem;
-        background: var(--poke-bg);
-        opacity: 0;
-        transform: scale(0.86);
-        transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-          transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-        pointer-events: none;
-      }
-
-      .dex-card__body {
-        transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
-      }
-
-      &.is-revealed {
-        .dex-card__art {
-          opacity: 1;
-          transform: scale(1);
-        }
-
-        .dex-card__body {
-          opacity: 0;
-          transform: translateY(4px);
-          transition-delay: 0s;
-        }
-      }
+    .dex-card__art {
+      flex: 1;
+      width: 100%;
     }
   }
 }
@@ -329,7 +320,9 @@
   }
 
   .dex-card {
+    animation: none !important;
     opacity: 1 !important;
+    filter: none !important;
     transform: none !important;
   }
 }
@@ -361,40 +354,6 @@
 
   .dex-card--hero {
     grid-column: span 2;
-  }
-
-  // At two columns the coy hover-reveal no longer suits the rhythm of the
-  // grid — every regular tile settles instead, portrait resting above its
-  // name, always in view, given the extra row it needs to hold both without
-  // crowding.
-  .dex-card--regular,
-  .dex-card--regular.can-hover,
-  .dex-card--regular.can-hover.is-revealed {
-    grid-row: span 2;
-    justify-content: flex-start;
-
-    .dex-card__id {
-      position: static;
-      align-self: flex-end;
-    }
-
-    .dex-card__art {
-      position: static;
-      inset: auto;
-      z-index: auto;
-      flex: 1;
-      width: 100%;
-      padding: 0;
-      background: transparent;
-      opacity: 1;
-      transform: none;
-      pointer-events: auto;
-    }
-
-    .dex-card__body {
-      opacity: 1;
-      transform: none;
-    }
   }
 }
 
