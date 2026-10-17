@@ -12,13 +12,30 @@
     <app-party-card
       [pokemon]="pokemon"
       [slot]="i"
-      [canMoveEarlier]="i > 0"
-      [canMoveLater]="!last"
       draggable="true"
       (dragstart)="onDragStart($event, pokemon.id)"
       (dragend)="onDragEnd()"
-      (move)="move.emit({ id: pokemon.id, index: i + $event })"
     ></app-party-card>
+
+    <!-- The keyboard- and touch-friendly twin of drag & drop. -->
+    <div class="party__moves">
+      <button
+        type="button"
+        [disabled]="i === 0"
+        [attr.aria-label]="'Move ' + (pokemon.name | pokemonName) + ' earlier in the party'"
+        (click)="move.emit({ id: pokemon.id, index: i - 1 })"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+      </button>
+      <button
+        type="button"
+        [disabled]="last"
+        [attr.aria-label]="'Move ' + (pokemon.name | pokemonName) + ' later in the party'"
+        (click)="move.emit({ id: pokemon.id, index: i + 1 })"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+      </button>
+    </div>
   </li>
 
   <li

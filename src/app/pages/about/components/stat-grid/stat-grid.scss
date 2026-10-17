@@ -1,17 +1,7 @@
+@use 'poke';
+
 :host {
-  --poke-red: #ee1515;
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-surface: #f5f5f7;
-
   display: block;
-}
-
-@keyframes stats-shimmer {
-  to {
-    background-position: -200% 0;
-  }
 }
 
 //   [ 1025 | types    | regions | dual ]
@@ -29,7 +19,7 @@
     gap: 0.75rem 1rem;
     padding: 1.25rem;
     border: 1px dashed var(--poke-border);
-    border-radius: 1.25rem;
+    border-radius: var(--radius-lg);
 
     p {
       margin: 0;
@@ -37,14 +27,8 @@
     }
 
     button {
+      @include poke.primary-button;
       padding: 0.5rem 1rem;
-      font: inherit;
-      font-weight: 600;
-      color: #ffffff;
-      background: var(--poke-red);
-      border: 0;
-      border-radius: 999px;
-      cursor: pointer;
     }
   }
 }
@@ -59,10 +43,10 @@
   padding: 1.25rem;
   color: var(--poke-ink);
   text-decoration: none;
-  background: #ffffff;
+  background: var(--poke-bg);
   border: 1px solid var(--poke-border);
-  border-radius: 1.25rem;
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  border-radius: var(--radius-lg);
+  transition: border-color var(--dur-base) ease, transform var(--dur-base) ease;
 
   &__value {
     font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
@@ -119,9 +103,8 @@
   }
 
   &--skeleton {
-    background: linear-gradient(100deg, var(--poke-surface) 40%, #fbfbfd 50%, var(--poke-surface) 60%) 0 0 / 200% 100%;
+    @include poke.skeleton;
     border: 0;
-    animation: stats-shimmer 1.4s ease-in-out infinite;
   }
 
   &:focus-visible {

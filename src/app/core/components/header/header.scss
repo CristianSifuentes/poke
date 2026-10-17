@@ -1,11 +1,7 @@
 :host {
-  --poke-red: #ee1515;
-  --poke-red-dark: #cc0000;
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-bg: #ffffff;
-
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: block;
 }
 
@@ -14,12 +10,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--poke-bg);
+  // Full-bleed bar, content aligned to the same column as the pages.
+  padding: 0.75rem max(var(--gutter), (100% - var(--page-max)) / 2);
+  background: color-mix(in srgb, var(--poke-bg) 88%, transparent);
   border-bottom: 1px solid var(--poke-border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  backdrop-filter: saturate(1.4) blur(12px);
 
   &__brand {
     display: flex;
@@ -54,7 +49,7 @@
       left: 50%;
       width: 0.4rem;
       height: 0.4rem;
-      background: #ffffff;
+      background: var(--poke-bg);
       border: 2px solid var(--poke-ink);
       border-radius: 50%;
       transform: translate(-50%, -50%);
@@ -82,7 +77,7 @@
     text-decoration: none;
     padding-block: 0.25rem;
     border-bottom: 2px solid transparent;
-    transition: color 0.2s ease, border-color 0.2s ease;
+    transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease;
 
     &:hover {
       color: var(--poke-ink);
@@ -106,9 +101,9 @@
     text-align: center;
     color: #ffffff;
     background: var(--poke-red);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     vertical-align: 0.0625rem;
-    animation: navbar-badge-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: navbar-badge-pop 0.4s var(--ease-out);
 
     &[hidden] {
       display: none;
@@ -152,7 +147,7 @@
       gap: 0.75rem;
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.2s ease;
+      transition: max-height var(--dur-fast) ease;
 
       &--open {
         max-height: 12rem;

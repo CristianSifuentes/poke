@@ -1,9 +1,6 @@
-:host {
-  --poke-red: #ee1515;
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
+@use 'poke';
 
+:host {
   display: block;
 }
 
@@ -20,19 +17,6 @@
   }
 }
 
-@keyframes hero-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes hero-copy-in {
-  from {
-    opacity: 0;
-    transform: translateY(1rem);
-  }
-}
-
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
@@ -41,7 +25,7 @@
   min-height: min(32rem, 70vh);
 
   &__copy {
-    animation: hero-copy-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    animation: poke-fade-up var(--dur-enter) var(--ease-out) 0.2s both;
 
     h1 {
       margin: 0 0 0.75rem;
@@ -54,12 +38,8 @@
   }
 
   &__eyebrow {
-    margin: 0 0 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--poke-red);
+    @include poke.eyebrow;
+    margin-bottom: 0.75rem;
   }
 
   &__lede {
@@ -84,8 +64,8 @@
     color: var(--poke-ink);
     text-decoration: none;
     border: 1px solid var(--poke-border);
-    border-radius: 999px;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    border-radius: var(--radius-pill);
+    transition: border-color var(--dur-fast) ease, transform var(--dur-fast) ease;
 
     &--primary {
       color: #ffffff;
@@ -125,13 +105,13 @@
     overflow: hidden;
     border-radius: 50%;
     clip-path: inset(0 0 50% 0);
-    animation: hero-fill 1s cubic-bezier(0.22, 1, 0.36, 1) 1.3s both;
+    animation: hero-fill 1s var(--ease-out) 1.3s both;
   }
 
   &__ring {
     position: absolute;
     inset: -25%;
-    animation: hero-spin 60s linear infinite;
+    animation: poke-spin 60s linear infinite;
   }
 
   &__line {

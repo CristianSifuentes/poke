@@ -1,0 +1,21 @@
+<div class="state" [attr.role]="tone === 'error' ? 'alert' : null">
+  <svg class="state__ball state__ball--{{ motion }}" [class.state__ball--error]="tone === 'error'" viewBox="0 0 96 96" aria-hidden="true">
+    <circle cx="48" cy="48" r="44" />
+    <path d="M4 48h34a10 10 0 0 0 20 0h34" />
+    <circle cx="48" cy="48" r="8" />
+  </svg>
+
+  <h2 class="state__heading">{{ heading }}</h2>
+  <p class="state__text" *ngIf="text">{{ text }}</p>
+
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="actionLabel">
+    <a *ngIf="actionLink; else button" class="state__action" [routerLink]="actionLink">
+      {{ actionLabel }} <span aria-hidden="true">&rarr;</span>
+    </a>
+    <ng-template #button>
+      <button type="button" class="state__action" (click)="action.emit()">{{ actionLabel }}</button>
+    </ng-template>
+  </ng-container>
+</div>

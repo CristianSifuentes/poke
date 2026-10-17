@@ -2,8 +2,8 @@
   display: block;
 }
 
+// The one place page width and gutters are decided. Pages only set their
+// vertical rhythm and center their content at --page-max.
 .app-main {
-  padding: 2rem 1.5rem;
-  max-width: 960px;
-  margin-inline: auto;
+  padding: 2rem var(--gutter) 4rem;
 }
