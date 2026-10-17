@@ -1,12 +1,79 @@
-<section class="about">
-  <header class="about__header">
-    <h1>About Poké</h1>
-    <p>A small Pokédex built with Angular.</p>
-  </header>
+<article class="about">
+  <app-about-hero></app-about-hero>
 
-  <ul class="about__list">
-    <li><strong>Home</strong> — landing page with quick links.</li>
-    <li><strong>Pokédex</strong> — search and browse Pokémon.</li>
-    <li><strong>Favorites</strong> — Pokémon you've starred.</li>
-  </ul>
-</section>
+  <section class="about__section" aria-labelledby="numbers-heading">
+    <header class="about__head">
+      <span class="about__index" aria-hidden="true">01</span>
+      <p class="about__eyebrow">By the numbers</p>
+      <h2 id="numbers-heading">Every Pokémon, counted</h2>
+    </header>
+
+    <app-stat-grid
+      [stats]="stats()"
+      [status]="status()"
+      [favoriteCount]="favorites.count()"
+      (retry)="load()"
+    ></app-stat-grid>
+  </section>
+
+  <section class="about__section" aria-labelledby="types-heading">
+    <header class="about__head">
+      <span class="about__index" aria-hidden="true">02</span>
+      <p class="about__eyebrow">The 18 types</p>
+      <h2 id="types-heading">A palette with teeth</h2>
+      <p>Every color in this app comes from one map. Pick a type to see who carries it.</p>
+    </header>
+
+    <app-type-gallery [types]="stats()?.types ?? null"></app-type-gallery>
+  </section>
+
+  <section class="about__section" aria-labelledby="regions-heading">
+    <header class="about__head">
+      <span class="about__index" aria-hidden="true">03</span>
+      <p class="about__eyebrow">Nine regions</p>
+      <h2 id="regions-heading">From Kanto to Paldea</h2>
+      <p>Each generation opened a new region. Hover a starter to bring it out of the shadows.</p>
+    </header>
+
+    <app-region-timeline></app-region-timeline>
+  </section>
+
+  <section class="about__section" aria-labelledby="built-heading">
+    <header class="about__head">
+      <span class="about__index" aria-hidden="true">04</span>
+      <p class="about__eyebrow">How it's built</p>
+      <h2 id="built-heading">Small modules, clear lines</h2>
+      <p>Angular 22 on classic NgModules: a thin shell, a shared toolkit, and pages that load only when you visit.</p>
+    </header>
+
+    <app-architecture-map></app-architecture-map>
+  </section>
+
+  <section class="about__section about__credits" aria-labelledby="credits-heading">
+    <header class="about__head">
+      <span class="about__index" aria-hidden="true">05</span>
+      <p class="about__eyebrow">Credits</p>
+      <h2 id="credits-heading">Standing on good shoulders</h2>
+    </header>
+
+    <ul class="about__credit-list">
+      <li>
+        <a href="https://pokeapi.co" target="_blank" rel="noopener">PokeAPI</a>
+        <span>Species and type data, free and open.</span>
+      </li>
+      <li>
+        <a href="https://github.com/PokeAPI/sprites" target="_blank" rel="noopener">PokeAPI/sprites</a>
+        <span>Official artwork, served through jsDelivr.</span>
+      </li>
+      <li>
+        <a href="https://angular.dev" target="_blank" rel="noopener">Angular</a>
+        <span>Signals, NgModules and the router doing the heavy lifting.</span>
+      </li>
+    </ul>
+
+    <p class="about__legal">
+      Pokémon and Pokémon character names are trademarks of Nintendo, Game Freak and The Pokémon Company.
+      This is an independent learning project, not affiliated with or endorsed by them.
+    </p>
+  </section>
+</article>

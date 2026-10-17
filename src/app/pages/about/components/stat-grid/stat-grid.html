@@ -1,0 +1,48 @@
+<div class="stats" *ngIf="status === 'ready' && stats as s; else placeholder">
+  <div class="stat stat--feature">
+    <strong class="stat__value" [appCountUp]="s.total" [appCountUpDuration]="1600"></strong>
+    <span class="stat__label">Pokémon in the National Pokédex</span>
+  </div>
+
+  <div class="stat">
+    <strong class="stat__value" [appCountUp]="s.typeCount"></strong>
+    <span class="stat__label">Types</span>
+  </div>
+
+  <div class="stat">
+    <strong class="stat__value" [appCountUp]="s.regionCount"></strong>
+    <span class="stat__label">Regions</span>
+  </div>
+
+  <div class="stat">
+    <strong class="stat__value" [appCountUp]="s.dualTypeCount"></strong>
+    <span class="stat__label">Carry two types</span>
+  </div>
+
+  <a
+    class="stat stat--type"
+    *ngIf="s.topType as top"
+    [appTypeColor]="top.type"
+    routerLink="/search"
+    [queryParams]="{ types: top.type }"
+  >
+    <strong class="stat__value" [appCountUp]="top.count"></strong>
+    <span class="stat__label"><em>{{ top.type }}</em>, the most common type</span>
+  </a>
+
+  <a class="stat stat--yours" routerLink="/favorites">
+    <strong class="stat__value" [appCountUp]="favoriteCount"></strong>
+    <span class="stat__label">In your collection</span>
+  </a>
+</div>
+
+<ng-template #placeholder>
+  <div class="stats" *ngIf="status === 'loading'" aria-busy="true" aria-label="Loading statistics">
+    <div class="stat stat--skeleton" *ngFor="let i of skeletons" [class.stat--feature]="i === 0"></div>
+  </div>
+
+  <div class="stats__error" *ngIf="status === 'error'" role="alert">
+    <p>The numbers live on PokeAPI, and it didn't answer this time.</p>
+    <button type="button" (click)="retry.emit()">Try again</button>
+  </div>
+</ng-template>

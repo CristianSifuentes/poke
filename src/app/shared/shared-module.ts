@@ -4,9 +4,11 @@ import { CommonModule } from '@angular/common';
 import { HeartButton } from './components/heart-button/heart-button';
 
 import { ArtworkFallbackDirective } from './directives/artwork-fallback-directive';
+import { CountUpDirective } from './directives/count-up-directive';
 import { EntranceRevealDirective } from './directives/entrance-reveal-directive';
 import { MagneticTiltDirective } from './directives/magnetic-tilt-directive';
 import { ScrollSentinelDirective } from './directives/scroll-sentinel-directive';
+import { ScrollRailDirective } from './directives/scroll-rail-directive';
 import { TypeColorDirective } from './directives/type-color-directive';
 import { PokedexIdPipe } from './pipes/pokedex-id-pipe';
 import { PokemonArtworkPipe } from './pipes/pokemon-artwork-pipe';
@@ -25,6 +27,8 @@ import { PokemonTypeColorPipe } from './pipes/pokemon-type-color-pipe';
     MagneticTiltDirective,
     ArtworkFallbackDirective,
     ScrollSentinelDirective,
+    ScrollRailDirective,
+    CountUpDirective,
   ],
   imports: [CommonModule],
   exports: [
@@ -38,6 +42,8 @@ import { PokemonTypeColorPipe } from './pipes/pokemon-type-color-pipe';
     MagneticTiltDirective,
     ArtworkFallbackDirective,
     ScrollSentinelDirective,
+    ScrollRailDirective,
+    CountUpDirective,
   ],
 })
 export class SharedModule {}

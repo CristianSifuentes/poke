@@ -1,0 +1,26 @@
+<header class="hero">
+  <div class="hero__copy">
+    <p class="hero__eyebrow">About this Pokédex</p>
+    <h1>Gotta index 'em all.</h1>
+    <p class="hero__lede">
+      A small, carefully made Pokédex: every Pokémon from Bulbasaur to Pecharunt, searchable in an instant,
+      painted in the colors of its type, and yours to collect.
+    </p>
+    <div class="hero__actions">
+      <a class="hero__cta hero__cta--primary" routerLink="/search">Explore the Pokédex</a>
+      <a class="hero__cta" routerLink="/favorites">Meet your party <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </div>
+
+  <div class="hero__ball" aria-hidden="true">
+    <div class="hero__cap">
+      <div class="hero__ring" [style.background]="typeRing"></div>
+    </div>
+    <svg viewBox="0 0 200 200">
+      <circle class="hero__line" cx="100" cy="100" r="94" pathLength="1" />
+      <path class="hero__line hero__line--seam" d="M6 100h68a26 26 0 0 1 52 0h68" pathLength="1" />
+      <circle class="hero__button" cx="100" cy="100" r="18" />
+      <circle class="hero__line hero__line--button" cx="100" cy="100" r="18" pathLength="1" />
+    </svg>
+  </div>
+</header>

@@ -1,0 +1,41 @@
+<div class="arch" [class.arch--focused]="active()">
+  <div class="arch__root">
+    <strong>AppModule</strong>
+    <span>Bootstraps the shell, wires the router</span>
+  </div>
+
+  <svg class="arch__wires" viewBox="0 0 300 48" preserveAspectRatio="none" aria-hidden="true">
+    <path [class.lit]="active() === 'core'" d="M150 0 C150 28 50 20 50 48" vector-effect="non-scaling-stroke" />
+    <path [class.lit]="active() === 'shared'" d="M150 0 V48" vector-effect="non-scaling-stroke" />
+    <path [class.lit]="active() === 'pages'" d="M150 0 C150 28 250 20 250 48" vector-effect="non-scaling-stroke" />
+  </svg>
+
+  <div class="arch__modules">
+    <section
+      *ngFor="let module of modules; trackBy: trackById"
+      class="module module--{{ module.id }}"
+      [class.module--lit]="isLit(module.id)"
+      tabindex="0"
+      [attr.aria-labelledby]="'arch-' + module.id"
+      (mouseenter)="active.set(module.id)"
+      (mouseleave)="active.set(null)"
+      (focus)="active.set(module.id)"
+      (blur)="active.set(null)"
+    >
+      <p class="module__kind">{{ module.kind }}</p>
+      <h3 class="module__name" [id]="'arch-' + module.id">{{ module.name }}</h3>
+      <ul class="module__items">
+        <li *ngFor="let item of module.items">{{ item }}</li>
+      </ul>
+      <p class="module__role">{{ module.role }}</p>
+    </section>
+  </div>
+</div>
+
+<ol class="decisions">
+  <li *ngFor="let decision of decisions; let i = index" class="decision">
+    <span class="decision__number" aria-hidden="true">{{ i + 1 | number: '2.0' }}</span>
+    <h3>{{ decision.title }}</h3>
+    <p>{{ decision.body }}</p>
+  </li>
+</ol>

@@ -1,0 +1,160 @@
+:host {
+  --poke-red: #ee1515;
+  --poke-ink: #1c1c1e;
+  --poke-gray: #6e6e73;
+  --poke-border: #e5e5ea;
+  --poke-surface: #f5f5f7;
+
+  display: block;
+}
+
+@keyframes stats-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+//   [ 1025 | types    | regions | dual ]
+//   [ 1025 | top type | yours (2 cols) ]
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: minmax(8.5rem, auto);
+  gap: 1rem;
+
+  &__error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 1.25rem;
+    border: 1px dashed var(--poke-border);
+    border-radius: 1.25rem;
+
+    p {
+      margin: 0;
+      color: var(--poke-gray);
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font: inherit;
+      font-weight: 600;
+      color: #ffffff;
+      background: var(--poke-red);
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+  }
+}
+
+.stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  overflow: hidden;
+  padding: 1.25rem;
+  color: var(--poke-ink);
+  text-decoration: none;
+  background: #ffffff;
+  border: 1px solid var(--poke-border);
+  border-radius: 1.25rem;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+
+  &__value {
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__label {
+    font-size: 0.8125rem;
+    color: var(--poke-gray);
+
+    em {
+      font-style: normal;
+      font-weight: 700;
+      text-transform: capitalize;
+      color: var(--accent);
+    }
+  }
+
+  // The headline number gets the big cell and the Poké Ball's red.
+  &--feature {
+    grid-row: span 2;
+    color: #ffffff;
+    background:
+      radial-gradient(circle at 110% -10%, rgba(255, 255, 255, 0.25), transparent 45%),
+      var(--poke-red);
+    border-color: var(--poke-red);
+
+    .stat__value {
+      font-size: clamp(3rem, 2rem + 4vw, 5.5rem);
+    }
+
+    .stat__label {
+      color: rgba(255, 255, 255, 0.85);
+    }
+  }
+
+  &--type {
+    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 18%, #ffffff), #ffffff 70%);
+    border-top: 4px solid var(--accent);
+  }
+
+  &--yours {
+    grid-column: span 2;
+    color: #ffffff;
+    background: var(--poke-ink);
+    border-color: var(--poke-ink);
+
+    .stat__label {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  &--skeleton {
+    background: linear-gradient(100deg, var(--poke-surface) 40%, #fbfbfd 50%, var(--poke-surface) 60%) 0 0 / 200% 100%;
+    border: 0;
+    animation: stats-shimmer 1.4s ease-in-out infinite;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent, var(--poke-red));
+    outline-offset: 3px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a.stat:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent, var(--poke-ink));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat {
+    transition: none;
+  }
+
+  .stat--skeleton {
+    animation: none;
+  }
+}
+
+@media screen and (max-width: 760px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .stat--feature {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+}
