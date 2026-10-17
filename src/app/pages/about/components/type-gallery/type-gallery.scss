@@ -1,8 +1,4 @@
 :host {
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-
   display: block;
 }
 
@@ -31,12 +27,12 @@
   padding: 0.5rem 0.5rem 0.875rem;
   color: var(--poke-ink);
   text-decoration: none;
-  background: #ffffff;
+  background: var(--poke-bg);
   border: 1px solid var(--poke-border);
-  border-radius: 1.25rem;
-  animation: swatch-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  border-radius: var(--radius-lg);
+  animation: swatch-in 0.6s var(--ease-out) both;
   animation-delay: calc(var(--i) * 35ms);
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s ease;
 
   &__chip {
     position: relative;
@@ -47,8 +43,8 @@
     background:
       radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35), transparent 55%),
       var(--accent);
-    border-radius: 0.875rem;
-    transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    border-radius: var(--radius-sm);
+    transition: height 0.4s var(--ease-out);
 
     img {
       position: absolute;
@@ -58,7 +54,7 @@
       height: auto;
       filter: brightness(0) opacity(0.18);
       transform: translateX(-50%);
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+      transition: transform var(--dur-slow) var(--ease-spring), filter 0.4s ease;
     }
   }
 
@@ -74,7 +70,7 @@
   }
 
   &__hex {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.6875rem;
     text-transform: uppercase;
     color: var(--poke-gray);

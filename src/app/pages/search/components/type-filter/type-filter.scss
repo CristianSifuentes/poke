@@ -1,9 +1,4 @@
 :host {
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-bg: #ffffff;
-
   display: block;
 }
 
@@ -50,9 +45,9 @@
   text-align: left;
   background: var(--poke-bg);
   border: 1px solid var(--poke-border);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: color 0.25s ease, border-color 0.25s ease, transform 0.2s ease, opacity 0.25s ease;
+  transition: color var(--dur-base) ease, border-color var(--dur-base) ease, transform var(--dur-fast) ease, opacity var(--dur-base) ease;
 
   &::before {
     content: "";
@@ -61,7 +56,7 @@
     z-index: 0;
     background: var(--accent);
     clip-path: circle(0 at 1.05rem 50%);
-    transition: clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: clip-path 0.45s var(--ease-out);
   }
 
   > * {
@@ -75,7 +70,7 @@
     background: var(--accent);
     border-radius: 50%;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+    transition: background-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
   }
 
   &__name {
@@ -89,7 +84,7 @@
     font-weight: 600;
     color: var(--poke-gray);
     font-variant-numeric: tabular-nums;
-    transition: color 0.25s ease;
+    transition: color var(--dur-base) ease;
   }
 
   &:hover:not(:disabled) {
@@ -116,7 +111,7 @@
     }
 
     .type-chip__dot {
-      background: #ffffff;
+      background: var(--poke-bg);
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
     }
 

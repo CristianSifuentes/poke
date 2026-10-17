@@ -1,0 +1,45 @@
+<article
+  class="dex-card dex-card--{{ size }}"
+  [appTypeColor]="pokemon.types[0]"
+  [appMagneticTilt]="size === 'hero' || size === 'wide'"
+  [style.--enter-delay]="(index | stagger: 45) + 'ms'"
+  [style.--enter-shift]="index % 2 === 0 ? -1 : 1"
+  appEntranceReveal
+>
+  <app-heart-button
+    [pokemonId]="pokemon.id"
+    [label]="pokemon.name"
+    [type]="pokemon.types[0]"
+  ></app-heart-button>
+
+  <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
+
+  <div class="dex-card__art">
+    <img
+      [src]="pokemon.id | pokemonArtwork"
+      [alt]="pokemon.name"
+      width="475"
+      height="475"
+      loading="lazy"
+      decoding="async"
+      appArtworkFallback
+    />
+  </div>
+
+  <div class="dex-card__body">
+    <h2 class="dex-card__name">{{ pokemon.name }}</h2>
+    <p class="dex-card__nickname" *ngIf="pokemon.nickname">&ldquo;{{ pokemon.nickname }}&rdquo;</p>
+
+    <ul class="dex-card__types">
+      <li
+        *ngFor="let type of pokemon.types; let isPrimary = first"
+        class="dex-card__type"
+        [class.dex-card__type--primary]="isPrimary"
+        [appTypeColor]="type"
+        appTypeColorMode="fill"
+      >
+        {{ type }}
+      </li>
+    </ul>
+  </div>
+</article>

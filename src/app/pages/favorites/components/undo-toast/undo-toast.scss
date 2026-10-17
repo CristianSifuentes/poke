@@ -33,10 +33,10 @@
   overflow: hidden;
   padding: 0.625rem 0.5rem 0.625rem 1rem;
   color: #ffffff;
-  background: #1c1c1e;
-  border-radius: 1rem;
-  box-shadow: 0 18px 40px -16px rgba(28, 28, 30, 0.6);
-  animation: toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  background: var(--poke-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-overlay);
+  animation: toast-in 0.35s var(--ease-out) both;
 
   &__message {
     flex: 1;
@@ -56,7 +56,7 @@
     color: #ffffff;
     background: none;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     cursor: pointer;
 
     &:focus-visible {
@@ -99,7 +99,7 @@
     right: 0;
     bottom: 0;
     height: 3px;
-    background: #ee1515;
+    background: var(--poke-red);
     transform-origin: left;
     animation: toast-countdown var(--duration, 5000ms) linear both;
   }

@@ -1,42 +1,17 @@
+@use 'poke';
+
 :host {
-  --poke-red: #ee1515;
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-bg: #ffffff;
-  --poke-surface: #f5f5f7;
-
   display: block;
-  padding: 2rem 1.5rem;
-}
-
-@keyframes pokedex-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pokedex-shimmer {
-  to {
-    background-position: -200% 0;
-  }
-}
-
-@keyframes pokedex-wobble {
-  0%, 100% { transform: rotate(0); }
-  20% { transform: rotate(-14deg); }
-  40% { transform: rotate(10deg); }
-  60% { transform: rotate(-6deg); }
 }
 
 .pokedex {
   position: relative;
-  max-width: 1080px;
+  max-width: var(--page-max);
   margin: 0 auto;
   isolation: isolate;
 
-  // A Poké Ball drawn in a single hairline, turning slower than you'd notice —
-  // texture for the header, never competing with it.
+  // A Poké Ball drawn in a single hairline, turning slower than you'd
+  // notice — texture for the header, never competing with it.
   &__ornament {
     position: absolute;
     top: -3rem;
@@ -46,34 +21,24 @@
     fill: none;
     stroke: var(--poke-border);
     stroke-width: 1.5;
-    animation: pokedex-spin 120s linear infinite;
+    animation: poke-spin 120s linear infinite;
   }
 
   &__header {
     margin-bottom: 1.75rem;
 
     h1 {
-      margin: 0 0 0.375rem;
-      font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--poke-ink);
+      @include poke.page-title;
     }
   }
 
   &__eyebrow {
-    margin: 0 0 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--poke-red);
+    @include poke.eyebrow;
   }
 
   &__lede {
+    @include poke.lede;
     max-width: 34rem;
-    margin: 0;
-    color: var(--poke-gray);
   }
 
   &__filters {
@@ -119,18 +84,16 @@
   }
 
   &__pill,
-  &__clear,
-  &__sort-option {
-    font: inherit;
-    font-size: 0.8125rem;
+  &__clear {
+    @include poke.button-reset;
+    font-size: var(--text-sm);
     font-weight: 600;
-    border-radius: 999px;
-    cursor: pointer;
+    border-radius: var(--radius-pill);
+    @include poke.focus-ring;
   }
 
   &__pill {
     padding: 0.25rem 0.625rem;
-    color: var(--poke-ink);
     background: var(--poke-surface);
     border: 1px solid var(--poke-border);
 
@@ -145,28 +108,10 @@
   &__clear {
     padding: 0.25rem 0.5rem;
     color: var(--poke-red);
-    background: none;
-    border: 0;
   }
 
   &__sort {
-    display: inline-flex;
-    padding: 0.1875rem;
-    background: var(--poke-surface);
-    border-radius: 999px;
-  }
-
-  &__sort-option {
-    padding: 0.3125rem 0.75rem;
-    color: var(--poke-gray);
-    background: none;
-    border: 0;
-
-    &--active {
-      color: var(--poke-ink);
-      background: var(--poke-bg);
-      box-shadow: 0 1px 3px rgba(28, 28, 30, 0.12);
-    }
+    @include poke.segmented('.pokedex__sort-option');
   }
 
   &__grid {
@@ -177,66 +122,22 @@
 
   &__skeleton {
     height: 15.5rem;
-    border-radius: 1.25rem;
-    background: linear-gradient(100deg, var(--poke-surface) 40%, #fbfbfd 50%, var(--poke-surface) 60%) 0 0 / 200% 100%;
-    animation: pokedex-shimmer 1.4s ease-in-out infinite;
+    @include poke.skeleton;
     animation-delay: calc(var(--i, 0) * 60ms);
   }
 
-  &__state {
-    display: grid;
-    justify-items: center;
-    gap: 0.5rem;
-    padding: 3.5rem 1rem;
-    text-align: center;
-
-    h2 {
-      margin: 0.5rem 0 0;
-      font-size: 1.25rem;
-      color: var(--poke-ink);
-    }
-
-    p {
-      max-width: 26rem;
-      margin: 0 0 0.75rem;
-      color: var(--poke-gray);
-    }
-  }
-
-  &__empty-ball {
-    width: 4.5rem;
-    fill: none;
-    stroke: var(--poke-border);
-    stroke-width: 4;
-    transform-origin: 50% 90%;
-    animation: pokedex-wobble 1.6s ease-in-out 0.3s 2;
-  }
-
-  &__action,
   &__more {
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 999px;
-  }
-
-  &__action {
-    padding: 0.625rem 1.25rem;
-    color: #ffffff;
-    background: var(--poke-red);
-    border: 0;
-  }
-
-  &__more {
+    @include poke.button-reset;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.125rem;
     margin: 2rem auto 0;
     padding: 0.625rem 1.5rem;
-    color: var(--poke-ink);
-    background: var(--poke-bg);
+    font-weight: 600;
     border: 1px solid var(--poke-border);
+    border-radius: var(--radius-pill);
+    @include poke.focus-ring;
 
     span {
       font-size: 0.75rem;
@@ -244,26 +145,16 @@
       color: var(--poke-gray);
     }
   }
-
-  button:focus-visible {
-    outline: 2px solid var(--poke-red);
-    outline-offset: 2px;
-  }
 }
 
-@media (prefers-reduced-motion: reduce) {
+@include poke.reduced-motion {
   .pokedex__ornament,
-  .pokedex__skeleton,
-  .pokedex__empty-ball {
+  .pokedex__skeleton {
     animation: none;
   }
 }
 
 @media screen and (max-width: 560px) {
-  :host {
-    padding: 1.5rem 0;
-  }
-
   .pokedex__grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;

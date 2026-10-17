@@ -1,54 +1,24 @@
-:host {
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-bg: #ffffff;
+@use 'poke';
 
+:host {
   display: block;
 }
 
-// Same bloom as the home mosaic: out of grayscale and shadow into color.
-@keyframes search-card-bloom {
-  from {
-    opacity: 0;
-    filter: grayscale(1) brightness(0.9);
-    transform: translateY(14px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    filter: none;
-    transform: none;
-  }
-}
-
 .search-card {
-  position: relative;
+  --enter-rise: 14px;
+
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
   padding: 0.875rem 1rem 1rem;
-  background: var(--poke-bg);
-  border: 1px solid var(--poke-border);
-  border-radius: 1.25rem;
-  box-shadow: 0 1px 2px rgba(28, 28, 30, 0.04);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-
-  &.pending-reveal {
-    animation: search-card-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: var(--enter-delay, 0ms);
-  }
+  @include poke.card;
+  transition: transform var(--dur-base) ease, box-shadow var(--dur-base) ease, border-color var(--dur-base) ease;
+  @include poke.bloom(0.7s);
 
   // The top hairline runs from the primary type into the secondary one —
   // a dual-type Pokémon literally wears both colors.
   &::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    z-index: 1;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2, var(--accent)));
+    @include poke.type-hairline;
   }
 
   &__watermark {
@@ -63,7 +33,7 @@
     -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 28%, transparent);
     pointer-events: none;
     user-select: none;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.6s var(--ease-spring);
   }
 
   &__art {
@@ -85,7 +55,7 @@
         color-mix(in srgb, var(--accent-2, var(--accent)) 10%, transparent) 55%,
         transparent 72%
       );
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform var(--dur-slow) var(--ease-spring);
     }
 
     img {
@@ -94,7 +64,7 @@
       height: auto;
       object-fit: contain;
       filter: drop-shadow(0 8px 10px rgba(28, 28, 30, 0.14));
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+      transition: transform var(--dur-slow) var(--ease-spring), filter var(--dur-slow) ease;
     }
   }
 
@@ -138,28 +108,28 @@
     letter-spacing: 0.02em;
     color: #ffffff;
     text-transform: capitalize;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
   }
 
   // On hover the Pokémon steps forward out of its spotlight, which widens
   // to meet it, while the number behind drifts the other way — a little
   // parallax that gives a flat card some depth.
-  &:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--poke-border));
-    box-shadow: 0 18px 32px -20px color-mix(in srgb, var(--accent) 70%, #1c1c1e);
+  @include poke.hover {
+    &:hover {
+      @include poke.accent-lift(-4px);
 
-    .search-card__art::before {
-      transform: scale(1.18);
-    }
+      .search-card__art::before {
+        transform: scale(1.18);
+      }
 
-    .search-card__art img {
-      transform: translateY(-6px) scale(1.08);
-      filter: drop-shadow(0 14px 14px rgba(28, 28, 30, 0.2));
-    }
+      .search-card__art img {
+        transform: translateY(-6px) scale(1.08);
+        filter: drop-shadow(0 14px 14px rgba(28, 28, 30, 0.2));
+      }
 
-    .search-card__watermark {
-      transform: translateX(-0.5rem);
+      .search-card__watermark {
+        transform: translateX(-0.5rem);
+      }
     }
   }
 }

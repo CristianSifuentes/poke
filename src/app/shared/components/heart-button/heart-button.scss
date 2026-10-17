@@ -1,9 +1,6 @@
 // Sits in a card's top-left corner by default; every card that hosts it is
 // already position: relative.
 :host {
-  --poke-red: #ee1515;
-  --poke-gray: #6e6e73;
-
   position: absolute;
   top: 0.625rem;
   left: 0.625rem;
@@ -55,7 +52,7 @@
   border-radius: 50%;
   backdrop-filter: blur(6px);
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform var(--dur-fast) ease, background-color var(--dur-fast) ease;
 
   &__icon {
     width: 1.0625rem;
@@ -63,7 +60,7 @@
     stroke: var(--poke-gray);
     stroke-width: 1.8;
     stroke-linejoin: round;
-    transition: fill 0.2s ease, stroke 0.2s ease;
+    transition: fill var(--dur-fast) ease, stroke var(--dur-fast) ease;
   }
 
   &__burst {
@@ -88,7 +85,7 @@
       height: 4px;
       background: var(--poke-red);
       border-radius: 50%;
-      animation: heart-spark 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: heart-spark 0.6s var(--ease-out) both;
 
       &:nth-child(even) {
         background: var(--accent, var(--poke-red));
@@ -105,7 +102,7 @@
     .heart__icon {
       fill: var(--poke-red);
       stroke: var(--poke-red);
-      animation: heart-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: heart-pop 0.45s var(--ease-out);
     }
   }
 }
@@ -113,7 +110,7 @@
 @media (hover: hover) and (pointer: fine) {
   .heart:hover {
     transform: scale(1.08);
-    background: #ffffff;
+    background: var(--poke-bg);
 
     .heart__icon {
       stroke: var(--poke-red);

@@ -1,10 +1,4 @@
 :host {
-  --poke-red: #ee1515;
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-surface: #f5f5f7;
-
   display: block;
 }
 
@@ -18,7 +12,7 @@
     padding: 0.875rem 1.5rem;
     color: #ffffff;
     background: var(--poke-ink);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
 
     span {
       font-size: 0.75rem;
@@ -36,7 +30,7 @@
       fill: none;
       stroke: var(--poke-border);
       stroke-width: 2;
-      transition: stroke 0.25s ease;
+      transition: stroke var(--dur-base) ease;
 
       &.lit {
         stroke: var(--poke-red);
@@ -61,11 +55,11 @@
 .module {
   position: relative;
   padding: 1.25rem;
-  background: #ffffff;
+  background: var(--poke-bg);
   border: 1px solid var(--poke-border);
-  border-radius: 1.25rem;
+  border-radius: var(--radius-lg);
   outline: none;
-  transition: opacity 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition: opacity var(--dur-base) ease, border-color var(--dur-base) ease, transform var(--dur-base) ease;
 
   &::before {
     content: "";
@@ -74,7 +68,7 @@
     height: 3px;
     background: var(--poke-border);
     border-radius: 0 0 3px 3px;
-    transition: background-color 0.25s ease;
+    transition: background-color var(--dur-base) ease;
   }
 
   &--lit {
@@ -101,7 +95,7 @@
 
   &__name {
     margin: 0.25rem 0 0.75rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 1rem;
     color: var(--poke-ink);
   }
@@ -119,7 +113,7 @@
       font-size: 0.75rem;
       font-weight: 600;
       background: var(--poke-surface);
-      border-radius: 999px;
+      border-radius: var(--radius-pill);
     }
   }
 
@@ -144,7 +138,7 @@
   overflow: hidden;
   padding: 1.25rem;
   background: var(--poke-surface);
-  border-radius: 1.25rem;
+  border-radius: var(--radius-lg);
 
   &__number {
     position: absolute;

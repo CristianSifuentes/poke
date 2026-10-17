@@ -1,0 +1,262 @@
+// Shared style patterns. Each mixin captures one thing the app does in
+// more than one place, so a card, a chip or a skeleton looks and moves the
+// same everywhere. Tokens (colors, radii, motion) live in src/styles.scss.
+
+// ── Text ────────────────────────────────────────────────────────────────
+
+@mixin eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--poke-red);
+}
+
+@mixin page-title {
+  margin: 0 0 0.375rem;
+  font-size: var(--text-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--poke-ink);
+}
+
+@mixin section-title {
+  margin: 0 0 0.5rem;
+  font-size: var(--text-section);
+  letter-spacing: -0.015em;
+  color: var(--poke-ink);
+}
+
+@mixin lede {
+  margin: 0;
+  color: var(--poke-gray);
+}
+
+// Big outlined numerals (card ids, section numbers) sitting behind content.
+@mixin outline-numeral($color) {
+  font-weight: 800;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px $color;
+  pointer-events: none;
+  user-select: none;
+}
+
+// ── Surfaces ────────────────────────────────────────────────────────────
+
+@mixin card($radius: var(--radius-lg)) {
+  position: relative;
+  overflow: hidden;
+  background: var(--poke-bg);
+  border: 1px solid var(--poke-border);
+  border-radius: $radius;
+  box-shadow: var(--shadow-rest);
+}
+
+// The type hairline: primary type flowing into the secondary one.
+@mixin type-hairline($edge: top, $height: 4px) {
+  content: "";
+  position: absolute;
+  @if $edge == top {
+    inset: 0 0 auto;
+  } @else {
+    inset: auto 0 0;
+  }
+  z-index: 1;
+  height: $height;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2, var(--accent)));
+}
+
+// Lift + accent-tinted shadow, for cards that carry a type color.
+@mixin accent-lift($rise: -4px) {
+  transform: translateY($rise);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--poke-border));
+  box-shadow: 0 18px 32px -20px color-mix(in srgb, var(--accent) 70%, #1c1c1e);
+}
+
+// A soft spotlight in the type color, pooled behind a Pokémon's artwork.
+@mixin type-spotlight($strength: 30%) {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) $strength, transparent),
+    color-mix(in srgb, var(--accent-2, var(--accent)) 10%, transparent) 55%,
+    transparent 72%
+  );
+}
+
+// ── Motion ──────────────────────────────────────────────────────────────
+
+// The grayscale-to-color entrance (appEntranceReveal adds .pending-reveal).
+@mixin bloom($duration: var(--dur-enter)) {
+  &.pending-reveal {
+    animation: poke-bloom $duration var(--ease-out) both;
+    animation-delay: var(--enter-delay, 0ms);
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+}
+
+@mixin skeleton($radius: var(--radius-lg)) {
+  border-radius: $radius;
+  background: linear-gradient(100deg, var(--poke-surface) 40%, var(--poke-surface-hi) 50%, var(--poke-surface) 60%) 0 0 /
+    200% 100%;
+  animation: poke-shimmer 1.4s ease-in-out infinite;
+}
+
+@mixin hover {
+  @media (hover: hover) and (pointer: fine) {
+    @content;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// ── Controls ────────────────────────────────────────────────────────────
+
+@mixin focus-ring($color: var(--poke-red), $offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: $offset;
+  }
+}
+
+@mixin button-reset {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+@mixin primary-button {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.6875rem 1.375rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  background: var(--poke-red);
+  border-radius: var(--radius-pill);
+  @include focus-ring(var(--poke-red), 3px);
+}
+
+// Round icon button with a stroked SVG inside (rail arrows, clear, moves).
+@mixin icon-button($size: 2.25rem, $icon: 1rem) {
+  @include button-reset;
+  display: grid;
+  place-items: center;
+  width: $size;
+  height: $size;
+  background: var(--poke-bg);
+  border: 1px solid var(--poke-border);
+  border-radius: 50%;
+
+  svg {
+    width: $icon;
+    fill: none;
+    stroke: var(--poke-ink);
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+// Pill-shaped segmented control: sort orders, small mode switches.
+@mixin segmented($option) {
+  display: inline-flex;
+  padding: 0.1875rem;
+  background: var(--poke-surface);
+  border-radius: var(--radius-pill);
+
+  #{$option} {
+    @include button-reset;
+    padding: 0.3125rem 0.75rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--poke-gray);
+    border-radius: var(--radius-pill);
+    transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+    @include focus-ring;
+
+    &--active {
+      color: var(--poke-ink);
+      background: var(--poke-bg);
+      box-shadow: var(--shadow-raised);
+    }
+  }
+}
+
+// A horizontally scrolling rail (pair with appScrollRail): no scrollbar,
+// snap per item, and edge fades driven by --fade-start / --fade-end.
+@mixin rail-track($gap: 0.5rem) {
+  display: flex;
+  gap: $gap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 2.75rem;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 var(--fade-start, 0px),
+    #000 calc(100% - var(--fade-end, 0px)),
+    transparent
+  );
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// The arrow buttons that sit over a rail's edges.
+@mixin rail-arrow {
+  @include icon-button;
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  box-shadow: var(--shadow-float);
+  transform: translateY(-50%);
+  transition: border-color var(--dur-fast) ease, transform var(--dur-fast) ease;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &--prev {
+    left: 0;
+  }
+
+  &--next {
+    right: 0;
+  }
+
+  @include hover {
+    &:hover {
+      border-color: var(--poke-ink);
+      transform: translateY(-50%) scale(1.06);
+    }
+  }
+}
+
+// A chip colored by its type (--accent from appTypeColor): colored dot at
+// rest, flooded with the type color once selected.
+@mixin type-chip-selected($dot) {
+  color: #ffffff;
+  background: var(--accent);
+  border-color: var(--accent);
+
+  #{$dot} {
+    background: #ffffff;
+  }
+}

@@ -1,17 +1,7 @@
+@use 'poke';
+
 :host {
-  --poke-ink: #1c1c1e;
-  --poke-gray: #6e6e73;
-  --poke-border: #e5e5ea;
-  --poke-bg: #ffffff;
-  --poke-surface: #f5f5f7;
-
   display: block;
-}
-
-@keyframes search-bar-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .search-bar {
@@ -22,9 +12,9 @@
   padding: 0 0.75rem 0 1.25rem;
   background: var(--poke-bg);
   border: 1px solid var(--poke-border);
-  border-radius: 999px;
-  box-shadow: 0 1px 2px rgba(28, 28, 30, 0.04);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-rest);
+  transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
 
   // An aura in the selected types' colors (--glow-a / --glow-b, set by the
   // page), blurred behind the field. It breathes in on focus, so the bar
@@ -35,15 +25,15 @@
     inset: -2px;
     z-index: -1;
     border-radius: inherit;
-    background: linear-gradient(110deg, var(--glow-a, #ee1515), var(--glow-b, #3b4cca));
+    background: linear-gradient(110deg, var(--glow-a, var(--poke-red)), var(--glow-b, var(--poke-blue)));
     filter: blur(18px);
     opacity: 0.12;
     transition: opacity 0.4s ease, background 0.6s ease;
   }
 
   &:focus-within {
-    border-color: color-mix(in srgb, var(--glow-a, #ee1515) 55%, var(--poke-border));
-    box-shadow: 0 10px 30px -18px var(--glow-a, #ee1515);
+    border-color: color-mix(in srgb, var(--glow-a, var(--poke-red)) 55%, var(--poke-border));
+    box-shadow: 0 10px 30px -18px var(--glow-a, var(--poke-red));
 
     &::before {
       opacity: 0.38;
@@ -72,7 +62,7 @@
     outline: none;
 
     &::placeholder {
-      color: #a1a1a6;
+      color: var(--poke-muted);
     }
 
     &::-webkit-search-cancel-button {
@@ -87,18 +77,17 @@
     font-variant-numeric: tabular-nums;
   }
 
-  &__kbd,
-  &__clear {
+  &__kbd {
     display: grid;
     place-items: center;
     flex: 0 0 auto;
     width: 2rem;
     height: 2rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
   }
 
   &__kbd {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.8125rem;
     color: var(--poke-gray);
     background: var(--poke-surface);
@@ -106,36 +95,25 @@
   }
 
   &__clear {
-    padding: 0;
+    @include poke.icon-button(2rem, 0.875rem);
+    flex: 0 0 auto;
     background: var(--poke-surface);
     border: 0;
-    cursor: pointer;
-
-    svg {
-      width: 0.875rem;
-      fill: none;
-      stroke: var(--poke-ink);
-      stroke-width: 2.25;
-      stroke-linecap: round;
-    }
 
     &:hover {
       background: var(--poke-border);
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--glow-a, #ee1515);
-      outline-offset: 2px;
-    }
+    @include poke.focus-ring(var(--glow-a, var(--poke-red)));
   }
 
   &__spinner {
     width: 1.125rem;
     height: 1.125rem;
     border: 2px solid var(--poke-border);
-    border-top-color: var(--glow-a, #ee1515);
+    border-top-color: var(--glow-a, var(--poke-red));
     border-radius: 50%;
-    animation: search-bar-spin 0.7s linear infinite;
+    animation: poke-spin 0.7s linear infinite;
   }
 }
 

@@ -5,51 +5,13 @@
   </header>
 
   <div class="dex__grid">
-    <article
+    <app-home-card
       *ngFor="let pokemon of pokemons; let i = index; trackBy: trackByPokemonId"
-      class="dex-card dex-card--{{ pokemon.bento }}"
-      [appTypeColor]="pokemon.types[0]"
-      [appMagneticTilt]="pokemon.bento === 'hero' || pokemon.bento === 'wide'"
-      appEntranceReveal
-      [ngStyle]="{
-        '--enter-delay': (i * 45) + 'ms',
-        '--enter-shift': i % 2 === 0 ? '-1' : '1'
-      }"
-    >
-      <app-heart-button
-        [pokemonId]="pokemon.id"
-        [label]="pokemon.name"
-        [type]="pokemon.types[0]"
-      ></app-heart-button>
-
-      <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
-
-      <div class="dex-card__art">
-        <img
-          [src]="pokemon.image"
-          [alt]="pokemon.name"
-          loading="lazy"
-          appArtworkFallback
-        />
-      </div>
-
-      <div class="dex-card__body">
-        <h2 class="dex-card__name">{{ pokemon.name }}</h2>
-        <p class="dex-card__nickname">&ldquo;{{ pokemon.nickname }}&rdquo;</p>
-
-        <ul class="dex-card__types">
-          <li
-            *ngFor="let type of pokemon.types; let isPrimary = first"
-            class="dex-card__type"
-            [ngClass]="{ 'dex-card__type--primary': isPrimary }"
-            [appTypeColor]="type"
-            appTypeColorMode="fill"
-          >
-            {{ type }}
-          </li>
-        </ul>
-      </div>
-    </article>
+      class="dex__cell dex__cell--{{ pokemon.bento }}"
+      [pokemon]="pokemon"
+      [size]="pokemon.bento"
+      [index]="i"
+    ></app-home-card>
   </div>
 
   <a class="dex__more" routerLink="/home/detail">
