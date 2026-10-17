@@ -52,6 +52,15 @@
   border-radius: 50%;
   backdrop-filter: blur(6px);
   cursor: pointer;
+
+  // ~44px to a fingertip, same 34px to the eye.
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -0.3125rem;
+    }
+  }
   transition: transform var(--dur-fast) ease, background-color var(--dur-fast) ease;
 
   &__icon {

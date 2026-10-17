@@ -1,4 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { PokedexEntry } from '../../core/models/pokedex-entry';
+import { FavoritesStore } from '../../core/services/favorites-store';
+import { PokedexService } from '../../core/services/pokedex-service';
+import { PokemonNamePipe } from '../../shared/pipes/pokemon-name-pipe';
+import { NATIONAL_DEX_SIZE } from '../../shared/utils/pokemon-generations';
 
 import { BentoSize, HomeCardPokemon } from './components/home-card/home-card';
 
@@ -7,6 +14,25 @@ interface DommiePokemon extends HomeCardPokemon {
   bento: BentoSize;
 }
 
+interface PartyTile {
+  pokemon: HomeCardPokemon;
+  bento: BentoSize;
+}
+
+// Bento shapes per party size, chosen so every size tiles the 4-column
+// grid without holes — a full party leads and closes with a hero cell.
+const PARTY_LAYOUTS: Readonly<Record<number, BentoSize[]>> = {
+  1: ['wide'],
+  2: ['wide', 'wide'],
+  3: ['hero', 'wide', 'wide'],
+  4: ['wide', 'wide', 'wide', 'wide'],
+  5: ['hero', 'regular', 'regular', 'wide', 'wide'],
+  6: ['hero', 'wide', 'wide', 'regular', 'regular', 'hero'],
+};
+
+const PARTY_SIZE = 6;
+const displayName = new PokemonNamePipe();
+
 @Component({
   selector: 'app-home',
   standalone: false,
@@ -14,7 +40,38 @@ interface DommiePokemon extends HomeCardPokemon {
   styleUrl: './home.scss',
 })
 export class Home {
+  private readonly favorites = inject(FavoritesStore);
+
   readonly trainerName = 'Dommie';
+  protected readonly dexSize = NATIONAL_DEX_SIZE;
+
+  private readonly entriesById = signal(new Map<number, PokedexEntry>());
+
+  // The visitor's own party (first six favorites), once the index can
+  // name them. Empty until then — Dommie's team carries the page alone.
+  protected readonly party = computed<PartyTile[]>(() => {
+    const byId = this.entriesById();
+    const members = this.favorites
+      .ids()
+      .slice(0, PARTY_SIZE)
+      .map((id) => byId.get(id))
+      .filter((entry): entry is PokedexEntry => !!entry);
+    const layout = PARTY_LAYOUTS[members.length] ?? [];
+    return members.map((entry, i) => ({
+      pokemon: { id: entry.id, name: displayName.transform(entry.name), types: entry.types },
+      bento: layout[i] ?? 'regular',
+    }));
+  });
+
+  constructor() {
+    // Only worth fetching the index if there's a party to show.
+    if (this.favorites.count()) {
+      inject(PokedexService)
+        .loadIndex()
+        .pipe(takeUntilDestroyed())
+        .subscribe((entries) => this.entriesById.set(new Map(entries.map((e) => [e.id, e]))));
+    }
+  }
 
   readonly pokemons: DommiePokemon[] = [
     {
@@ -133,5 +190,9 @@ export class Home {
 
   trackByPokemonId(_index: number, pokemon: DommiePokemon): number {
     return pokemon.id;
+  }
+
+  protected trackByTile(_index: number, tile: PartyTile): number {
+    return tile.pokemon.id;
   }
 }

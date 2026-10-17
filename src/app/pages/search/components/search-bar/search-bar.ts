@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-search-bar',
@@ -6,13 +6,20 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewC
   templateUrl: './search-bar.html',
   styleUrl: './search-bar.scss',
 })
-export class SearchBar {
+export class SearchBar implements AfterViewInit {
   @Input() query = '';
   @Input() resultCount = 0;
   @Input() loading = false;
   @Output() readonly queryChange = new EventEmitter<string>();
 
   @ViewChild('searchInput', { static: true }) private readonly input!: ElementRef<HTMLInputElement>;
+
+  // Arriving via the header's "/" shortcut from another page.
+  ngAfterViewInit(): void {
+    if (typeof history !== 'undefined' && history.state?.focusSearch) {
+      this.input.nativeElement.focus();
+    }
+  }
 
   // "/" jumps to search from anywhere on the page, the same shortcut
   // GitHub, YouTube and MDN use — unless the user is already typing.

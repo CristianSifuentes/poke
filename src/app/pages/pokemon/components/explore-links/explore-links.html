@@ -1,0 +1,14 @@
+<ul class="explore">
+  <li *ngFor="let type of types">
+    <a routerLink="/search" [queryParams]="{ types: type }" [appTypeColor]="type">
+      <span class="explore__dot" aria-hidden="true"></span>
+      <span>More <strong>{{ type }}</strong>-type Pokémon</span>
+    </a>
+  </li>
+  <li *ngIf="generation as gen">
+    <a routerLink="/search" [queryParams]="{ gen: gen.id }">
+      <span class="explore__dot" aria-hidden="true"></span>
+      <span>Everyone from <strong>{{ gen.region }}</strong></span>
+    </a>
+  </li>
+</ul>

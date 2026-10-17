@@ -100,3 +100,66 @@ body {
     transform: translateY(1rem);
   }
 }
+
+// View transitions between routes (router: enableViewTransitions). Pages
+// cross-fade quickly; a Pokémon's artwork morphs from its card into the
+// detail page (see PokemonTransition); the header holds still.
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-base);
+}
+
+::view-transition-group(pokemon-art) {
+  animation-duration: 0.45s;
+  animation-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+// ── Small kindnesses, everywhere ────────────────────────────────────────
+
+::selection {
+  color: var(--poke-ink);
+  background: color-mix(in srgb, var(--poke-red) 22%, transparent);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+}
+
+// Headings break into even lines; paragraphs avoid lonely last words.
+:where(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+:where(p, blockquote, dd) {
+  text-wrap: pretty;
+}
+
+// No double-tap zoom delay on controls.
+:where(a, button, [role="button"], label) {
+  touch-action: manipulation;
+}
+
+// A press you can feel. `scale` (not `transform`) composes with any
+// transform a component already uses — hover lifts, centered arrows.
+:where(button, [role="radio"]):not(:disabled):active {
+  scale: 0.96;
+}
+
+// A baseline focus ring; components refine it with their own color.
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--poke-red);
+  outline-offset: 2px;
+}
+
+:where(img) {
+  max-width: 100%;
+}

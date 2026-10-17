@@ -1,0 +1,13 @@
+<dl class="stats">
+  <div class="stats__row" *ngFor="let row of rows; let i = index" [style.--share]="row.share" [style.--i]="i">
+    <dt>{{ row.label }}</dt>
+    <dd>
+      <span class="stats__value">{{ row.value }}</span>
+      <span class="stats__track" aria-hidden="true"><span class="stats__bar"></span></span>
+    </dd>
+  </div>
+  <div class="stats__row stats__row--total">
+    <dt>Total</dt>
+    <dd><span class="stats__value">{{ total }}</span></dd>
+  </div>
+</dl>

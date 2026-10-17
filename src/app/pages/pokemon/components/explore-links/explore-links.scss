@@ -1,0 +1,42 @@
+@use 'poke';
+
+:host {
+  display: block;
+}
+
+.explore {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    color: var(--poke-ink);
+    text-decoration: none;
+    border: 1px solid var(--poke-border);
+    border-radius: var(--radius-pill);
+    transition: border-color var(--dur-fast) ease;
+    @include poke.focus-ring;
+
+    &:hover {
+      border-color: var(--accent, var(--poke-ink));
+    }
+  }
+
+  strong {
+    text-transform: capitalize;
+  }
+}
+
+.explore__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--accent, var(--poke-red));
+  border-radius: 50%;
+}

@@ -24,11 +24,12 @@
       decoding="async"
       draggable="false"
       appArtworkFallback
+      [appArtTransition]="pokemon.id"
     />
   </div>
 
   <span class="box-card__id">{{ pokemon.id | pokedexId }}</span>
-  <h3 class="box-card__name">{{ pokemon.name | pokemonName }}</h3>
+  <h3 class="box-card__name"><a class="box-card__link" [routerLink]="['/pokemon', pokemon.id]" [appPokemonLink]="pokemon.id" draggable="false">{{ pokemon.name | pokemonName }}</a></h3>
 
   <button
     *ngIf="showPartyAction"

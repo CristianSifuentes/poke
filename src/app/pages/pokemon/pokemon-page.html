@@ -1,0 +1,109 @@
+<app-state-panel
+  *ngIf="state().status === 'missing'; else page"
+  heading="We couldn't find that Pokémon"
+  text="That number isn't in the National Pokédex. Try searching by name instead."
+  actionLabel="Search the Pokédex"
+  actionLink="/search"
+></app-state-panel>
+
+<ng-template #page>
+  <article
+    class="detail"
+    [appTypeColor]="entry()?.types?.[0]"
+    [style.--accent-2]="(entry()?.types?.[1] ?? entry()?.types?.[0]) | pokemonTypeColor"
+  >
+    <nav class="detail__crumbs" aria-label="Breadcrumb">
+      <a routerLink="/search">Pokédex</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ pokemonId() | pokedexId }}</span>
+    </nav>
+
+    <div class="detail__hero">
+      <div class="detail__stage">
+        <span class="detail__number" aria-hidden="true">{{ pokemonId() | pokedexId }}</span>
+        <img
+          [src]="pokemonId() | pokemonArtwork"
+          [alt]="entry() ? (entry()!.name | pokemonName) : ''"
+          [style.view-transition-name]="artTransition"
+          width="475"
+          height="475"
+          decoding="async"
+          appArtworkFallback
+        />
+        <app-heart-button
+          *ngIf="entry() as e"
+          [pokemonId]="e.id"
+          [label]="e.name | pokemonName"
+          [type]="e.types[0]"
+        ></app-heart-button>
+      </div>
+
+      <div class="detail__info">
+        <p class="detail__eyebrow">
+          {{ pokemonId() | pokedexId }}
+          <ng-container *ngIf="generation() as gen"> · Generation {{ gen.numeral }} · {{ gen.region }}</ng-container>
+        </p>
+        <h1 class="detail__name">{{ entry() ? (entry()!.name | pokemonName) : 'Pokémon' }}</h1>
+
+        <p class="detail__genus" *ngIf="detail() as d">
+          {{ d.genus }}
+          <span class="detail__rarity" *ngIf="d.mythical">Mythical</span>
+          <span class="detail__rarity" *ngIf="d.legendary">Legendary</span>
+        </p>
+
+        <ul class="detail__types" *ngIf="entry() as e" aria-label="Types">
+          <li *ngFor="let type of e.types">
+            <a routerLink="/search" [queryParams]="{ types: type }" [appTypeColor]="type" appTypeColorMode="fill">
+              {{ type }}
+            </a>
+          </li>
+        </ul>
+
+        <ng-container *ngIf="detail() as d; else infoState">
+          <blockquote class="detail__flavor" *ngIf="d.flavorText">{{ d.flavorText }}</blockquote>
+
+          <dl class="detail__facts">
+            <div>
+              <dt>Height</dt>
+              <dd>{{ d.height | number: '1.1-1' }} m</dd>
+            </div>
+            <div>
+              <dt>Weight</dt>
+              <dd>{{ d.weight | number: '1.1-1' }} kg</dd>
+            </div>
+            <div class="detail__abilities">
+              <dt>Abilities</dt>
+              <dd>
+                <span *ngFor="let ability of d.abilities; let last = last">
+                  {{ ability.name | pokemonName }}<small *ngIf="ability.hidden"> (hidden)</small>{{ last ? '' : ', ' }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </ng-container>
+
+        <ng-template #infoState>
+          <div class="detail__skeleton" *ngIf="state().status === 'loading'" aria-busy="true">
+            <span></span><span></span><span></span>
+          </div>
+          <p class="detail__error" *ngIf="state().status === 'error'" role="alert">
+            We couldn't load the details this time.
+            <button type="button" (click)="retry()">Try again</button>
+          </p>
+        </ng-template>
+      </div>
+    </div>
+
+    <section class="detail__section" *ngIf="detail() as d" aria-labelledby="stats-heading">
+      <h2 id="stats-heading">Base stats</h2>
+      <app-stat-bars [stats]="d.stats"></app-stat-bars>
+    </section>
+
+    <section class="detail__section" *ngIf="entry() as e" aria-labelledby="explore-heading">
+      <h2 id="explore-heading">Keep exploring</h2>
+      <app-explore-links [types]="e.types" [generation]="generation() ?? null"></app-explore-links>
+    </section>
+
+    <app-pokemon-pager [previous]="neighbors().previous" [next]="neighbors().next"></app-pokemon-pager>
+  </article>
+</ng-template>

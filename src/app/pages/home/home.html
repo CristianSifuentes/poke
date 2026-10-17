@@ -1,7 +1,37 @@
-<section class="dex">
+<section class="dex" *ngIf="party().length" aria-labelledby="party-heading">
   <header class="dex__header">
-    <h1>{{ trainerName }}'s Pokémon</h1>
-    <p>A hand-picked squad, ready to battle.</p>
+    <p class="dex__eyebrow">Welcome back</p>
+    <h1 id="party-heading">Your party</h1>
+    <p>
+      The six you keep closest, straight from your favorites.
+      <a class="dex__more" routerLink="/favorites">Rearrange them <span aria-hidden="true">&rarr;</span></a>
+    </p>
+  </header>
+
+  <div class="dex__grid">
+    <app-home-card
+      *ngFor="let tile of party(); let i = index; trackBy: trackByTile"
+      class="dex__cell dex__cell--{{ tile.bento }}"
+      [pokemon]="tile.pokemon"
+      [size]="tile.bento"
+      [index]="i"
+    ></app-home-card>
+  </div>
+</section>
+
+<section class="dex" [class.dex--secondary]="party().length" aria-labelledby="dommie-heading">
+  <header class="dex__header">
+    <ng-container *ngIf="party().length; else pageTitle">
+      <h2 id="dommie-heading">{{ trainerName }}'s Pokémon</h2>
+    </ng-container>
+    <ng-template #pageTitle>
+      <p class="dex__eyebrow">Meet a fellow trainer</p>
+      <h1 id="dommie-heading">{{ trainerName }}'s Pokémon</h1>
+    </ng-template>
+    <p>
+      A hand-picked squad, ready to battle.
+      <ng-container *ngIf="!party().length">Tap the heart on any Pokémon and your own party will join them here.</ng-container>
+    </p>
   </header>
 
   <div class="dex__grid">
@@ -14,10 +44,8 @@
     ></app-home-card>
   </div>
 
-  <a class="dex__more" routerLink="/home/detail">
-    See Pokémon detail
+  <a class="dex__more dex__more--block" routerLink="/search">
+    Browse all {{ dexSize | number }} Pokémon
     <span aria-hidden="true">&rarr;</span>
   </a>
-
-  <router-outlet/>
 </section>

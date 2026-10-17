@@ -1,0 +1,29 @@
+<nav class="pager" aria-label="Pokédex order">
+  <a
+    *ngIf="previous as prev"
+    class="pager-link pager-link--prev"
+    [routerLink]="['/pokemon', prev.id]"
+    [appPokemonLink]="prev.id"
+    [appTypeColor]="prev.types[0]"
+  >
+    <img [src]="prev.id | pokemonArtwork" alt="" width="475" height="475" loading="lazy" appArtworkFallback />
+    <span class="pager-link__label">
+      <small>← Previous · {{ prev.id | pokedexId }}</small>
+      {{ prev.name | pokemonName }}
+    </span>
+  </a>
+  <a
+    *ngIf="next as next"
+    class="pager-link pager-link--next"
+    [routerLink]="['/pokemon', next.id]"
+    [appPokemonLink]="next.id"
+    [appTypeColor]="next.types[0]"
+  >
+    <span class="pager-link__label">
+      <small>Next · {{ next.id | pokedexId }} →</small>
+      {{ next.name | pokemonName }}
+    </span>
+    <img [src]="next.id | pokemonArtwork" alt="" width="475" height="475" loading="lazy" appArtworkFallback />
+  </a>
+</nav>
+<p class="pager__hint">Tip: use ← and → to page through the Pokédex.</p>
