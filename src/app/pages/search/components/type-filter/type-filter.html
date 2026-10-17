@@ -1,0 +1,22 @@
+<fieldset class="type-filter" [disabled]="disabled">
+  <legend class="type-filter__legend">
+    Type <span>Pick up to two</span>
+  </legend>
+
+  <div class="type-filter__grid">
+    <button
+      *ngFor="let type of types"
+      type="button"
+      class="type-chip"
+      [class.type-chip--selected]="selected.includes(type)"
+      [appTypeColor]="type"
+      [attr.aria-pressed]="selected.includes(type)"
+      [disabled]="!selected.includes(type) && !counts[type]"
+      (click)="typeToggle.emit(type)"
+    >
+      <span class="type-chip__dot" aria-hidden="true"></span>
+      <span class="type-chip__name">{{ type }}</span>
+      <span class="type-chip__count">{{ counts[type] ?? '–' }}</span>
+    </button>
+  </div>
+</fieldset>

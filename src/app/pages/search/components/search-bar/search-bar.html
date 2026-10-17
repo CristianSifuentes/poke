@@ -1,0 +1,32 @@
+<div class="search-bar" role="search">
+  <svg class="search-bar__icon" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+
+  <input
+    #searchInput
+    type="search"
+    class="search-bar__input"
+    placeholder="Search by name or number — Pikachu, #025…"
+    aria-label="Search Pokémon by name or Pokédex number"
+    autocomplete="off"
+    spellcheck="false"
+    [value]="query"
+    (input)="onInput($event)"
+    (keydown.escape)="onEscape()"
+  />
+
+  <span class="search-bar__spinner" *ngIf="loading" aria-label="Loading Pokédex"></span>
+
+  <span class="search-bar__count" *ngIf="!loading && query" aria-hidden="true">
+    {{ resultCount | number }}
+  </span>
+
+  <button *ngIf="query; else shortcut" type="button" class="search-bar__clear" aria-label="Clear search" (click)="clear()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+  </button>
+  <ng-template #shortcut>
+    <kbd class="search-bar__kbd" aria-hidden="true">/</kbd>
+  </ng-template>
+</div>
