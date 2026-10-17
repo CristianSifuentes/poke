@@ -36,8 +36,10 @@
     margin-top: 5rem;
   }
 
+  // Not positioned on purpose: the knot and the section number position
+  // against the section, so the number sits at the page's right edge
+  // instead of floating beside a 40rem heading.
   &__head {
-    position: relative;
     max-width: 40rem;
     margin-bottom: 1.75rem;
 
@@ -85,7 +87,7 @@
 
   &__credit-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
     margin: 0;
     padding: 0;
@@ -148,5 +150,12 @@
     &__head::before {
       left: -1.75rem;
     }
+  }
+}
+
+// Three credits: one row on wide screens, one column otherwise — never 2 + 1.
+@media screen and (max-width: 760px) {
+  .about__credit-list {
+    grid-template-columns: 1fr;
   }
 }

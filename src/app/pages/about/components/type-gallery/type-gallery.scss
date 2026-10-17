@@ -1,135 +1,259 @@
+@use 'poke';
+
 :host {
   display: block;
+  // Named: each cell is a container too, and an unnamed query would
+  // measure the nearest one — the cell — instead of the whole sheet.
+  container: specimen / inline-size;
 }
 
-@keyframes swatch-in {
+// The swatch slides up into its cell, like a color chip set into a
+// printed specimen sheet.
+@keyframes spec-chip-in {
   from {
-    opacity: 0;
-    transform: translateY(12px) rotate(calc((var(--i) - 8.5) * 0.6deg));
+    clip-path: inset(100% 0 0 0 round 0.5rem);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0 round 0.5rem);
   }
 }
 
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-  gap: 0.875rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+// A Swiss-style specimen sheet: the grid isn't hidden, it's the design.
+// Cells sit edge to edge and the 1px gaps let the sheet's own color show
+// through as hairlines — no borders to double up where cells meet.
+.specimen {
+  &__legend {
+    @include poke.label;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--poke-ink);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--poke-border);
+    border: 1px solid var(--poke-border);
+  }
+
+  // Each cell measures itself, so a narrow one can restack its text.
+  &__cell {
+    min-width: 0;
+    container: spec-cell / inline-size;
+  }
 }
 
-// A paint-chip card: a block of pure type color on top, its name and hex
-// below. The chip holds the type's first Pokémon, sitting low and quiet
-// until you point at it — then it rises out of its color.
-.swatch {
+// One cell, four corners and a swatch:
+//   01            #F08030
+//   [ color + silhouette ]
+//   Fire               81
+.spec {
+  position: relative;
   display: grid;
-  gap: 0.125rem;
-  padding: 0.5rem 0.5rem 0.875rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "index hex"
+    "chip  chip"
+    "name  count";
+  gap: 0.625rem 0.5rem;
+  height: 100%;
+  min-height: 13rem;
+  padding: 0.75rem;
   color: var(--poke-ink);
   text-decoration: none;
   background: var(--poke-bg);
-  border: 1px solid var(--poke-border);
-  border-radius: var(--radius-lg);
-  animation: swatch-in 0.6s var(--ease-out) both;
-  animation-delay: calc(var(--i) * 35ms);
-  transition: transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+  isolation: isolate;
+
+  // On hover the color seeps out of the swatch and floods the whole cell —
+  // a tint, so the text stays readable on every type.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: color-mix(in srgb, var(--accent) 16%, var(--poke-bg));
+    clip-path: inset(2.25rem 0.75rem 2.5rem 0.75rem round 0.5rem);
+    opacity: 0;
+    transition: clip-path 0.55s var(--ease-out), opacity var(--dur-base) ease;
+  }
+
+  // Number and hex read like a card's "#025": quiet, tabular, sans.
+  &__index,
+  &__hex {
+    @include poke.id-label;
+    line-height: 1;
+  }
+
+  &__index {
+    grid-area: index;
+  }
+
+  &__hex {
+    grid-area: hex;
+    text-transform: uppercase;
+  }
 
   &__chip {
     position: relative;
-    display: block;
+    grid-area: chip;
+    min-height: 5.5rem;
     overflow: hidden;
-    height: 6.5rem;
-    margin-bottom: 0.625rem;
     background:
-      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35), transparent 55%),
+      radial-gradient(circle at 25% 15%, rgba(255, 255, 255, 0.35), transparent 55%),
       var(--accent);
-    border-radius: var(--radius-sm);
-    transition: height 0.4s var(--ease-out);
+    border-radius: 0.5rem;
+    animation: spec-chip-in 0.7s var(--ease-out) both;
+    animation-delay: calc(var(--i) * 35ms);
 
+    // The type's first Pokémon as a soft shadow in its own color — always
+    // there, never hidden — stepping into full color on hover or focus.
+    // Centered with room to spare, so the Pokémon is always whole — and
+    // there's space for it to grow a little on hover without touching the
+    // edges.
     img {
       position: absolute;
+      top: 50%;
       left: 50%;
-      bottom: -18%;
-      width: 78%;
-      height: auto;
-      filter: brightness(0) opacity(0.18);
-      transform: translateX(-50%);
-      transition: transform var(--dur-slow) var(--ease-spring), filter 0.4s ease;
+      width: 72%;
+      height: 72%;
+      object-fit: contain;
+      filter: brightness(0) opacity(0.2);
+      transform: translate(-50%, -50%);
+      transition: transform 0.6s var(--ease-spring), filter 0.45s ease;
     }
   }
 
   &__name,
-  &__hex,
   &__count {
-    padding-inline: 0.375rem;
+    line-height: 1.1;
   }
 
+  // Name and count follow the cards elsewhere: a 1rem name in ink, the
+  // count beside it as tabular data.
   &__name {
-    font-weight: 700;
+    grid-area: name;
+    overflow: hidden;
+    font-size: var(--text-md);
+    font-weight: 650;
     text-transform: capitalize;
-  }
-
-  &__hex {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    color: var(--poke-gray);
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   &__count {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    color: var(--poke-gray);
+    grid-area: count;
+    justify-self: end;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
   &:focus-visible {
+    z-index: 1;
     outline: 2px solid var(--accent);
-    outline-offset: 3px;
+    outline-offset: -2px;
   }
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .swatch:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 30px -20px var(--accent);
+.spec:focus-visible {
+  &::before {
+    clip-path: inset(0 round 0);
+    opacity: 1;
+  }
 
-    .swatch__chip {
-      height: 7.25rem;
+  .spec__chip img {
+    filter: drop-shadow(0 6px 8px rgba(28, 28, 30, 0.25));
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+
+@include poke.hover {
+  .spec:hover {
+    &::before {
+      clip-path: inset(0 round 0);
+      opacity: 1;
     }
 
-    .swatch__chip img {
+    .spec__hex {
+      color: var(--poke-ink);
+    }
+
+    .spec__chip img {
       filter: drop-shadow(0 6px 8px rgba(28, 28, 30, 0.25));
-      transform: translateX(-50%) translateY(-22%) scale(1.04);
+      transform: translate(-50%, -50%) scale(1.14);
     }
   }
 }
 
-// Keyboard focus earns the same reveal as a hovering pointer.
-.swatch:focus-visible .swatch__chip img {
-  filter: none;
-  transform: translateX(-50%) translateY(-22%);
+// No hover to reveal with: show every Pokémon in color from the start.
+@media (hover: none) {
+  .spec__chip img {
+    filter: drop-shadow(0 4px 6px rgba(28, 28, 30, 0.2));
+  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .swatch,
-  .swatch__chip,
-  .swatch__chip img {
+@include poke.reduced-motion {
+  .spec::before,
+  .spec__chip,
+  .spec__chip img {
     transition: none;
     animation: none;
   }
 }
 
-// No hover to reveal with: show the Pokémon in color from the start.
-@media (hover: none) {
-  .swatch__chip img {
-    filter: none;
-    bottom: -8%;
+// Narrower sheets keep six columns with tighter cells and smaller type —
+// every field stays.
+@container specimen (max-width: 56rem) {
+  .spec {
+    gap: 0.5rem 0.25rem;
+    min-height: 11rem;
+    padding: 0.5rem;
+
+    &::before {
+      clip-path: inset(1.75rem 0.5rem 2rem 0.5rem round 0.5rem);
+    }
+
+    &__chip {
+      min-height: 4.5rem;
+    }
+
+    &__name {
+      font-size: var(--text-sm);
+    }
   }
 }
 
-@media screen and (max-width: 560px) {
-  .gallery {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.625rem;
+// A narrow cell gives the count its own line under the name, so no type
+// name is ever cut short.
+@container spec-cell (max-width: 8.5rem) {
+  .spec {
+    grid-template-areas:
+      "index hex"
+      "chip  chip"
+      "name  name"
+      "count count";
+    row-gap: 0.375rem;
+
+    &__count {
+      justify-self: start;
+      margin-top: -0.25rem;
+      font-size: var(--text-xs);
+      color: var(--poke-gray);
+    }
+  }
+}
+
+// Phones: three columns.
+@container specimen (max-width: 34rem) {
+  .specimen__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

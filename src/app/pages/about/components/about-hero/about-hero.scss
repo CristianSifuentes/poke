@@ -145,6 +145,19 @@
   }
 }
 
+// Below ~900px the copy column is too narrow for both CTAs side by side;
+// rather than wrapping into two uneven pills, they stack at equal width.
+@media screen and (max-width: 900px) {
+  .hero__actions {
+    display: grid;
+    max-width: 24rem;
+  }
+
+  .hero__cta {
+    justify-content: center;
+  }
+}
+
 @media screen and (max-width: 760px) {
   .hero {
     grid-template-columns: 1fr;

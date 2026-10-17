@@ -31,7 +31,9 @@
   // The track itself: one hairline the stops hang from.
   &__stop {
     position: relative;
-    flex: 0 0 11rem;
+    // A little over two stops visible on a phone (so the rail invites a
+    // swipe), five or six on desktop.
+    flex: 0 0 clamp(8.5rem, 30vw, 11rem);
     scroll-snap-align: start;
 
     &::before {

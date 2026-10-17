@@ -1,28 +1,39 @@
-<ul class="gallery">
-  <li *ngFor="let stat of swatches; let i = index; trackBy: trackByType">
-    <a
-      class="swatch"
-      [appTypeColor]="stat.type"
-      [style.--i]="i"
-      routerLink="/search"
-      [queryParams]="{ types: stat.type }"
-      [attr.aria-label]="(stat.type | titlecase) + ' type' + (stat.count ? ', ' + stat.count + ' Pokémon' : '')"
-    >
-      <span class="swatch__chip">
-        <img
-          *ngIf="stat.representativeId"
-          [src]="stat.representativeId | pokemonArtwork"
-          alt=""
-          width="475"
-          height="475"
-          loading="lazy"
-          decoding="async"
-          appArtworkFallback
-        />
-      </span>
-      <span class="swatch__name">{{ stat.type }}</span>
-      <span class="swatch__hex">{{ stat.type | pokemonTypeColor }}</span>
-      <span class="swatch__count">{{ stat.count ? (stat.count | number) + ' Pokémon' : '&nbsp;' }}</span>
-    </a>
-  </li>
-</ul>
+<div class="specimen">
+  <!-- The sheet's ruler: what each corner of a cell holds. -->
+  <p class="specimen__legend" aria-hidden="true">
+    <span>No. — Type</span>
+    <span>Hex — Pokémon</span>
+  </p>
+
+  <ul class="specimen__grid">
+    <li *ngFor="let stat of swatches; let i = index; trackBy: trackByType" class="specimen__cell">
+      <a
+        class="spec"
+        [appTypeColor]="stat.type"
+        [style.--i]="i"
+        routerLink="/search"
+        [queryParams]="{ types: stat.type }"
+        [attr.aria-label]="(stat.type | titlecase) + ' type' + (stat.count ? ', ' + stat.count + ' Pokémon' : '')"
+      >
+        <span class="spec__index" aria-hidden="true">{{ i + 1 | number: '2.0' }}</span>
+        <span class="spec__hex">{{ stat.type | pokemonTypeColor }}</span>
+
+        <span class="spec__chip">
+          <img
+            *ngIf="stat.representativeId"
+            [src]="stat.representativeId | pokemonArtwork"
+            alt=""
+            width="475"
+            height="475"
+            loading="lazy"
+            decoding="async"
+            appArtworkFallback
+          />
+        </span>
+
+        <span class="spec__name">{{ stat.type }}</span>
+        <span class="spec__count">{{ stat.count ? (stat.count | number) : '–' }}</span>
+      </a>
+    </li>
+  </ul>
+</div>

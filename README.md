@@ -644,7 +644,7 @@ A red **"thread"**, the Poké Ball's seam, runs down the left edge and stitches 
 | ------- | --------- | ---------- |
 | Hero | `AboutHero` | An SVG Poké Ball **draws itself** (`pathLength="1"` + `stroke-dashoffset`). Then its cap fills with a **slowly turning conic ring of all 18 type colors**, clipped to the top half. Two CTAs follow. |
 | 01 · By the numbers | `StatGrid` | Live figures from `summarizePokedex()`: total, types, regions, dual-type count, the **most common type** (linked, in its color) and **your favorites** (live). Each number uses `appCountUp`. The layout is a 4×2 bento with a red feature tile. |
-| 02 · The 18 types | `TypeGallery` | Paint-chip swatches with the color, name, hex and count. Each type's first primary-type Pokémon waits as a **silhouette** and rises into color on hover or focus (and is always in color on touch devices). Links go to `/search?types=…`. |
+| 02 · The 18 types | `TypeGallery` | A **Swiss-style specimen sheet**: 18 cells set edge to edge, with 1px hairlines (the sheet's own color showing through 1px gaps) under a labeled ruler. Each cell has its number and hex on top, a color swatch in the middle, and the name and count at the bottom. The type's first Pokémon sits centered and whole in its swatch as a soft silhouette. On hover or focus the color floods the cell (an animated `clip-path`) and the Pokémon grows slightly into full color. It's 6 columns on wide screens and 3 on phones, and narrow cells restack the count under the name, so nothing is cut or hidden. Links go to `/search?types=…`. |
 | 03 · Nine regions | `RegionTimeline` | A horizontal timeline on `appScrollRail`: numeral, region, id range, species count and the grass starter as a "Who's that Pokémon?" silhouette. Unova uses Snivy (#495), because #494 is the mythical Victini. Links go to `/search?gen=…`. It's static data, so it renders without the index. |
 | 04 · How it's built | `ArchitectureMap` | `AppModule` wired to Core, Shared and Pages with SVG curves (`vector-effect: non-scaling-stroke` keeps them crisp at any width). Hovering or focusing a module lights its wire, highlights related modules (Shared ↔ Pages) and dims the rest. Four "design decision" cards sit below. |
 | 05 · Credits | — | PokeAPI, PokeAPI/sprites, Angular, and a trademark notice. No official logos. |
@@ -693,7 +693,7 @@ A giant outlined **404** sits behind "This route fled!", above a `StatePanel` ("
 
 | Group | Mixin | Purpose |
 | ----- | ----- | ------- |
-| Text | `eyebrow`, `page-title`, `section-title`, `lede`, `outline-numeral($color)` | The type scale shared by every page |
+| Text | `eyebrow`, `page-title`, `section-title`, `lede`, `label`, `id-label`, `outline-numeral($color)` | The type scale shared by every page. `label` is the small uppercase field label ("HEIGHT", "TYPES", a legend); `id-label` is a quiet tabular reference ("#025", a hex code) |
 | Surfaces | `card($radius)`, `type-hairline($edge, $height)`, `accent-lift($rise)`, `type-spotlight($strength)` | Cards and their type-colored details |
 | Motion | `bloom($duration)`, `skeleton($radius)`, `hover { … }`, `reduced-motion { … }` | Entrances, placeholders, capability gates |
 | Controls | `focus-ring($color, $offset)`, `button-reset`, `primary-button`, `icon-button($size, $icon)`, `touch-target($reach)`, `segmented($option)`, `type-chip-selected($dot)` | Buttons and controls |

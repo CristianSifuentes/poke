@@ -2,6 +2,9 @@
 
 :host {
   display: block;
+  // Layout follows the grid's own width, not the viewport's: the About
+  // page loses width to its red thread, so viewport breakpoints lie here.
+  container-type: inline-size;
 }
 
 //   [ 1025 | types    | regions | dual ]
@@ -39,8 +42,11 @@
   flex-direction: column;
   justify-content: flex-end;
   gap: 0.25rem;
+  --stat-pad: 1.25rem;
+
   overflow: hidden;
-  padding: 1.25rem;
+  padding: var(--stat-pad);
+  container-type: inline-size;
   color: var(--poke-ink);
   text-decoration: none;
   background: var(--poke-bg);
@@ -48,8 +54,19 @@
   border-radius: var(--radius-lg);
   transition: border-color var(--dur-base) ease, transform var(--dur-base) ease;
 
+  // Every number fits its own tile. The tile is a container, and the
+  // template passes the formatted length (--chars: "526" → 3, "1,025" → 5),
+  // so the size is the tile's content width divided by the width of that
+  // many bold tabular digits (~0.62em each) — capped by --value-max so a
+  // lone "9" in a wide tile doesn't balloon past its neighbors.
   &__value {
-    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    --value-max: 3rem;
+
+    font-size: clamp(
+      1.5rem,
+      calc((100cqi - 2 * var(--stat-pad)) / (var(--chars, 3) * 0.62)),
+      var(--value-max)
+    );
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.03em;
@@ -68,7 +85,8 @@
     }
   }
 
-  // The headline number gets the big cell and the Poké Ball's red.
+  // The headline number gets the big cell, the Poké Ball's red and a
+  // much higher ceiling.
   &--feature {
     grid-row: span 2;
     color: #ffffff;
@@ -78,7 +96,7 @@
     border-color: var(--poke-red);
 
     .stat__value {
-      font-size: clamp(3rem, 2rem + 4vw, 5.5rem);
+      --value-max: 6rem;
     }
 
     .stat__label {
@@ -130,14 +148,18 @@
   }
 }
 
-@media screen and (max-width: 760px) {
+// Narrow grids (tablets, phones): two columns. The headline number takes
+// a full-width row, the rest pair up, and "yours" closes the grid.
+@container (max-width: 50rem) {
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(6.5rem, auto);
     gap: 0.75rem;
   }
 
   .stat--feature {
     grid-column: span 2;
     grid-row: span 1;
+    min-height: 9rem;
   }
 }

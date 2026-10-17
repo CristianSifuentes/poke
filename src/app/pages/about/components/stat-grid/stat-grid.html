@@ -1,21 +1,21 @@
 <div class="stats" *ngIf="status === 'ready' && stats as s; else placeholder">
   <div class="stat stat--feature">
-    <strong class="stat__value" [appCountUp]="s.total" [appCountUpDuration]="1600"></strong>
+    <strong class="stat__value" [style.--chars]="(s.total | number)?.length" [appCountUp]="s.total" [appCountUpDuration]="1600"></strong>
     <span class="stat__label">Pokémon in the National Pokédex</span>
   </div>
 
   <div class="stat">
-    <strong class="stat__value" [appCountUp]="s.typeCount"></strong>
+    <strong class="stat__value" [style.--chars]="(s.typeCount | number)?.length" [appCountUp]="s.typeCount"></strong>
     <span class="stat__label">Types</span>
   </div>
 
   <div class="stat">
-    <strong class="stat__value" [appCountUp]="s.regionCount"></strong>
+    <strong class="stat__value" [style.--chars]="(s.regionCount | number)?.length" [appCountUp]="s.regionCount"></strong>
     <span class="stat__label">Regions</span>
   </div>
 
   <div class="stat">
-    <strong class="stat__value" [appCountUp]="s.dualTypeCount"></strong>
+    <strong class="stat__value" [style.--chars]="(s.dualTypeCount | number)?.length" [appCountUp]="s.dualTypeCount"></strong>
     <span class="stat__label">Carry two types</span>
   </div>
 
@@ -26,12 +26,12 @@
     routerLink="/search"
     [queryParams]="{ types: top.type }"
   >
-    <strong class="stat__value" [appCountUp]="top.count"></strong>
+    <strong class="stat__value" [style.--chars]="(top.count | number)?.length" [appCountUp]="top.count"></strong>
     <span class="stat__label"><em>{{ top.type }}</em>, the most common type</span>
   </a>
 
   <a class="stat stat--yours" routerLink="/favorites">
-    <strong class="stat__value" [appCountUp]="favoriteCount"></strong>
+    <strong class="stat__value" [style.--chars]="(favoriteCount | number)?.length" [appCountUp]="favoriteCount"></strong>
     <span class="stat__label">In your collection</span>
   </a>
 </div>
