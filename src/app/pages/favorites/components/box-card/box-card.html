@@ -1,0 +1,43 @@
+<article
+  class="box-card"
+  [appTypeColor]="pokemon.types[0]"
+  [style.--accent-2]="(pokemon.types[1] ?? pokemon.types[0]) | pokemonTypeColor"
+  [style.--enter-delay]="delay + 'ms'"
+  [attr.draggable]="draggable"
+  [class.box-card--draggable]="draggable"
+  (dragstart)="onDragStart($event)"
+  appEntranceReveal
+>
+  <app-heart-button
+    [pokemonId]="pokemon.id"
+    [label]="pokemon.name | pokemonName"
+    [type]="pokemon.types[0]"
+  ></app-heart-button>
+
+  <div class="box-card__art">
+    <img
+      [src]="pokemon.id | pokemonArtwork"
+      [alt]="pokemon.name | pokemonName"
+      width="475"
+      height="475"
+      loading="lazy"
+      decoding="async"
+      draggable="false"
+      appArtworkFallback
+    />
+  </div>
+
+  <span class="box-card__id">{{ pokemon.id | pokedexId }}</span>
+  <h3 class="box-card__name">{{ pokemon.name | pokemonName }}</h3>
+
+  <button
+    *ngIf="showPartyAction"
+    type="button"
+    class="box-card__promote"
+    [attr.aria-label]="'Send ' + (pokemon.name | pokemonName) + ' to the party'"
+    title="Send to party"
+    (click)="toParty.emit(pokemon.id)"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
+  </button>
+</article>

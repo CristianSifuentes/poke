@@ -1,0 +1,109 @@
+:host {
+  --poke-red: #ee1515;
+  --poke-ink: #1c1c1e;
+  --poke-gray: #6e6e73;
+  --poke-border: #e5e5ea;
+  --poke-surface: #f5f5f7;
+
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.box-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  &__types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  &__sort {
+    display: inline-flex;
+    padding: 0.1875rem;
+    background: var(--poke-surface);
+    border-radius: 999px;
+  }
+
+  &__sort-option {
+    padding: 0.3125rem 0.75rem;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--poke-gray);
+    background: none;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+
+    &--active {
+      color: var(--poke-ink);
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(28, 28, 30, 0.12);
+    }
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--accent, var(--poke-red));
+    outline-offset: 2px;
+  }
+}
+
+// Same language as /search's type chips: a colored dot at rest, the whole
+// chip flooding with the type's color once selected.
+.box-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--poke-ink);
+  text-transform: capitalize;
+  background: #ffffff;
+  border: 1px solid var(--poke-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+
+  &__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  &__count {
+    font-size: 0.6875rem;
+    color: var(--poke-gray);
+  }
+
+  &:hover {
+    border-color: var(--accent, var(--poke-ink));
+  }
+
+  &--selected {
+    color: #ffffff;
+    background: var(--accent, var(--poke-ink));
+    border-color: var(--accent, var(--poke-ink));
+
+    .box-chip__dot {
+      background: #ffffff;
+    }
+
+    .box-chip__count {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .box-chip {
+    transition: none;
+  }
+}

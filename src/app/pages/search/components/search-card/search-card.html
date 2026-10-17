@@ -5,6 +5,12 @@
   [style.--enter-delay]="delay + 'ms'"
   appEntranceReveal
 >
+  <app-heart-button
+    [pokemonId]="pokemon.id"
+    [label]="pokemon.name | pokemonName"
+    [type]="pokemon.types[0]"
+  ></app-heart-button>
+
   <span class="search-card__watermark" aria-hidden="true">{{ pokemon.id | pokedexId }}</span>
 
   <div class="search-card__art">

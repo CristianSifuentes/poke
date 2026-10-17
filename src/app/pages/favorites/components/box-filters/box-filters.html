@@ -1,0 +1,40 @@
+<div class="box-filters">
+  <div class="box-filters__types" role="group" aria-label="Filter the box by type">
+    <button
+      type="button"
+      class="box-chip box-chip--all"
+      [class.box-chip--selected]="!selectedType"
+      [attr.aria-pressed]="!selectedType"
+      (click)="typeChange.emit(null)"
+    >
+      All
+    </button>
+    <button
+      *ngFor="let item of types"
+      type="button"
+      class="box-chip"
+      [class.box-chip--selected]="selectedType === item.type"
+      [appTypeColor]="item.type"
+      [attr.aria-pressed]="selectedType === item.type"
+      (click)="typeChange.emit(selectedType === item.type ? null : item.type)"
+    >
+      <span class="box-chip__dot" aria-hidden="true"></span>
+      {{ item.type }}
+      <span class="box-chip__count">{{ item.count }}</span>
+    </button>
+  </div>
+
+  <div class="box-filters__sort" role="radiogroup" aria-label="Sort the box">
+    <button
+      *ngFor="let option of sortOptions"
+      type="button"
+      role="radio"
+      [class.box-filters__sort-option--active]="sort === option.value"
+      class="box-filters__sort-option"
+      [attr.aria-checked]="sort === option.value"
+      (click)="sortChange.emit(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  </div>
+</div>

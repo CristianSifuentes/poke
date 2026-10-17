@@ -94,6 +94,27 @@
     }
   }
 
+  // Re-created by *ngFor whenever the count changes, so the pop replays.
+  &__badge {
+    display: inline-block;
+    min-width: 1.125rem;
+    margin-left: 0.375rem;
+    padding: 0 0.3125rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.125rem;
+    text-align: center;
+    color: #ffffff;
+    background: var(--poke-red);
+    border-radius: 999px;
+    vertical-align: 0.0625rem;
+    animation: navbar-badge-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
   &__toggle {
     display: none;
     flex-direction: column;
@@ -138,5 +159,17 @@
         margin-top: 0.5rem;
       }
     }
+  }
+}
+
+@keyframes navbar-badge-pop {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__badge {
+    animation: none;
   }
 }

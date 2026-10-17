@@ -1,4 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+
+import { FavoritesStore } from '../../services/favorites-store';
 
 @Component({
   selector: 'app-header',
@@ -7,6 +9,8 @@ import { Component, signal } from '@angular/core';
   styleUrl: './header.scss',
 })
 export class Header {
+
+  protected readonly favorites = inject(FavoritesStore);
 
   protected readonly title = signal('poke');
 
