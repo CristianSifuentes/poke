@@ -582,7 +582,7 @@ interface PokemonDetail { id; height /* m */; weight /* kg */; stats: { name; va
 | `visibleResults` / `hasMore` | The slice that's actually rendered |
 | `typeCounts` | For each type: how many results you'd get if you tapped it. **0 disables the chip**, so you can't walk into an empty page |
 | `generationCounts` | The same for generations (key `0` = all) |
-| `glowA` / `glowB` | The search bar's aura colors: the selected types, or Poké Ball red and blue |
+| `glowA` | The search bar's focus tint: the first selected type, or the brand red |
 
 - **URL as state.**
   - Filters are read once from `queryParamMap` (validated: unknown types dropped, at most 2, bad `gen`/`sort` ignored).
@@ -594,7 +594,7 @@ interface PokemonDetail { id; height /* m */; weight /* kg */; stats: { name; va
 
 | Component | Highlights |
 | --------- | ---------- |
-| `SearchBar` | A pill input with an aura (`--glow-a` → `--glow-b` gradient, blurred) that "breathes in" on focus. A result count appears while typing. <kbd>/</kbd> focuses it, and so does arriving through the header shortcut (`history.state.focusSearch`). The first <kbd>Esc</kbd> clears, the second blurs. The native WebKit clear button is hidden in favor of its own. |
+| `SearchBar` | A quiet pill input, like every other control. On focus only the edge answers: the border and the magnifier take a tint of the first selected type (or the brand red) with a thin 3px ring. A result count appears while typing. <kbd>/</kbd> focuses it, and so does arriving through the header shortcut (`history.state.focusSearch`). The first <kbd>Esc</kbd> clears, the second blurs. The native WebKit clear button is hidden in favor of its own. |
 | `TypeFilter` | 18 chips inside a `<fieldset>`/`<legend>`. Selecting a chip floods it with its type color through an animated `clip-path: circle()` that grows from the dot. Each chip shows its facet count and uses `aria-pressed`. |
 | `GenerationFilter` | A `role="radiogroup"` timeline of 9 regions, built on `appScrollRail`. Arrows and edge fades appear **only** on the side where more is hidden, pills snap into place, and choosing a half-hidden pill scrolls it into view. The active pill turns ink-black with a red "seam" underneath. |
 | `SearchCard` | An outlined id watermark behind the art, a type-colored spotlight, and a hairline running from the primary to the secondary type. On hover the Pokémon "steps forward" while the watermark drifts the other way (parallax). The whole card links to the detail page. |

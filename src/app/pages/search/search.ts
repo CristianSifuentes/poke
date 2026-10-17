@@ -129,15 +129,11 @@ export class Search {
     () => !!this.query().trim() || this.types().length > 0 || this.generation() !== null,
   );
 
-  // The search bar's ambient glow takes on the selected types' colors —
-  // red and blue, like a Poké Ball, until a type is chosen.
+  // The search bar's focus tint: the first selected type's color, or the
+  // brand red when no type is chosen.
   protected readonly glowA = computed(() =>
     this.types()[0] ? resolvePokemonTypeColor(this.types()[0]) : 'var(--poke-red)',
   );
-  protected readonly glowB = computed(() => {
-    const [first, second] = this.types();
-    return second || first ? resolvePokemonTypeColor(second ?? first) : 'var(--poke-blue)';
-  });
 
   private readonly queryMatcher = computed(() => {
     const raw = this.query().trim();
