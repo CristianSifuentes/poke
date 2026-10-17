@@ -1,0 +1,93 @@
+@use 'poke';
+
+:host {
+  position: fixed;
+  right: max(1.25rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 15;
+}
+
+// A quiet circle in the corner. Hidden, it rests a little lower and
+// invisible; scrolled far enough, it rises into place.
+.scroll-top {
+  @include poke.button-reset;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  color: var(--poke-ink);
+  background: color-mix(in srgb, var(--poke-bg) 88%, transparent);
+  border-radius: 50%;
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  translate: 0 0.75rem;
+  pointer-events: none;
+  transition: opacity var(--dur-base) ease, translate var(--dur-slow) var(--ease-spring);
+
+  &--visible {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: auto;
+  }
+
+  // The ring: a hairline track, and over it a red arc as long as the part
+  // of the page you've read — starting at twelve o'clock.
+  &__ring {
+    position: absolute;
+    inset: 0;
+    rotate: -90deg;
+    fill: none;
+    stroke-width: 2;
+  }
+
+  &__track {
+    stroke: var(--poke-border);
+  }
+
+  &__progress {
+    stroke: var(--poke-red);
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--progress, 0));
+    transition: stroke-dashoffset 0.12s linear, stroke-width var(--dur-fast) ease;
+  }
+
+  &__arrow {
+    width: 1.125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: translate var(--dur-base) var(--ease-out), color var(--dur-base) ease;
+  }
+
+  // Reached the end: the ring closes and the arrow takes the brand red.
+  &--complete {
+    color: var(--poke-red);
+  }
+
+  @include poke.focus-ring(var(--poke-red), 3px);
+}
+
+@include poke.hover {
+  .scroll-top:hover {
+    .scroll-top__arrow {
+      translate: 0 -2px;
+    }
+
+    .scroll-top__progress {
+      stroke-width: 3;
+    }
+  }
+}
+
+@include poke.reduced-motion {
+  .scroll-top,
+  .scroll-top__arrow,
+  .scroll-top__progress {
+    transition: none;
+  }
+}

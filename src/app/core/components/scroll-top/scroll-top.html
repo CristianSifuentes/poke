@@ -1,0 +1,20 @@
+<button
+  type="button"
+  class="scroll-top"
+  [class.scroll-top--visible]="state().visible"
+  [class.scroll-top--complete]="state().complete"
+  [style.--progress]="state().progress"
+  [attr.tabindex]="state().visible ? null : -1"
+  [attr.aria-hidden]="!state().visible"
+  aria-label="Back to top"
+  title="Back to top"
+  (click)="toTop()"
+>
+  <svg class="scroll-top__ring" viewBox="0 0 48 48" aria-hidden="true">
+    <circle class="scroll-top__track" cx="24" cy="24" r="22" />
+    <circle class="scroll-top__progress" cx="24" cy="24" r="22" pathLength="1" />
+  </svg>
+  <svg class="scroll-top__arrow" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 19V5M6 11l6-6 6 6" />
+  </svg>
+</button>

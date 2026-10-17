@@ -258,3 +258,15 @@ html {
     animation: poke-theme-reveal 0.6s var(--ease-out) both;
   }
 }
+
+// On phones a toast spans nearly the full width at the bottom; the
+// back-to-top button steps up out of its way while one is showing.
+app-scroll-top {
+  transition: translate var(--dur-slow) var(--ease-spring);
+}
+
+@media screen and (max-width: 640px) {
+  body:has(.toast) app-scroll-top {
+    translate: 0 -4.5rem;
+  }
+}

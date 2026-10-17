@@ -254,6 +254,7 @@ poke/
         │   ├── components/
         │   │   ├── header/            # Sticky translucent nav, favorites badge, "/" shortcut, mobile menu
         │   │   ├── theme-toggle/      # Sun ⇄ moon switch
+        │   │   ├── scroll-top/        # Back-to-top with a reading-progress ring (+ spec)
         │   │   └── toast-outlet/      # Renders the current toast with a countdown
         │   ├── models/
         │   │   ├── pokedex-entry.ts   # { id, name, types, generation }
@@ -418,6 +419,16 @@ forkJoin({
   - Storage access is wrapped in `try/catch`.
 - **The reveal.** `ThemeToggle` passes the button's center to `toggle()`. Inside `document.startViewTransition()`, the new theme grows from that point as a `clip-path: circle()`, sized to reach the farthest corner of the viewport. The DOM update runs **synchronously** inside the transition callback (not in an `effect`), because the "after" snapshot is taken right when the callback returns. During the switch, the header drops its own `view-transition-name`, so it's revealed along with the page.
 - **The toggle.** A sun whose core swells while a shadow disc slides in to carve a crescent, and whose rays fold away with a quarter turn. It's all transforms, so it's smooth and interruptible. It's a `role="switch"` with `aria-checked` and a contextual `title`.
+
+### `ScrollTop`: back to the top, with a reading ring
+
+**Files:** `core/components/scroll-top/` (`scroll-state.ts` holds the pure logic, with a spec).
+
+- **When it shows.** It appears once you've scrolled past most of a screen, and only on pages long enough to need it. It rises in from slightly below and hides again near the top.
+- **The ring.** A red arc (`pathLength="1"` + `stroke-dashoffset`) shows how much of the page you've read, starting at twelve o'clock. At the very bottom the ring closes and the arrow turns red.
+- **On click.** It scrolls smoothly to the top (instantly under reduced motion) and focuses the page's `<h1>`, so keyboard and screen-reader users land where sighted users do.
+- **Performance.** Scroll and resize are measured at most once per frame (`requestAnimationFrame`) with passive listeners.
+- **On phones,** it steps up while a toast is showing (`body:has(.toast)`), so the two never overlap.
 
 ### `PokemonTransition`: which artwork morphs
 
@@ -880,12 +891,13 @@ Why this shape:
 
 ## 14. Testing
 
-Tests run with **Vitest + jsdom** through Angular's `@angular/build:unit-test` builder (`npm test`). **32 tests across 9 files**, all green.
+Tests run with **Vitest + jsdom** through Angular's `@angular/build:unit-test` builder (`npm test`). **37 tests across 10 files**, all green.
 
 | Spec | What it proves |
 | ---- | -------------- |
 | `app.spec.ts` | The shell renders (header, `<main>` outlet, toast region) and the nav links to all four pages |
 | `favorites-store.spec.ts` | Toggle on/off, persistence across instances, invalid/duplicate/legacy data in storage, invalid JSON, undo restores the original position, `moveTo` with clamping |
+| `scroll-state.spec.ts` | Hidden near the top; appears after most of a screen; never on short pages; completion at the bottom with rounding tolerance; clamped progress |
 | `theme-service.spec.ts` | Follows the OS when nothing is saved; a saved choice wins; garbage in storage is ignored; toggle persists and sets `data-theme`; toggling back to the OS theme returns to `'system'` |
 | `toast-service.spec.ts` | Auto-dismiss after the duration, the action runs once and isn't a dismissal, a new toast replaces (and dismisses) the old one |
 | `poke-title-strategy.spec.ts` | Title formatting; the document title follows the active route |
@@ -1019,6 +1031,8 @@ Each chapter of the course lives on its own branch (`features/one` … `features
 | **Search** | `PokedexService` (19-request index), URL-backed filters, faceted counts, infinite list, responsive generation rail |
 | **Favorites** | `FavoritesStore`, heart button, party lineup with drag & drop, the Box, the type wheel, undo |
 | **About** | Editorial page; `appCountUp`, `appScrollRail`; scroll-driven animations |
+| **Header personality** (`thirteen`) | The brand "catch" on hover and the nav line that travels between pages |
+| **Back to top** (`fourteen`) | A floating button with a reading-progress ring |
 | **Responsive favorites** (`ten`) | Artwork fills its card with `object-fit: contain`; cards read their own shape with size container queries (`cqi`) |
 | **Dark mode** (`eleven`) | `ThemeService`, sun ⇄ moon toggle, a dark token set, inverse/emphasis tokens, pre-paint script, circular View Transitions reveal |
 | **Cohesion pass** (`nine-one`) | Design tokens and mixins; `HomeCard`, `StatePanel`, `stagger`; the `/pokemon/:id` page; view transitions; title strategy; focus management; app-wide toasts; 404; touch targets; copy pass; cleanup and a green test suite |
