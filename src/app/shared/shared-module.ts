@@ -9,6 +9,7 @@ import { ArtworkFallbackDirective } from './directives/artwork-fallback-directiv
 import { CountUpDirective } from './directives/count-up-directive';
 import { EntranceRevealDirective } from './directives/entrance-reveal-directive';
 import { MagneticTiltDirective } from './directives/magnetic-tilt-directive';
+import { ArtTransitionDirective, PokemonLinkDirective } from './directives/pokemon-link-directive';
 import { ScrollSentinelDirective } from './directives/scroll-sentinel-directive';
 import { ScrollRailDirective } from './directives/scroll-rail-directive';
 import { TypeColorDirective } from './directives/type-color-directive';
@@ -34,6 +35,8 @@ import { StaggerPipe } from './pipes/stagger-pipe';
     ScrollSentinelDirective,
     ScrollRailDirective,
     CountUpDirective,
+    PokemonLinkDirective,
+    ArtTransitionDirective,
   ],
   imports: [CommonModule, RouterModule],
   exports: [
@@ -51,6 +54,8 @@ import { StaggerPipe } from './pipes/stagger-pipe';
     ScrollSentinelDirective,
     ScrollRailDirective,
     CountUpDirective,
+    PokemonLinkDirective,
+    ArtTransitionDirective,
   ],
 })
 export class SharedModule {}

@@ -164,6 +164,8 @@ export class Search {
         this.router.navigate([], {
           relativeTo: this.route,
           replaceUrl: true,
+          // Refining a search isn't a new page: stay where you are.
+          scroll: 'manual',
           queryParams: {
             q: query.trim() || null,
             types: types.join(',') || null,

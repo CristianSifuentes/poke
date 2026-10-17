@@ -100,3 +100,24 @@ body {
     transform: translateY(1rem);
   }
 }
+
+// View transitions between routes (router: enableViewTransitions). Pages
+// cross-fade quickly; a Pokémon's artwork morphs from its card into the
+// detail page (see PokemonTransition); the header holds still.
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-base);
+}
+
+::view-transition-group(pokemon-art) {
+  animation-duration: 0.45s;
+  animation-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

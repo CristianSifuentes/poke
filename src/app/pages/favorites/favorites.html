@@ -86,12 +86,4 @@
       </div>
     </app-state-panel>
   </ng-template>
-
-  <app-undo-toast
-    *ngFor="let removed of undoQueue()"
-    [name]="removedName(removed) | pokemonName"
-    [duration]="undoWindowMs"
-    (undo)="favorites.undoRemove()"
-    (dismiss)="favorites.dismissUndo()"
-  ></app-undo-toast>
 </section>

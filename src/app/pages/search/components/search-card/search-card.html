@@ -22,12 +22,13 @@
       loading="lazy"
       decoding="async"
       appArtworkFallback
+      [appArtTransition]="pokemon.id"
     />
   </div>
 
   <div class="search-card__body">
     <span class="search-card__id">{{ pokemon.id | pokedexId }}</span>
-    <h2 class="search-card__name">{{ pokemon.name | pokemonName }}</h2>
+    <h2 class="search-card__name"><a class="search-card__link" [routerLink]="['/pokemon', pokemon.id]" [appPokemonLink]="pokemon.id" draggable="false">{{ pokemon.name | pokemonName }}</a></h2>
 
     <ul class="search-card__types">
       <li *ngFor="let type of pokemon.types" class="search-card__type" [appTypeColor]="type" appTypeColorMode="fill">

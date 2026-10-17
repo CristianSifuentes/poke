@@ -1,10 +1,11 @@
 import { Component, Input, inject, signal } from '@angular/core';
 
 import { FavoritesStore } from '../../../core/services/favorites-store';
+import { ToastService } from '../../../core/services/toast-service';
 
 // Every card's way into the favorites collection. Owns no state of its own:
 // it reads and writes FavoritesStore, so the same Pokémon's heart stays in
-// sync on every page and in every open tab.
+// sync on every page and in every open tab. Removing offers an undo toast.
 @Component({
   selector: 'app-heart-button',
   standalone: false,
@@ -13,6 +14,7 @@ import { FavoritesStore } from '../../../core/services/favorites-store';
 })
 export class HeartButton {
   private readonly favorites = inject(FavoritesStore);
+  private readonly toasts = inject(ToastService);
 
   @Input({ required: true }) pokemonId!: number;
   // Display name, for the accessible label.
@@ -34,6 +36,16 @@ export class HeartButton {
     const adding = !this.active;
     this.favorites.toggle(this.pokemonId);
     this.bursts.set(adding ? [Date.now()] : []);
+    if (!adding) {
+      // Un-hearting is easy to do by accident, so it's always undoable,
+      // from whichever page it happened on.
+      this.toasts.show({
+        message: `${this.label || 'Pokémon'} left your favorites.`,
+        actionLabel: 'Undo',
+        action: () => this.favorites.undoRemove(),
+        dismissed: () => this.favorites.dismissUndo(),
+      });
+    }
   }
 
   protected trackByKey(_index: number, key: number): number {

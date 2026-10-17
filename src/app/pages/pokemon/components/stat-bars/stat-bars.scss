@@ -1,0 +1,80 @@
+@use 'poke';
+
+:host {
+  display: block;
+}
+
+@keyframes stat-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.stats {
+  display: grid;
+  gap: 0.625rem;
+  max-width: 40rem;
+  margin: 0;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+
+    dt {
+      font-size: var(--text-sm);
+      color: var(--poke-gray);
+    }
+
+    dd {
+      display: grid;
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0;
+    }
+
+    &--total {
+      padding-top: 0.625rem;
+      border-top: 1px solid var(--poke-border);
+
+      dt,
+      .stats__value {
+        font-weight: 700;
+        color: var(--poke-ink);
+      }
+    }
+  }
+
+  &__value {
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__track {
+    height: 0.5rem;
+    overflow: hidden;
+    background: var(--poke-surface);
+    border-radius: var(--radius-pill);
+  }
+
+  // Bars fill in the type's colors, one after another, from a standstill.
+  &__bar {
+    display: block;
+    width: calc(var(--share) * 100%);
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2, var(--accent)));
+    border-radius: inherit;
+    transform-origin: left;
+    animation: stat-grow 0.9s var(--ease-out) both;
+    animation-delay: calc(var(--i) * 70ms + 150ms);
+  }
+}
+
+@include poke.reduced-motion {
+  .stats__bar {
+    animation: none;
+  }
+}

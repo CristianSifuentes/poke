@@ -59,9 +59,16 @@
     color: var(--poke-ink);
   }
 
+  @include poke.card-focus('.box-card__link');
+
+  &__link {
+    @include poke.stretched-link;
+  }
+
   &__promote {
     @include poke.icon-button(1.75rem, 0.875rem);
     position: absolute;
+    z-index: 2;
     top: 0.625rem;
     right: 0.625rem;
     transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease;

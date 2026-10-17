@@ -25,13 +25,14 @@
       decoding="async"
       draggable="false"
       appArtworkFallback
+      [appArtTransition]="pokemon.id"
     />
   </div>
 
   <div class="party-card__body">
     <span class="party-card__role" *ngIf="slot === 0">Party lead</span>
     <span class="party-card__id">{{ pokemon.id | pokedexId }}</span>
-    <h3 class="party-card__name">{{ pokemon.name | pokemonName }}</h3>
+    <h3 class="party-card__name"><a class="party-card__link" [routerLink]="['/pokemon', pokemon.id]" [appPokemonLink]="pokemon.id" draggable="false">{{ pokemon.name | pokemonName }}</a></h3>
     <ul class="party-card__types">
       <li *ngFor="let type of pokemon.types" [appTypeColor]="type" appTypeColorMode="fill">{{ type }}</li>
     </ul>

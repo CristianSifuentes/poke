@@ -27,7 +27,8 @@
       class="navbar__link"
       routerLink="/search"
       routerLinkActive="navbar__link--active"
-      [routerLinkActiveOptions]="{ exact: true }"
+      [routerLinkActiveOptions]="{ exact: false }"
+      [class.navbar__link--section]="inPokedex()"
     >Pokédex</a>
     <a
       class="navbar__link"

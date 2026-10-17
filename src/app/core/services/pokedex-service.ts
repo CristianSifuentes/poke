@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, forkJoin, map, shareReplay } from 'rxjs';
 
 import { PokedexEntry } from '../models/pokedex-entry';
+import { PokemonDetail } from '../models/pokemon-detail';
 import { NATIONAL_DEX_SIZE, resolvePokemonGeneration } from '../../shared/utils/pokemon-generations';
 import { POKEMON_TYPE_COLORS } from '../../shared/utils/pokemon-type-colors';
 
@@ -19,6 +20,24 @@ interface SpeciesListResponse {
 
 interface TypeResponse {
   pokemon: { slot: number; pokemon: NamedResource }[];
+}
+
+interface PokemonResponse {
+  height: number;
+  weight: number;
+  stats: { base_stat: number; stat: NamedResource }[];
+  abilities: { is_hidden: boolean; ability: NamedResource }[];
+}
+
+interface LocalizedText {
+  language: NamedResource;
+}
+
+interface SpeciesResponse {
+  genera: (LocalizedText & { genus: string })[];
+  flavor_text_entries: (LocalizedText & { flavor_text: string })[];
+  is_legendary: boolean;
+  is_mythical: boolean;
 }
 
 function idFromUrl(url: string): number {
@@ -78,7 +97,47 @@ export class PokedexService {
     shareReplay({ bufferSize: 1, refCount: false }),
   );
 
+  private readonly details = new Map<number, Observable<PokemonDetail>>();
+
   loadIndex(): Observable<PokedexEntry[]> {
     return this.index$;
   }
+
+  // Cached per id for the session, so paging back and forth between
+  // detail pages never refetches.
+  loadDetail(id: number): Observable<PokemonDetail> {
+    let detail$ = this.details.get(id);
+    if (!detail$) {
+      detail$ = forkJoin({
+        pokemon: this.http.get<PokemonResponse>(`${POKE_API}/pokemon/${id}`),
+        species: this.http.get<SpeciesResponse>(`${POKE_API}/pokemon-species/${id}`),
+      }).pipe(
+        map(({ pokemon, species }) => toDetail(id, pokemon, species)),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+      this.details.set(id, detail$);
+    }
+    return detail$;
+  }
+}
+
+function english<T extends LocalizedText>(entries: T[]): T[] {
+  return entries.filter((entry) => entry.language.name === 'en');
+}
+
+function toDetail(id: number, pokemon: PokemonResponse, species: SpeciesResponse): PokemonDetail {
+  // The newest English entry reads best; the raw text carries hard line
+  // breaks and form feeds from the original game boxes.
+  const flavor = english(species.flavor_text_entries).at(-1)?.flavor_text ?? '';
+  return {
+    id,
+    height: pokemon.height / 10,
+    weight: pokemon.weight / 10,
+    stats: pokemon.stats.map(({ stat, base_stat }) => ({ name: stat.name, value: base_stat })),
+    abilities: pokemon.abilities.map(({ ability, is_hidden }) => ({ name: ability.name, hidden: is_hidden })),
+    genus: english(species.genera)[0]?.genus ?? '',
+    flavorText: flavor.replace(/[\f\n\r\u00ad]+/g, ' ').replace(/\s+/g, ' ').trim(),
+    legendary: species.is_legendary,
+    mythical: species.is_mythical,
+  };
 }

@@ -1,0 +1,16 @@
+<div class="toast-region" role="status" aria-live="polite">
+  <div
+    class="toast"
+    *ngFor="let toast of queue(); trackBy: trackById"
+    [style.--duration]="toast.duration + 'ms'"
+  >
+    <p class="toast__message">{{ toast.message }}</p>
+    <button *ngIf="toast.actionLabel" type="button" class="toast__action" (click)="toasts.runAction()">
+      {{ toast.actionLabel }}
+    </button>
+    <button type="button" class="toast__close" aria-label="Dismiss" (click)="toasts.dismiss()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+    </button>
+    <span class="toast__timer" aria-hidden="true"></span>
+  </div>
+</div>

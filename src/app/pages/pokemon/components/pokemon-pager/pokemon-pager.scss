@@ -1,0 +1,62 @@
+@use 'poke';
+
+:host {
+  display: block;
+  margin-top: 3rem;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--poke-border);
+}
+
+.pager__hint {
+  margin: 1rem 0 0;
+  font-size: var(--text-xs);
+  text-align: center;
+  color: var(--poke-muted);
+
+  @media (hover: none) {
+    display: none;
+  }
+}
+
+.pager-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  color: var(--poke-ink);
+  font-weight: 600;
+  text-decoration: none;
+  @include poke.focus-ring;
+
+  &--next {
+  margin-left: auto;
+  text-align: right;
+  }
+
+  img {
+  width: 3.5rem;
+  height: auto;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, var(--poke-bg));
+  transition: transform var(--dur-base) var(--ease-spring);
+  }
+
+  small {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--poke-gray);
+  }
+
+  @include poke.hover {
+  &:hover img {
+    transform: scale(1.1) rotate(-4deg);
+  }
+  }
+}

@@ -1,0 +1,38 @@
+@use 'poke';
+
+:host {
+  display: block;
+}
+
+.not-found {
+  position: relative;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-top: 2rem;
+  text-align: center;
+  isolation: isolate;
+
+  &__code {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: -1;
+    margin: 0;
+    font-size: clamp(8rem, 5rem + 15vw, 16rem);
+    letter-spacing: -0.05em;
+    @include poke.outline-numeral(var(--poke-border));
+  }
+
+  &__title {
+    @include poke.page-title;
+    margin-top: clamp(3rem, 2rem + 5vw, 6rem);
+    text-wrap: balance;
+  }
+
+  &__home {
+    order: 1;
+    font-size: var(--text-sm);
+    color: var(--poke-gray);
+    text-underline-offset: 0.2em;
+    @include poke.focus-ring;
+  }
+}

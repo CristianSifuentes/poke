@@ -1,15 +1,13 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { EMPTY, switchMap, timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PokedexEntry } from '../../core/models/pokedex-entry';
-import { FavoritesStore, RemovedFavorite } from '../../core/services/favorites-store';
+import { FavoritesStore } from '../../core/services/favorites-store';
 import { PokedexService } from '../../core/services/pokedex-service';
 import { BoxSort, CollectedPokemon, PARTY_SIZE, PartyMove, TypeCount } from './favorites-model';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 
-const UNDO_WINDOW_MS = 5000;
 const SUGGESTION_COUNT = 3;
 
 @Component({
@@ -24,7 +22,6 @@ export class Favorites {
   protected readonly favorites = inject(FavoritesStore);
 
   protected readonly partySize = PARTY_SIZE;
-  protected readonly undoWindowMs = UNDO_WINDOW_MS;
   protected readonly skeletons = Array.from({ length: PARTY_SIZE }, (_, i) => i);
 
   protected readonly status = signal<LoadStatus>('loading');
@@ -83,24 +80,8 @@ export class Favorites {
 
   protected readonly boxCount = computed(() => this.boxed().length);
 
-  // Wrapped in an array so *ngFor re-creates the toast for every new
-  // removal, restarting its countdown animation.
-  protected readonly undoQueue = computed<RemovedFavorite[]>(() => {
-    const removed = this.favorites.lastRemoved();
-    return removed ? [removed] : [];
-  });
-
   constructor() {
-    // An undo from another page's heart shouldn't greet you here.
-    this.favorites.dismissUndo();
     this.load();
-
-    toObservable(this.favorites.lastRemoved)
-      .pipe(
-        switchMap((removed) => (removed ? timer(UNDO_WINDOW_MS) : EMPTY)),
-        takeUntilDestroyed(),
-      )
-      .subscribe(() => this.favorites.dismissUndo());
   }
 
   protected load(): void {
@@ -126,10 +107,6 @@ export class Favorites {
   // sixth member steps down to the box.
   protected sendToParty(id: number): void {
     this.favorites.moveTo(id, Math.min(this.party().length, PARTY_SIZE - 1));
-  }
-
-  protected removedName(removed: RemovedFavorite): string {
-    return this.entriesById().get(removed.record.id)?.name ?? '';
   }
 
   protected trackByPokemonId(_index: number, entry: PokedexEntry): number {

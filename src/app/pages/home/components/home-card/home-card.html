@@ -23,11 +23,12 @@
       loading="lazy"
       decoding="async"
       appArtworkFallback
+      [appArtTransition]="pokemon.id"
     />
   </div>
 
   <div class="dex-card__body">
-    <h2 class="dex-card__name">{{ pokemon.name }}</h2>
+    <h2 class="dex-card__name"><a class="dex-card__link" [routerLink]="['/pokemon', pokemon.id]" [appPokemonLink]="pokemon.id" draggable="false">{{ pokemon.name }}</a></h2>
     <p class="dex-card__nickname" *ngIf="pokemon.nickname">&ldquo;{{ pokemon.nickname }}&rdquo;</p>
 
     <ul class="dex-card__types">

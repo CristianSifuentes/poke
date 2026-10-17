@@ -3,6 +3,8 @@
   top: 0;
   z-index: 10;
   display: block;
+  // Its own layer in route transitions, so it never cross-fades.
+  view-transition-name: site-header;
 }
 
 .navbar {
@@ -83,7 +85,8 @@
       color: var(--poke-ink);
     }
 
-    &--active {
+    &--active,
+    &--section {
       color: var(--poke-ink);
       border-color: var(--poke-red);
     }

@@ -15,8 +15,14 @@
   transition: transform var(--dur-base) ease, box-shadow var(--dur-base) ease, border-color var(--dur-base) ease;
   @include poke.bloom;
 
+  @include poke.card-focus('.party-card__link');
+
   &::before {
     @include poke.type-hairline;
+  }
+
+  &__link {
+    @include poke.stretched-link;
   }
 
   &__slot {

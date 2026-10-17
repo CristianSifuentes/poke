@@ -260,3 +260,29 @@
     background: #ffffff;
   }
 }
+
+// ── Links ───────────────────────────────────────────────────────────────
+
+// A card's one link (usually its name) stretched over the whole card, so
+// the card is clickable without nesting other controls inside an <a>.
+// Buttons that must stay clickable on top (heart, moves) sit at z-index 2.
+@mixin stretched-link {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+}
+
+// Shows keyboard focus on the whole card while its stretched link has it.
+@mixin card-focus($link) {
+  &:has(#{$link}:focus-visible) {
+    outline: 2px solid var(--accent, var(--poke-red));
+    outline-offset: 3px;
+  }
+}

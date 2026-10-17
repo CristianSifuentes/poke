@@ -17,8 +17,14 @@
 
   // The top hairline runs from the primary type into the secondary one —
   // a dual-type Pokémon literally wears both colors.
+  @include poke.card-focus('.search-card__link');
+
   &::before {
     @include poke.type-hairline;
+  }
+
+  &__link {
+    @include poke.stretched-link;
   }
 
   &__watermark {
