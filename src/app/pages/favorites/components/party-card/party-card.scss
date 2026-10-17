@@ -4,6 +4,8 @@
   display: block;
   height: 100%;
   cursor: grab;
+  // The card reads its own shape (see the container query at the end).
+  container-type: size;
 }
 
 .party-card {
@@ -38,38 +40,44 @@
     position: absolute;
     right: -0.5rem;
     bottom: -0.75rem;
-    font-size: 5rem;
+    font-size: min(5rem, 30cqi);
     font-weight: 800;
     line-height: 1;
     color: transparent;
     -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 26%, transparent);
   }
 
+  // The art box takes whatever space the text leaves, and the image fills
+  // it with object-fit: contain — always whole, never cropped, never
+  // spilling over the text. (A percentage max-height on an image inside a
+  // grid cell has no height to resolve against, which is why the artwork
+  // used to render at its natural 475px.)
   &__art {
     position: relative;
-    display: grid;
-    flex: 1;
-    place-items: center;
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 0;
+    margin: 0.25rem 0 0.5rem;
 
     &::before {
       content: "";
       position: absolute;
-      width: 80%;
+      top: 50%;
+      left: 50%;
+      height: 100%;
+      max-width: 100%;
       aspect-ratio: 1;
       border-radius: 50%;
-      background: radial-gradient(
-        circle,
-        color-mix(in srgb, var(--accent) 30%, transparent),
-        color-mix(in srgb, var(--accent-2, var(--accent)) 10%, transparent) 55%,
-        transparent 72%
-      );
+      transform: translate(-50%, -50%);
+      @include poke.type-spotlight;
     }
 
     img {
-      position: relative;
-      max-width: 100%;
-      max-height: 100%;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       filter: drop-shadow(0 8px 10px rgba(28, 28, 30, 0.14));
       transition: transform var(--dur-slow) var(--ease-spring);
     }
@@ -104,10 +112,14 @@
 
   &__types {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.3125rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    // Room on the right for the party grid's move buttons; the name
+    // above keeps the full width.
+    padding-right: 4rem;
 
     li {
       padding: 0.1875rem 0.5rem;
@@ -172,5 +184,29 @@
   .party-card *,
   .party-card::after {
     transition: none;
+  }
+}
+
+// Landscape cards (desktop member slots, the lead) put the text on the
+// left and give the artwork the full height on the right, like Home's
+// wide tiles. Portrait and square cards keep art above text.
+@container (min-aspect-ratio: 3 / 2) {
+  .party-card {
+    flex-direction: row-reverse;
+    gap: 1rem;
+  }
+
+  .party-card__art {
+    margin: 1rem 0 0;
+  }
+
+  .party-card__body {
+    flex: 0 1 45%;
+    align-self: flex-end;
+    min-width: 0;
+  }
+
+  .party-card__types {
+    padding-right: 0;
   }
 }

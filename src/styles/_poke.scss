@@ -267,8 +267,9 @@
 // rest, flooded with the type color once selected.
 @mixin type-chip-selected($dot) {
   color: #ffffff;
-  background: var(--accent);
-  border-color: var(--accent);
+  // Ink for chips without a type of their own (an "All" chip).
+  background: var(--accent, var(--poke-ink));
+  border-color: var(--accent, var(--poke-ink));
 
   #{$dot} {
     background: #ffffff;
