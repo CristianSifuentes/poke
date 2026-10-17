@@ -7,6 +7,8 @@
 .search-card {
   --enter-rise: 14px;
 
+  container-type: inline-size;
+
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -27,16 +29,20 @@
     @include poke.stretched-link;
   }
 
+  // A quiet index in the top-right corner, level with the heart — whole,
+  // inside the card, and small enough not to compete with the Pokémon.
   &__watermark {
     position: absolute;
-    top: 0.25rem;
-    right: -0.375rem;
-    font-size: 3.75rem;
+    top: 0.75rem;
+    right: 0.875rem;
+    // Sized by the card's own width (the card is a container), so it stays
+    // proportionate on a phone's narrow cards and a wide desktop grid alike.
+    font-size: clamp(1.5rem, 15cqi, 2.25rem);
     font-weight: 800;
     line-height: 1;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     color: transparent;
-    -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 28%, transparent);
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 24%, transparent);
     pointer-events: none;
     user-select: none;
     transition: transform 0.6s var(--ease-spring);
@@ -134,7 +140,7 @@
       }
 
       .search-card__watermark {
-        transform: translateX(-0.5rem);
+        transform: translateX(-0.25rem);
       }
     }
   }
