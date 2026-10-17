@@ -1,32 +1,62 @@
 <fieldset class="gen-filter" [disabled]="disabled">
   <legend class="gen-filter__legend">Generation</legend>
 
-  <div class="gen-filter__track" role="radiogroup" aria-label="Generation">
+  <div
+    class="gen-filter__viewport"
+    [class.gen-filter__viewport--start]="canScrollStart()"
+    [class.gen-filter__viewport--end]="canScrollEnd()"
+  >
     <button
       type="button"
-      role="radio"
-      class="gen-pill"
-      [class.gen-pill--active]="selected === null"
-      [attr.aria-checked]="selected === null"
-      (click)="generationChange.emit(null)"
+      class="gen-filter__arrow gen-filter__arrow--prev"
+      aria-label="Show previous generations"
+      tabindex="-1"
+      [hidden]="!canScrollStart()"
+      (click)="scrollByPage(-1)"
     >
-      <span class="gen-pill__numeral">All</span>
-      <span class="gen-pill__region">{{ counts[0] ?? '–' }}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
     </button>
 
+    <div #track class="gen-filter__track" role="radiogroup" aria-label="Generation" (scroll)="updateScrollState()">
+      <button
+        #allPill
+        type="button"
+        role="radio"
+        class="gen-pill"
+        [class.gen-pill--active]="selected === null"
+        [attr.aria-checked]="selected === null"
+        (click)="choose(null, allPill)"
+      >
+        <span class="gen-pill__numeral">All</span>
+        <span class="gen-pill__region">{{ counts[0] ?? '–' }}</span>
+      </button>
+
+      <button
+        #pill
+        *ngFor="let gen of generations"
+        type="button"
+        role="radio"
+        class="gen-pill"
+        [class.gen-pill--active]="selected === gen.id"
+        [attr.aria-checked]="selected === gen.id"
+        [attr.aria-label]="'Generation ' + gen.numeral + ', ' + gen.region"
+        (click)="choose(selected === gen.id ? null : gen.id, pill)"
+      >
+        <span class="gen-pill__numeral">{{ gen.numeral }}</span>
+        <span class="gen-pill__region">{{ gen.region }}</span>
+        <span class="gen-pill__count" *ngIf="counts[gen.id] !== undefined || !disabled">{{ counts[gen.id] ?? 0 }}</span>
+      </button>
+    </div>
+
     <button
-      *ngFor="let gen of generations"
       type="button"
-      role="radio"
-      class="gen-pill"
-      [class.gen-pill--active]="selected === gen.id"
-      [attr.aria-checked]="selected === gen.id"
-      [attr.aria-label]="'Generation ' + gen.numeral + ', ' + gen.region"
-      (click)="generationChange.emit(selected === gen.id ? null : gen.id)"
+      class="gen-filter__arrow gen-filter__arrow--next"
+      aria-label="Show more generations"
+      tabindex="-1"
+      [hidden]="!canScrollEnd()"
+      (click)="scrollByPage(1)"
     >
-      <span class="gen-pill__numeral">{{ gen.numeral }}</span>
-      <span class="gen-pill__region">{{ gen.region }}</span>
-      <span class="gen-pill__count" *ngIf="counts[gen.id] !== undefined || !disabled">{{ counts[gen.id] ?? 0 }}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
     </button>
   </div>
 </fieldset>

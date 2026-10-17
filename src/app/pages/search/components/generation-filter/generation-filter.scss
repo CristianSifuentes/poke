@@ -23,20 +23,88 @@
     color: var(--poke-ink);
   }
 
-  // Nine regions don't fit a phone's width, and wrapping them breaks the
+  // Nine regions rarely fit in one row, and wrapping them would break the
   // left-to-right "timeline" reading — so the track scrolls sideways
-  // instead, snapping pill by pill, with its edges fading out.
+  // (swipe, trackpad, Shift+wheel or the arrow buttons), snapping pill by
+  // pill. Each edge fades out only while there's more hidden behind it.
+  &__viewport {
+    --fade-start: 0px;
+    --fade-end: 0px;
+
+    position: relative;
+
+    &--start {
+      --fade-start: 3rem;
+    }
+
+    &--end {
+      --fade-end: 3rem;
+    }
+  }
+
   &__track {
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     padding: 0.25rem 0.125rem 0.5rem;
     scroll-snap-type: x proximity;
+    scroll-padding-inline: 2.75rem;
     scrollbar-width: none;
-    mask-image: linear-gradient(90deg, transparent, #000 0.75rem, #000 calc(100% - 1.5rem), transparent);
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 var(--fade-start),
+      #000 calc(100% - var(--fade-end)),
+      transparent
+    );
 
     &::-webkit-scrollbar {
       display: none;
+    }
+  }
+
+  &__arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    background: var(--poke-bg);
+    border: 1px solid var(--poke-border);
+    border-radius: 50%;
+    box-shadow: 0 6px 16px -8px rgba(28, 28, 30, 0.35);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &--prev {
+      left: 0;
+    }
+
+    &--next {
+      right: 0;
+    }
+
+    svg {
+      width: 1rem;
+      fill: none;
+      stroke: var(--poke-ink);
+      stroke-width: 2.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover {
+      border-color: var(--poke-ink);
+      transform: translateY(-50%) scale(1.06);
     }
   }
 }
@@ -125,7 +193,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gen-pill {
+  .gen-pill,
+  .gen-filter__arrow {
     transition: none;
   }
 }
