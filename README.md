@@ -1,6 +1,6 @@
-# 🔴 Poke
+# 🔴 Poké
 
-> A minimalistic Angular 22 application, built on classic **NgModules** (no standalone components), organized around a scalable **Core / Shared / Pages** architecture.
+> A Pokédex built with Angular 22 on classic **NgModules** (no standalone components). It's organized as **Core / Shared / Pages** and held together by one small design system.
 
 [![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)](https://angular.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -16,24 +16,25 @@
 - [Architecture](#architecture)
   - [Guiding Principles](#guiding-principles)
   - [Module Map](#module-map)
+  - [Data Flow](#data-flow)
 - [Project Structure](#project-structure)
-  - [Current Folder Tree](#current-folder-tree)
+  - [Folder Tree](#folder-tree)
   - [Folder Responsibilities](#folder-responsibilities)
+- [Design System](#design-system)
+  - [Tokens](#tokens)
+  - [Shared Style Patterns](#shared-style-patterns)
+  - [Motion](#motion)
 - [Naming & Coding Conventions](#naming--coding-conventions)
-- [UI Pattern Spotlight: The Home Bento Grid](#ui-pattern-spotlight-the-home-bento-grid)
-- [Shared Directives: Behavior That Doesn't Belong in a Component](#shared-directives-behavior-that-doesnt-belong-in-a-component)
-- [Shared Pipes: Pure Transformations, Not Template Methods](#shared-pipes-pure-transformations-not-template-methods)
-- [Feature Spotlight: Search, Favorites & About](#feature-spotlight-search-favorites--about)
+- [Shared Building Blocks](#shared-building-blocks)
+  - [Components](#components)
+  - [Directives](#directives)
+  - [Pipes](#pipes)
+- [Features](#features)
+- [Navigation & Feedback](#navigation--feedback)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Development Server](#development-server)
-  - [Build](#build)
-  - [Testing](#testing)
 - [NPM Scripts](#npm-scripts)
 - [Scaling the Project](#scaling-the-project)
   - [Adding a New Feature Module](#adding-a-new-feature-module)
-  - [Future-Ready Blueprint](#future-ready-blueprint)
   - [Growth Path](#growth-path)
 - [CI/CD](#cicd)
 - [Contributing](#contributing)
@@ -43,374 +44,293 @@
 
 ## Overview
 
-**Poke** is the foundation of a Pokémon-themed Angular application, deliberately started **lean and framework-idiomatic**: `NgModule`-based (not standalone), SCSS-first styling, and a folder layout that separates cross-cutting concerns (`core`) from routed features (`pages`). The goal of this structure is simple: **every future addition should be additive** — a new feature, service, or UI element should have one obvious place to live, without forcing a rewrite of what already exists.
+**Poké** lets you search all 1,025 Pokémon by name, number, type and generation. You can open any one of them, collect favorites into a six-member party, and read how the app itself is built. It stays **framework-idiomatic** on purpose: `NgModule`-based, SCSS-first, signals for state and no UI library. Every addition is **additive**: a new feature, service or visual pattern has one obvious place to live and doesn't force a rewrite of what already exists.
 
 ## Tech Stack
 
-| Concern            | Choice                                   |
-| ------------------- | ----------------------------------------- |
-| Framework           | [Angular 22](https://angular.dev) (NgModules, non-standalone) |
-| Language            | TypeScript 6.0                           |
-| Styling             | SCSS (component-scoped + global tokens)  |
-| Reactive primitives | Angular Signals                          |
-| Routing             | `@angular/router` — root `AppRoutingModule` **lazy-loads every feature** via `loadChildren()`; each feature declares its own `forChild` routes internally |
-| Unit testing        | Vitest + jsdom                           |
-| Tooling             | Angular CLI 22, Prettier                 |
+| Concern             | Choice |
+| ------------------- | ------ |
+| Framework           | [Angular 22](https://angular.dev) (NgModules, `standalone: false`) |
+| Language            | TypeScript 6.0 |
+| Styling             | SCSS: global tokens in `src/styles.scss`, shared mixins in `src/styles/_poke.scss`, component-scoped styles |
+| State               | Angular Signals (`signal`, `computed`, `linkedSignal`), with RxJS at the HTTP edges |
+| Data                | [PokeAPI](https://pokeapi.co/) for species, types and details. Official artwork comes from the [PokeAPI/sprites](https://github.com/PokeAPI/sprites) repo via jsDelivr |
+| Routing             | `provideRouter` in `AppRoutingModule`, every page lazy-loaded with `loadChildren`, plus view transitions, scroll restoration and component input binding |
+| Unit testing        | Vitest + jsdom |
+| Tooling             | Angular CLI 22, Prettier |
 | CI                  | GitHub Actions (Claude PR Assistant & Code Review workflows) |
 
 ## Architecture
 
 ### Guiding Principles
 
-1. **Feature isolation, fully lazy** — each routed page is its own `NgModule` (declarations + routing) under `pages/`, loaded on demand via `loadChildren()`. `AppModule` never imports a feature module directly — features are wired **only** through the router, so each one ships as its own JS chunk and can be deleted without touching sibling features.
-2. **Core is a singleton** — `CoreModule` holds app-shell UI (`Header`, wired to every route via `routerLink`/`routerLinkActive`) and, going forward, app-wide singleton services, guards, and interceptors. It is imported **once**, eagerly, in `AppModule` (the shell must exist before any route resolves).
-3. **Shared is stateless and reusable** — presentational components, pipes, and directives used by *multiple* features belong in a `SharedModule` (see [Future-Ready Blueprint](#future-ready-blueprint)), never in `Core` or a single feature.
-4. **Additive over invasive** — new features are new folders + new `loadChildren` entries. `AppModule` is never touched for a new feature; only `AppRoutingModule` gains one route object.
-5. **Style locality** — component SCSS lives next to its component (`header.scss` next to `header.ts`); only truly global rules (resets, typography, design tokens shared app-wide) live in `src/styles.scss`.
-6. **Route table owns navigation, and order is load-bearing** — `AppRoutingModule` is the single source of truth for top-level paths. The router matches top-to-bottom and stops at the first match, so the `**` wildcard **must be declared last**; declaring it before the feature routes would silently swallow every navigation (a real regression this project hit and fixed — see the route table below).
+1. **Feature isolation, fully lazy.** Each routed page is its own `NgModule` under `pages/`, loaded on demand. `AppModule` never imports a feature module. Each page ships as its own chunk and can be deleted without touching its siblings.
+2. **Core holds singletons.** `CoreModule` holds the app shell (`Header`, `ToastOutlet`). `core/` also holds the app-wide services (index, favorites, toasts, transitions) and the routing helpers (title strategy, focus management). It is imported once, eagerly, by `AppModule`.
+3. **Shared is stateless and reusable.** Pipes, directives and small presentational components used by two or more pages live in `SharedModule` and never know which page uses them.
+4. **Additive over invasive.** A new page means a new folder plus one route entry. `AppModule` doesn't change.
+5. **One design system.** Colors, radii, shadows, motion and type are tokens on `:root`. Recurring patterns (cards, chips, rails, skeletons, buttons) are mixins. A component only adds what is genuinely its own.
+6. **Route order is load-bearing.** The router matches top-to-bottom, so the `**` wildcard stays **last**. Declaring it earlier once silently swallowed every navigation in this repo.
 
 ### Module Map
 
 ```
-AppModule (root, eager — shell only)
- ├─ CoreModule            → app shell: Header (singleton, imported once, links to every route)
- └─ AppRoutingModule       → root route table (forRoot), matched top-to-bottom:
-      ├─ ''         → redirectTo 'home'
-      ├─ 'home'      loadChildren → HomeModule      ─┐
-      ├─ 'search'    loadChildren → SearchModule     │ each is its own lazy chunk,
-      ├─ 'about'     loadChildren → AboutModule      │ fetched only when its route
-      ├─ 'favorites' loadChildren → FavoritesModule ─┘ is first navigated to
-      └─ '**'        redirectTo 'home'    ← MUST stay last (matches any path)
-           each feature module → its own <feature>-routing-module.ts
-           (RouterModule.forChild, path: '' — relative to the lazy segment above)
+AppModule (root, eager)
+ ├─ CoreModule        → Header, ToastOutlet (shell, imported once)
+ └─ AppRoutingModule  → provideRouter(routes, scrolling, view transitions, input binding)
+      ├─ ''             → redirectTo 'home'
+      ├─ 'home'         loadChildren → HomeModule       ─┐
+      ├─ 'search'       loadChildren → SearchModule      │
+      ├─ 'pokemon/:id'  loadChildren → PokemonModule     │ one lazy chunk each,
+      ├─ 'about'        loadChildren → AboutModule       │ fetched on first visit
+      ├─ 'favorites'    loadChildren → FavoritesModule   │
+      └─ '**'           loadChildren → NotFoundModule  ──┘ ← MUST stay last
 ```
+
+Every feature module imports `SharedModule` and declares its own page-local components.
+
+### Data Flow
+
+```
+PokeAPI ──► PokedexService.loadIndex()   19 requests → 1,025 PokedexEntry (id, name, types, generation)
+        │                                shareReplay: fetched once per session
+        └► PokedexService.loadDetail(id) /pokemon + /pokemon-species → PokemonDetail, cached per id
+
+FavoritesStore  signal ⇄ localStorage (validated on read, synced across tabs, undoable)
+ToastService    one toast at a time, app-wide (e.g. "Pikachu left your favorites. Undo")
+```
+
+Search, filtering, counts and stats all run in memory over the index. Nothing makes one request per Pokémon except the detail page.
 
 ## Project Structure
 
-### Current Folder Tree
+### Folder Tree
 
 ```
-poke/
-├── .github/
-│   └── workflows/              # CI: Claude PR Assistant & Code Review
-├── public/                     # Static assets copied as-is (favicon, images)
-├── src/
-│   ├── app/
-│   │   ├── app-module.ts       # Root NgModule — bootstraps the app
-│   │   ├── app-routing-module.ts # Root route table — redirect, 4x loadChildren, wildcard LAST
-│   │   ├── app.ts               # Root component (application shell)
-│   │   ├── app.html
-│   │   ├── app.scss
-│   │   ├── app.spec.ts
-│   │   │
-│   │   ├── core/                        # Singleton, app-wide concerns
-│   │   │   ├── core-module.ts            # Imported once by AppModule
-│   │   │   ├── components/
-│   │   │   │   └── header/               # App shell navbar — links to every page below
-│   │   │   │       ├── header.ts
-│   │   │   │       ├── header.html
-│   │   │   │       └── header.scss
-│   │   │   └── pipes/
-│   │   │       └── custom-pipe-pipe.ts   # Scaffold stub — see Shared Pipes below
-│   │   │
-│   │   ├── pages/                        # Routed, feature-scoped modules
-│   │       ├── home/
-│   │       │   ├── home-module.ts        # Feature NgModule — lazy-loaded target
-│   │       │   ├── home-routing-module.ts# path: '' (relative to /home segment)
-│   │       │   ├── home.ts               # "Dommie's Pokémon" — bento-grid dataset + view logic
-│   │       │   ├── home.html
-│   │       │   ├── home.scss             # Bento CSS Grid — see UI Pattern Spotlight below
-│   │       │   ├── home-detail/          # Nested view, declared in HomeModule
-│   │       │   │   ├── home-detail.ts
-│   │       │   │   ├── home-detail.html
-│   │       │   │   └── home-detail.scss
-│   │       │   ├── home-card/            # Reserved — empty scaffold, not yet extracted
-│   │       │   └── home-card-container/  # Reserved — empty scaffold, not yet extracted
-│   │       ├── search/                   # Pokédex search — lazy-loaded target
-│   │       │   ├── search-module.ts
-│   │       │   ├── search-routing-module.ts # path: '' (relative to /search segment)
-│   │       │   ├── search.ts
-│   │       │   ├── search.html
-│   │       │   └── search.scss
-│   │       ├── favorites/                # lazy-loaded target
-│   │       │   ├── favorites-module.ts
-│   │       │   ├── favorites-routing-module.ts # path: '' (relative to /favorites segment)
-│   │       │   ├── favorites.ts
-│   │       │   ├── favorites.html
-│   │       │   └── favorites.scss
-│   │       └── about/                    # lazy-loaded target
-│   │           ├── about-module.ts
-│   │           ├── about-routing-module.ts # path: '' (relative to /about segment)
-│   │           ├── about.ts
-│   │           ├── about.html
-│   │           └── about.scss
-│   │
-│   │   └── shared/                       # Reusable, stateless — imported by any feature that needs it
-│   │       ├── shared-module.ts          # Declares + exports every shared pipe AND directive
-│   │       ├── pipes/
-│   │       │   ├── pokedex-id-pipe.ts        # number → '#025'
-│   │       │   └── pokemon-type-color-pipe.ts # type name → its brand color
-│   │       ├── directives/                   # Reusable behavior — see Shared Directives below
-│   │       │   ├── type-color-directive.ts       # appTypeColor — type → --accent or background
-│   │       │   ├── reveal-on-interaction-directive.ts # appRevealOnInteraction — hover/focus reveal
-│   │       │   ├── entrance-reveal-directive.ts  # appEntranceReveal — IntersectionObserver entrance
-│   │       │   └── magnetic-tilt-directive.ts    # appMagneticTilt — pointer-follow 3D tilt + glow
-│   │       └── utils/
-│   │           └── pokemon-type-colors.ts    # POKEMON_TYPE_COLORS map — single source for the pipe AND the directive
-│   │
-│   ├── index.html
-│   ├── main.ts                 # Bootstraps AppModule via platformBrowser
-│   └── styles.scss             # Global resets & base typography
-│
-├── angular.json                # Workspace config (standalone: false by default)
-├── package.json
-└── tsconfig*.json
+src/
+├── styles.scss                  # Design tokens, shared keyframes, global craft rules
+├── styles/
+│   └── _poke.scss               # Shared mixins — `@use 'poke'` from any component
+└── app/
+    ├── app-module.ts            # Root NgModule: CoreModule + AppRoutingModule + providers
+    ├── app-routing-module.ts    # Route table (wildcard LAST) + router features
+    ├── app.ts / .html / .scss   # Shell: header, <main>, toast outlet
+    │
+    ├── core/
+    │   ├── core-module.ts
+    │   ├── components/
+    │   │   ├── header/          # Nav, live favorites badge, "/" shortcut
+    │   │   └── toast-outlet/    # Renders ToastService
+    │   ├── models/              # PokedexEntry, PokemonDetail
+    │   ├── routing/             # PokeTitleStrategy, NavigationFocus
+    │   └── services/            # PokedexService, FavoritesStore, ToastService, PokemonTransition
+    │
+    ├── shared/
+    │   ├── shared-module.ts     # Declares + exports everything below
+    │   ├── components/          # heart-button, state-panel
+    │   ├── directives/          # 9 directives (see Shared Building Blocks)
+    │   ├── pipes/               # pokedexId, pokemonName, pokemonArtwork, pokemonTypeColor, stagger
+    │   └── utils/               # pokemon-type-colors, pokemon-generations, pokemon-artwork
+    │
+    └── pages/
+        ├── home/                # Bento mosaic: your party + Dommie's team (components/home-card)
+        ├── search/              # search-bar, type-filter, generation-filter, search-card
+        ├── pokemon/             # Detail page: stat-bars, explore-links, pokemon-pager
+        ├── favorites/           # party-grid, party-card, box-card, box-filters, collection-summary
+        ├── about/               # about-hero, stat-grid, type-gallery, region-timeline, architecture-map
+        └── not-found/           # "This route fled!"
 ```
 
 ### Folder Responsibilities
 
-| Path                        | Responsibility                                                                 | Grows by...                                      |
-| --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `app/core/`                 | App shell UI, singleton services, guards, interceptors — loaded **once**        | Adding `services/`, `guards/`, `interceptors/` subfolders |
-| `app/core/components/`      | Structural UI rendered once per app (header, footer, side-nav)                  | One new component folder per shell element         |
-| `app/core/pipes/`           | Transforms that only ever make sense wrapped around the app shell itself — currently just the unimplemented `customPipe` stub (see [Shared Pipes](#shared-pipes-pure-transformations-not-template-methods)) | Fold into `shared/pipes/` instead unless the transform is genuinely shell-only |
-| `app/pages/<feature>/`      | One routed feature: its module, routing, components, and page-local styles      | One new sibling folder per feature — never touches other features |
-| `app/shared/`               | Reusable, stateless building blocks used by 2+ features — today, 2 pipes (`pokedexId`, `pokemonTypeColor`) and 4 directives (`appTypeColor`, `appRevealOnInteraction`, `appEntranceReveal`, `appMagneticTilt`) | New component/pipe/directive, declared + exported from `SharedModule`, imported by whichever feature module needs it |
-| `app/models/` *(planned)*   | TypeScript interfaces/types for domain data (e.g., `Pokemon`, `PokemonListItem`) | New `*.model.ts` file per domain entity            |
-| `src/styles.scss`           | Global resets, base typography — **not** component-specific rules               | Rare edits; prefer component SCSS instead          |
+| Path | Responsibility | Grows by… |
+| ---- | -------------- | --------- |
+| `src/styles.scss` | Tokens on `:root`, keyframes used by many components, global craft rules (selection, focus, press) | A new token only once two or more components need the same value |
+| `src/styles/_poke.scss` | Mixins for patterns that repeat across components | A new mixin when a pattern is copied a second time |
+| `app/core/` | The shell, singleton services and routing helpers, loaded once | `services/`, `routing/`, later `guards/` and `interceptors/` |
+| `app/shared/` | Stateless building blocks used by 2+ pages | A component, pipe or directive declared and exported from `SharedModule` |
+| `app/pages/<feature>/` | One routed page: its module, routing, page component and `components/` | A new sibling folder, without touching other pages |
+
+## Design System
+
+### Tokens
+
+All tokens are defined once on `:root` in `src/styles.scss`. Components read them directly and don't redeclare them.
+
+| Group | Tokens |
+| ----- | ------ |
+| Palette | `--poke-red`, `--poke-red-dark`, `--poke-blue`, `--poke-ink`, `--poke-gray`, `--poke-muted`, `--poke-border`, `--poke-bg`, `--poke-surface`, `--poke-surface-hi` |
+| Shape | `--radius-sm` (0.75rem), `--radius-md` (1rem), `--radius-lg` (1.25rem, cards), `--radius-pill` |
+| Elevation | `--shadow-rest`, `--shadow-raised`, `--shadow-float`, `--shadow-overlay` |
+| Motion | `--ease-out`, `--ease-spring`, `--dur-fast`, `--dur-base`, `--dur-slow`, `--dur-enter` |
+| Type | `--font-sans`, `--font-mono`, `--text-xs`, `--text-sm`, `--text-md`, `--text-title`, `--text-section` |
+| Layout | `--page-max` (1080px), `--gutter` (1.5rem, 1rem on phones) |
+
+Type colors aren't tokens. They live in `POKEMON_TYPE_COLORS` (`shared/utils/pokemon-type-colors.ts`), and `appTypeColor` hands them to CSS as `--accent` on whatever it's placed on (and `--accent-2` for a second type).
+
+### Shared Style Patterns
+
+`@use 'poke';` makes these available in any component stylesheet (`includePaths` points at `src/styles`):
+
+| Mixin | What it gives you |
+| ----- | ----------------- |
+| `card`, `type-hairline`, `accent-lift`, `type-spotlight` | The card surface, the top hairline in the type colors, the hover lift with a type-tinted shadow, the pool of color behind artwork |
+| `bloom`, `skeleton` | The grayscale-to-color entrance (with `appEntranceReveal`), shimmer placeholders |
+| `eyebrow`, `page-title`, `section-title`, `lede`, `outline-numeral` | The text scale every page shares |
+| `primary-button`, `icon-button`, `segmented`, `type-chip-selected` | Buttons and controls |
+| `rail-track`, `rail-arrow` | Horizontal rails with edge fades and arrows (pair with `appScrollRail`) |
+| `stretched-link`, `card-focus` | A whole card clickable through its one link, with a visible focus ring |
+| `focus-ring`, `touch-target`, `hover`, `reduced-motion` | Accessibility and capability helpers |
+
+### Motion
+
+- **Two curves, a few durations.** Entrances never take longer than `--dur-enter` (0.8s), and the `stagger` pipe caps how long a long list keeps rippling in.
+- **Keyframes over transitions for entrances.** A keyframe animation plays the moment its class exists, so it never races the first paint.
+- **Hover only where hover exists.** Hover effects sit behind `(hover: hover) and (pointer: fine)`.
+- **Everything degrades** under `prefers-reduced-motion`, including route transitions.
+- **Route transitions** use the View Transitions API. They're skipped on first load and when only the query string changes, and a Pokémon's artwork morphs from its card into the detail page.
 
 ## Naming & Coding Conventions
 
-- **No standalone components** — `angular.json` schematics default `standalone: false` for components, directives, and pipes; every new piece generated via `ng generate` follows this automatically.
-- **File suffixes** describe role, not type-in-brackets: `header.ts`, `header-module.ts`, `header-routing-module.ts` (Angular 22's schematic convention — no more `.component.ts`).
-- **One module per feature folder**, colocated with its routing module (`<feature>-routing-module.ts`).
-- **SCSS colocation** — every component owns its own `.scss`; cross-cutting tokens (colors, spacing) are promoted to `styles.scss` only once genuinely shared by 2+ components.
-- **Signals over manual subscriptions** for local component state (see `Header`'s `isMenuOpen` signal, toggled/closed via a mobile hamburger menu).
-- **Navigation stays declarative** — `Header` uses `routerLink` + `routerLinkActive` (with `[routerLinkActiveOptions]="{ exact: true }"` so a link only highlights on an exact path match, not a prefix) for all four primary routes; no imperative `Router.navigate()` calls for top-level nav.
-- **Pipes are named and filed like every other Angular building block here** — `name` in camelCase (`pokedexId`, `pokemonTypeColor`), class name is the PascalCase name + `Pipe` suffix, file name is the kebab-case name + `-pipe.ts` (`pokedex-id-pipe.ts`), matching the same "role-suffix, no dot-bracket" convention used for modules and routing modules. `angular.json` defaults `standalone: false` for pipes too, so they're declared in `SharedModule` rather than a component's own `imports`.
-- **Directives follow the same shape, prefixed `app`.** Selector is `appCamelCase` (`appTypeColor`, `appEntranceReveal`), class name is the PascalCase name + `Directive` suffix, file name is the kebab-case name + `-directive.ts` (`type-color-directive.ts`) — one more instance of "role-suffix, no dot-bracket," and, like the pipes, declared in `SharedModule` rather than any single feature.
+- **No standalone components.** `angular.json` schematics default to `standalone: false` for components, directives and pipes.
+- **Role suffixes, no dot-brackets.** `header.ts`, `search-module.ts`, `search-routing-module.ts`, `pokedex-id-pipe.ts`, `type-color-directive.ts`.
+- **Page-local components** live in `pages/<feature>/components/<name>/`. They're promoted to `shared/` only when a second page needs them.
+- **Inputs and outputs** use `@Input`/`@Output` with `EventEmitter`. Lists use `*ngFor` with `trackBy`.
+- **State** lives in signals, and components inject dependencies with `inject()`.
+- **Pure pipes instead of template method calls** for presentational values.
+- **Directives only for behavior that needs a DOM node**: geometry, observers, events.
+- **Budgets.** Each component stylesheet stays under 4 kB. When one grows past that, it gets split into subcomponents rather than trimmed in quality.
+- **UI copy** is in English, warm and brief: "Pokémon" always with its accent, numbers with thousands separators, ids as `#025`.
 
-## UI Pattern Spotlight: The Home Bento Grid
+## Shared Building Blocks
 
-`pages/home` is the first feature to move past scaffolding, and it doubles as a worked example of every styling convention above. It renders "Dommie's Pokémon" — a typed roster (`DommiePokemon[]` in `home.ts`) — as a **Bento-style CSS Grid**, and is a reference for five reusable patterns:
+### Components
 
-1. **Size-driven dense packing.** Each Pokémon carries a `bento: 'hero' | 'wide' | 'tall' | 'regular'` field. `home.scss` maps each variant to a `grid-column`/`grid-row` span on a `grid-auto-flow: dense` container, so the mosaic look comes entirely from data, not hand-placed markup — adding a Pokémon is a one-object addition to the array, never a template edit.
-2. **Behavior lives in directives, not in bindings scattered across the template.** Per-card accents used to be an inline `[style.--accent]="pokemon.types[0] | pokemonTypeColor"`; today every card carries `[appTypeColor]="pokemon.types[0]"` instead, and every type badge carries `[appTypeColor]="type" appTypeColorMode="fill"`. Same underlying color lookup, but the "what property does this value go on" decision now lives in one directive (see [Shared Directives](#shared-directives-behavior-that-doesnt-belong-in-a-component)) instead of being re-decided at each call site. `Home` still declares its own `--poke-red` / `--poke-ink` / `--poke-gray` / `--poke-border` / `--poke-bg` tokens on `:host`, same as `Header` — no shared token file yet (see [Growth Path](#growth-path)).
-3. **Hover-reveal, formalized as a directive, not left as a CSS side-effect.** `regular`-sized tiles hide their artwork by default and only reveal it — a crossfade + scale, eased with `cubic-bezier(0.16, 1, 0.3, 1)` — via `[appRevealOnInteraction]="pokemon.bento === 'regular'"`. The directive is what actually knows whether the device can hover at all (`matchMedia('(hover: hover) and (pointer: fine)')`, exposed as a `.can-hover` host class) and manages `tabindex` itself, so touch devices simply always show the artwork instead of hitting a dead-end tap target, and there's no hand-written `[attr.tabindex]` ternary left in the template to keep in sync. Every transition still collapses under `@media (prefers-reduced-motion: reduce)`.
-4. **An organic entrance and a pointer-follow tilt, both opt-in per card.** `appEntranceReveal` (every card) uses `IntersectionObserver` to fade + settle each tile into place the first time it crosses the viewport, staggered by grid position via an `[ngStyle]` `transition-delay`; `appMagneticTilt` (`hero`/`wide` only, where the surface area earns it) reads pointer position against the card's own `getBoundingClientRect()` and drives a few degrees of 3D tilt plus a cursor-follow radial glow. Both are gated behind hover-capability and `prefers-reduced-motion`, and both need the host's real DOM node — the reason they're directives (`ElementRef` + `inject()`) and not template bindings.
-5. **Responsive art bound to the stable dimension, resilient to the network.** `hero` and `wide` scale their artwork by `aspect-ratio` against whichever box dimension stays predictable across breakpoints; `tall` cells now answer a hovering pointer by easing their artwork down to `scale(0.9)` at ≥901px — the same courtesy as stepping back from a painting, a deliberate mirror of `hero`'s zoom-in. `object-fit: contain` guarantees artwork is always shown whole, never cropped. Underneath all of it, `home.ts`'s `artwork()` helper points at jsDelivr's CDN mirror of the PokeAPI sprite repo rather than `raw.githubusercontent.com` (which isn't meant for production hotlinking and intermittently rate-limits/resets under load); a failed load retries once against a cache-busted URL, then falls back to a same-domain inline SVG silhouette, so a persistent failure never surfaces the browser's broken-image icon.
+| Component | Purpose |
+| --------- | ------- |
+| `<app-heart-button>` | The only way into favorites. It sits in a card's corner, adds with a burst in the type color, and removes with an undo toast. |
+| `<app-state-panel>` | Every empty and error state: a line-drawn Poké Ball, a heading, one sentence, one next step. Extra content (such as suggestions) is projected. |
 
-None of this required a new dependency — it's `grid-auto-flow: dense`, `aspect-ratio`, `IntersectionObserver`, CSS custom properties, and media queries, matching the "additive, framework-idiomatic" spirit of the rest of the app. The same patterns are the intended starting point once `search` and `favorites` grow past their current placeholder state.
+### Directives
 
-## Shared Directives: Behavior That Doesn't Belong in a Component
+| Directive | Selector | Does |
+| --------- | -------- | ---- |
+| `TypeColorDirective` | `[appTypeColor]` (+ `appTypeColorMode="accent" \| "fill"`) | Turns a type into `--accent` or a solid background |
+| `EntranceRevealDirective` | `appEntranceReveal` | Marks a card for the `bloom` entrance. The animation itself is pure CSS |
+| `MagneticTiltDirective` | `[appMagneticTilt]` | Pointer-follow tilt and glow for large cards (hover devices only) |
+| `ArtworkFallbackDirective` | `img[appArtworkFallback]` | Retries a failed CDN image once, then shows an inline SVG silhouette |
+| `ScrollSentinelDirective` | `(appScrollSentinel)` | Emits when the host nears the viewport (infinite lists) |
+| `ScrollRailDirective` | `appScrollRail` (`#rail="scrollRail"`) | Exposes `canScrollStart`/`canScrollEnd` and `scrollByPage()` for horizontal rails |
+| `CountUpDirective` | `[appCountUp]` | Counts a number up from 0 when it scrolls into view |
+| `PokemonLinkDirective` | `a[appPokemonLink]` | Marks which Pokémon is being opened, for the artwork morph |
+| `ArtTransitionDirective` | `img[appArtTransition]` | Gives a card's artwork the shared `view-transition-name` while it's the one being opened |
 
-Pipes transform a value for display. Directives are for the other half of "presentational logic" — the part that needs a DOM node, an event, or a piece of interaction state, none of which a `{{ }}` interpolation can hold. `app/shared/directives/` has four, all `standalone: false`, all declared + exported from `SharedModule`, all currently exercised by `home.html`:
+### Pipes
 
-| Directive | Selector | What it replaces |
-| --- | --- | --- |
-| `appTypeColor` | `[appTypeColor]="type"` + optional `appTypeColorMode="accent" \| "fill"` | An inline `[style.--accent]`/`[style.background]` binding, repeated at every call site, each re-deciding how to apply the same color lookup |
-| `appRevealOnInteraction` | `[appRevealOnInteraction]="condition"` | A CSS-only `:hover`/`:focus-within` pair plus a hand-written `[attr.tabindex]="cond ? 0 : null"` ternary in the template |
-| `appEntranceReveal` | `appEntranceReveal` (no binding — always on) | Nothing existed before it; new organic-entrance behavior, not a refactor of prior code |
-| `appMagneticTilt` | `[appMagneticTilt]="condition"` | Nothing existed before it either — a pointer-follow tilt/glow scoped to the grid's largest cells |
+| Pipe | Input → Output |
+| ---- | -------------- |
+| `pokedexId` | `25` → `#025` |
+| `pokemonName` | `mr-mime` → `Mr. Mime`, `ho-oh` → `Ho-Oh` |
+| `pokemonArtwork` | `25` → official artwork URL (jsDelivr) |
+| `pokemonTypeColor` | `electric` → `#f8d030` |
+| `stagger` | `i \| stagger: 30` → capped entrance delay in ms |
 
-A few things worth knowing about how they're built:
+## Features
 
-- **`ElementRef` + `inject()`, only where DOM geometry is actually needed.** `appEntranceReveal` and `appMagneticTilt` inject `ElementRef` because `IntersectionObserver` and `getBoundingClientRect()` need the host's real node — that's the dividing line between "this could've been a `[class.x]`/`[style.x]` binding on the component" and "this had to be a directive." `appTypeColor` and `appRevealOnInteraction` need no `ElementRef` at all; they only read `@Input()`s and write host bindings.
-- **Every interaction directive is capability-gated, not just device-width-gated.** `appRevealOnInteraction` and `appMagneticTilt` both check `matchMedia('(hover: hover) and (pointer: fine)')` before doing anything pointer-driven, and both directives (plus `appEntranceReveal`) back off under `prefers-reduced-motion`. A touch device or a user with motion sensitivity gets the same information, presented plainly, instead of a broken or nauseating version of the effect.
-- **`appTypeColor` is `resolvePokemonTypeColor()` wearing a host binding.** The actual type→color map lives in `shared/utils/pokemon-type-colors.ts` — one lookup, consumed by both the directive and the `pokemonTypeColor` pipe below, so they can never drift apart into two different palettes.
-- **They're exported, not embedded in `home`.** Nothing about any of the four mentions `DommiePokemon` or the bento layout by name — `SharedModule` exports them the same way it exports the pipes, so `search`/`favorites` inherit all four the moment those pages import `SharedModule` and render real Pokémon.
+- **Home (`/home`).** A bento mosaic. If you have favorites, your party leads ("Welcome back"), laid out to tile the grid at any party size. Dommie's hand-picked team follows.
+- **Pokédex (`/search`).** Search by name or number, narrow by up to two types and by generation, and sort. Every filter lives in the URL. Type chips and generation pills show how many results each would leave, and dead ends are disabled.
+- **Pokémon (`/pokemon/:id`).** The artwork on its own stage, plus genus, flavor text, height, weight and abilities. Base stats are drawn against a shared 255 ceiling. Links continue into filtered searches, and previous/next work with ← → keys.
+- **Your party (`/favorites`).** The first six favorites form the lineup, reorderable by drag and drop or with arrow buttons. The rest wait in the Box, which you can filter and sort. A type-wheel summary shows the collection's mix.
+- **About (`/about`).** An editorial page: a self-drawing Poké Ball, live numbers from the index, an 18-type palette, a region timeline and a map of this architecture.
+- **404.** "This route fled!", with a way back to the Pokédex.
 
-## Shared Pipes: Pure Transformations, Not Template Methods
+## Navigation & Feedback
 
-`home.ts` originally computed two purely presentational values with plain TypeScript: a zero-padded Pokédex id (`#025`) and a type-name-to-hex-color lookup, both invoked as template method calls (`{{ paddedId(pokemon.id) }}`). Method calls in a template are **impure by construction** — Angular re-invokes them on every change-detection pass, whether or not their input actually changed. Both have since moved to `app/shared/pipes/`:
-
-| Pipe | Input → Output | Used as |
-| --- | --- | --- |
-| `pokedexId` | `25` → `"#025"` | `{{ pokemon.id \| pokedexId }}` |
-| `pokemonTypeColor` | `"electric"` → `"#f8d030"` | Not currently bound in any template — see note below |
-
-This is a small change with an outsized architectural payoff:
-
-- **Pure by default.** Neither pipe sets `pure: false`, so Angular caches the transform per input value/reference instead of recomputing it every check — a genuine performance win over the method-call approach it replaced, not just a style preference.
-- **One color palette, not one per feature.** `POKEMON_TYPE_COLORS` previously lived inside `home.ts`; now it's the only copy in the repo. When `search` and `favorites` render real Pokémon, they `import { SharedModule }` and get the same badge colors for free — no re-deriving, no drift.
-- **The data model got simpler, not more abstract.** `DommiePokemon.types` shrank from `{ name: string; color: string }[]` to plain `string[]` — the component's job is to hold *what* a Pokémon is, not *how* its type should be painted. That question now has exactly one answer, in exactly one file.
-- **Declared where the "planned" `SharedModule` in [Folder Responsibilities](#folder-responsibilities) said it would be.** `shared-module.ts` declares and exports both pipes; `HomeModule` imports `SharedModule` alongside `CommonModule` and `HomeRoutingModule` — the same "one new import, zero existing files rewritten" shape as every other addition in this app.
-- **`pokemonTypeColor` isn't dead code, even though `home.html` no longer calls it.** `home` moved to the `appTypeColor` [directive](#shared-directives-behavior-that-doesnt-belong-in-a-component) for its own template bindings, but the pipe stays: both it and the directive delegate to the same `resolvePokemonTypeColor()`, so the pipe remains the way to get a plain color *value* (in a test, in a future non-template context) rather than a host binding. One lookup, two thin adapters over it — not two competing implementations.
-
-**A second, `core`-scoped pipe exists too, and it's a useful contrast.** `core/pipes/custom-pipe-pipe.ts` declares `customPipe`, generated as a scaffold and registered directly in `CoreModule` — its `transform()` currently just returns `null` and it isn't referenced from any template yet. Its location is the tell: `core/` is for the app shell and singleton concerns ([Guiding Principle #2](#guiding-principles)), so a pipe declared there is implicitly saying "this only ever makes sense wrapped around shell-level UI, not feature data." Neither `pokedexId` nor `pokemonTypeColor` fit that description — they're Pokémon-domain transforms any feature might need — which is exactly why they live in `shared/`, not `core/`, instead. Until `customPipe` is implemented and given a real, shell-specific job, treat it the same as the empty `home-card` / `home-card-container` folders: a placeholder marking an intention, not a pattern to copy.
-
-## Feature Spotlight: Search, Favorites & About
-
-Both features read from one client-side index, `PokedexService.loadIndex()` (`core/services/`). It makes 19 small PokeAPI requests (the species list plus one list per type), shares the result with `shareReplay`, and resolves artwork by id through the same jsDelivr mirror that Home uses.
-
-- **`/search`.** Matches a name or Pokédex number, filters by up to two types and by generation, and sorts. The filters live in the URL (`?q=&types=&gen=&sort=`). Each type chip and generation pill shows how many results it would leave.
-- **`/favorites`.** Built on `FavoritesStore` (`core/services/favorites-store.ts`): a signal persisted to `localStorage`, validated on read and synced across tabs. The first six favorites form the **Party**, a bento layout you can reorder by drag and drop or with the arrow buttons. Everyone else waits in the **Box**, which you can filter and sort. A type-wheel summary, an undo toast and an empty state with suggestions complete the page.
-- **`<app-heart-button>`** (`shared/components/`) is the single way in. It sits on Home, Search and Favorites cards, and the header shows a live count.
-- **`/about`.** An editorial page with five sections:
-  - **Hero:** a Poké Ball drawn in one line, then capped with a turning ring of all 18 type colors.
-  - **By the numbers:** live counts from the index via `summarizePokedex()` (`pages/about/about-stats.ts`).
-  - **Type gallery:** a paint-chip swatch per type, linking to `/search?types=`.
-  - **Region timeline:** starter silhouettes, linking to `/search?gen=`.
-  - **Architecture map:** a hoverable diagram of this module layout.
-
-  Sections rise in with scroll-driven animations where the browser supports them. Two new shared directives came with it: `appCountUp` (an eased count-up when the element scrolls into view) and `appScrollRail` (a horizontal rail that knows when more is hidden past either edge). The rail also powers the generation filter on `/search`.
+- **Tab titles.** Set per route by `PokeTitleStrategy` ("Pokédex · Poké"). The detail page titles itself ("Charizard #006 · Poké").
+- **Focus.** It moves to the new page's `<h1>` after a path change (`NavigationFocus`). It's left alone when the new page has already focused something, such as the search field.
+- **Scroll.** It's restored on back/forward and starts at the top on a new page. Filtering on `/search` opts out per navigation (`scroll: 'manual'`), so refining a search never moves you.
+- **Header.** It keeps "Pokédex" lit on detail pages and filtered searches. A badge counts your favorites. `/` opens search from anywhere.
+- **Toasts.** One at a time, app-wide, with an optional action and a visible countdown.
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js ≥ 20
-- npm ≥ 11 (or your package manager of choice)
-
-### Installation
+**Prerequisites:** Node.js ≥ 20 and npm ≥ 11.
 
 ```bash
 npm install
+npm start        # http://localhost:4200
+npm run build    # production build → dist/poke/
+npm test         # Vitest + jsdom
 ```
 
-### Development Server
-
-```bash
-npm start
-```
-
-Navigate to `http://localhost:4200/` — the app reloads automatically on file changes.
-
-### Build
-
-```bash
-npm run build
-```
-
-Artifacts are emitted to `dist/poke/`, production-optimized by default.
-
-### Testing
-
-```bash
-npm test
-```
-
-Runs unit tests via Vitest + jsdom.
+The app needs network access to PokeAPI and jsDelivr at runtime. Favorites are stored in `localStorage` under `poke.favorites.v1`.
 
 ## NPM Scripts
 
-| Script          | Command                                  | Purpose                              |
-| --------------- | ----------------------------------------- | ------------------------------------- |
-| `npm start`     | `ng serve`                                | Local dev server with live reload     |
-| `npm run build` | `ng build`                                | Production build to `dist/`           |
-| `npm run watch` | `ng build --watch --configuration development` | Continuous dev build (no server) |
-| `npm test`      | `ng test`                                 | Unit tests via Vitest                 |
+| Script          | Command | Purpose |
+| --------------- | ------- | ------- |
+| `npm start`     | `ng serve` | Dev server with live reload |
+| `npm run build` | `ng build` | Production build to `dist/` |
+| `npm run watch` | `ng build --watch --configuration development` | Continuous dev build |
+| `npm test`      | `ng test` | Unit tests via Vitest |
 
 ## Scaling the Project
 
 ### Adding a New Feature Module
 
-`home`, `search`, `favorites`, and `about` all follow the same lazy-loaded recipe today, so a new page (e.g., a Pokémon detail view) repeats it — **create, don't modify**:
+**Create, don't modify:**
 
 ```bash
-ng generate module pages/detail --routing
-ng generate component pages/detail
+ng generate module pages/moves --routing
+ng generate component pages/moves
 ```
 
-The feature's own routing module keeps `path: ''` — it's always mounted *relative to* the segment the router lazy-loads it under, so it never needs to know its own top-level path:
+The feature's routing keeps `path: ''` (it's mounted relative to its lazy segment) and imports `SharedModule` for the shared building blocks. Then add one entry to `AppRoutingModule`, **before** the wildcard:
 
 ```typescript
-// pages/detail/detail-routing-module.ts
-const routes: Routes = [
-  { path: '', component: Detail },
-];
+{
+  path: 'moves',
+  title: 'Moves',
+  loadChildren: () => import('./pages/moves/moves-module').then((m) => m.MovesModule),
+},
+// …
+{ path: '**', title: 'Not found', loadChildren: () => import('./pages/not-found/not-found-module').then((m) => m.NotFoundModule) },
 ```
 
-Register that one top-level segment in `AppRoutingModule` — **`AppModule` is never touched**:
+Two rules make this safe:
 
-```typescript
-// app-routing-module.ts
-const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', loadChildren: () => import('./pages/home/home-module').then(m => m.HomeModule) },
-  { path: 'search', loadChildren: () => import('./pages/search/search-module').then(m => m.SearchModule) },
-  { path: 'about', loadChildren: () => import('./pages/about/about-module').then(m => m.AboutModule) },
-  { path: 'favorites', loadChildren: () => import('./pages/favorites/favorites-module').then(m => m.FavoritesModule) },
-  { path: 'detail', loadChildren: () => import('./pages/detail/detail-module').then(m => m.DetailModule) }, // ← the only entry a new feature adds
+1. **New routes go before `**`, never after.**
+2. **`loadChildren` points at the feature's `*-module.ts`**, not its routing module.
 
-  // '**' MUST remain the last entry — it matches any path and would
-  // otherwise shadow every route declared above it
-  { path: '**', redirectTo: 'home' },
-];
-```
-
-Two rules make this safe every time:
-
-1. **Insert new feature routes *before* `**`, never after.** The router matches top-to-bottom and stops at the first hit — this repo shipped a bug where `**` sat second in the list and silently redirected every click back to `/home` before any feature route was ever tried.
-2. **Point `loadChildren` at the feature's `*-module.ts`** (the NgModule with `declarations`), not its `*-routing-module.ts`. The routing module alone has no component declarations — loading it directly leaves the router with routes but nothing to render.
-
-Finally, add one `routerLink` (+ `routerLinkActive` and `[routerLinkActiveOptions]="{ exact: true }"`) in `header.html` if the feature belongs in primary navigation. No existing feature module is touched or re-declared anywhere — the new page is fully self-contained and ships as its own chunk (`ng build` output shows one `chunk-*.js` per feature).
-
-### Future-Ready Blueprint
-
-As the app grows, the structure extends **outward**, not **through** existing code:
-
-```
-src/app/
-├── core/
-│   ├── components/          # header, footer, side-nav…
-│   ├── services/            # PokemonApiService, StorageService…
-│   ├── guards/              # authGuard, unsavedChangesGuard…
-│   └── interceptors/        # errorInterceptor, loadingInterceptor…
-│
-├── shared/
-│   ├── components/          # app-button, app-card, app-badge… — still planned
-│   ├── pipes/                # pokedexId, pokemonTypeColor — done; capitalizeType, statBar… next
-│   ├── directives/           # appTypeColor, appRevealOnInteraction, appEntranceReveal,
-│   │                         # appMagneticTilt — done; appLazyImage… next
-│   └── utils/                 # pokemon-type-colors.ts — done, the shared color source
-│
-├── models/
-│   └── pokemon.model.ts      # Domain types shared across features
-│
-├── pages/
-│   ├── home/                  # lazy-loaded
-│   ├── search/                # lazy-loaded, detail-ready
-│   ├── favorites/             # lazy-loaded
-│   └── about/                 # lazy-loaded
-│
-└── app-routing-module.ts     # Root route table — redirect, loadChildren per
-                                # feature, '**' wildcard always last
-```
+If the page belongs in primary navigation, add a `routerLink` + `routerLinkActive` to `header.html`. For styles, start from the mixins in `_poke.scss` and the tokens rather than new literal values.
 
 ### Growth Path
 
-| Stage | Milestone                                                                 |
-| ----- | --------------------------------------------------------------------------- |
-| ✅ 0   | NgModule shell, `CoreModule` header, first `pages/home` feature             |
-| ✅ 1  | Root `AppRoutingModule` (`redirectTo: 'home'` + `**` wildcard) wired into `AppModule` |
-| ✅ 2  | Four routed features (`home`, `search`, `favorites`, `about`) with a shell `Header` linking all of them |
-| ✅ 3  | All four features fully **lazy-loaded** via `loadChildren`; `AppModule` only imports `CoreModule` + `AppRoutingModule` — verified by `ng build` emitting one lazy `chunk-*.js` per feature |
-| ✅ 4  | `pages/home` moved past scaffolding: a responsive **Bento CSS Grid** ("Dommie's Pokémon") establishing the size-driven dense-packing, component-local token, hover-reveal, and aspect-ratio patterns — see [UI Pattern Spotlight](#ui-pattern-spotlight-the-home-bento-grid) |
-| ✅ 5  | `SharedModule` introduced with its first two exports, `pokedexId` and `pokemonTypeColor` — see [Shared Pipes](#shared-pipes-pure-transformations-not-template-methods). Reusable **components** (buttons, the card layout itself) are still pending — the empty `home-card` / `home-card-container` scaffolds mark where that extraction is expected to land |
-| ✅ 5.1 | `SharedModule` grew four attribute directives (`appTypeColor`, `appRevealOnInteraction`, `appEntranceReveal`, `appMagneticTilt`) — see [Shared Directives](#shared-directives-behavior-that-doesnt-belong-in-a-component). The bento grid's per-card accent, hover-reveal, viewport entrance, and pointer-tilt behavior all moved out of inline template bindings and CSS-only tricks into reusable, capability-gated directives |
-| 🔜 6  | Typed `PokemonApiService` in `core/services`, backed by the [PokéAPI](https://pokeapi.co/) — to replace `home.ts`'s hand-authored roster and back `search`/`favorites` |
-| 🔜 7  | `models/` for strongly-typed domain entities (promoting `home.ts`'s local `DommiePokemon` interface into a shared model) |
-| 🔜 8  | HTTP interceptors (loading state, error normalization) in `core/interceptors` |
-| 🔜 9  | Route-level `preloadingStrategy` (e.g. `PreloadAllModules`) once enough features exist that first-navigation lazy-load latency is noticeable |
-| 🔜 10 | State management (Signals-based store, or NgRx if complexity demands it) — likely needed once `favorites` persists selections |
-| 🔜 11 | E2E test suite (Playwright/Cypress) alongside the existing Vitest unit tests |
-
-Each stage is purely **additive**: new folders, new modules, new lazy routes — existing features never need to change shape to accommodate the next one.
+| Stage | Milestone |
+| ----- | --------- |
+| ✅ 0–3 | NgModule shell, `CoreModule` header, four lazy routed pages, wildcard last |
+| ✅ 4–5 | Home bento grid; `SharedModule` with the first pipes and directives |
+| ✅ 6 | `PokedexService` on PokeAPI: a 19-request in-memory index, plus cached per-Pokémon detail |
+| ✅ 7 | `/search` with URL-backed filters; `/favorites` with a persisted, undoable `FavoritesStore` |
+| ✅ 8 | `/about` editorial page; `appCountUp` and `appScrollRail` |
+| ✅ 9 | Cohesion pass: design tokens and mixins, `/pokemon/:id`, view transitions, title strategy, focus management, app-wide toasts, 404 |
+| 🔜 10 | HTTP interceptors (retry, error normalization) in `core/interceptors` |
+| 🔜 11 | `PreloadAllModules` (or a hover-based preloading strategy) once first-visit latency is noticeable |
+| 🔜 12 | Dark theme: tokens are already centralized, so it's a second token set |
+| 🔜 13 | E2E tests (Playwright) for search filters, drag-and-drop reordering and the artwork morph |
 
 ## CI/CD
 
 GitHub Actions workflows (`.github/workflows/`) run:
 
-- **Claude Code Review** — automated review on pull requests.
-- **Claude PR Assistant** — automated PR assistance triggered via mentions.
+- **Claude Code Review**: automated review on pull requests.
+- **Claude PR Assistant**: PR assistance triggered via mentions.
 
 ## Contributing
 
-1. Create a feature branch from `main`.
-2. Follow the folder conventions above — new features go in `pages/`, shared UI in `shared/` (once introduced).
-3. Keep components NgModule-based (`standalone: false`) to match the rest of the codebase.
-4. Open a pull request — CI will run the Claude review workflows automatically.
+1. Branch from `develop` (features merge there, then into `main`).
+2. Follow the structure above: pages in `pages/`, cross-page pieces in `shared/`, singletons in `core/`.
+3. Keep everything NgModule-based (`standalone: false`), and keep `npx ng build` warning-free and `npm test` green.
+4. Open a pull request. CI runs the Claude review workflows automatically.
 
 ## License
 

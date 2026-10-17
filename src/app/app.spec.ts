@@ -1,25 +1,35 @@
 import { TestBed } from '@angular/core/testing';
+
 import { App } from './app';
+import { AppModule } from './app-module';
 
 describe('App', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [
-        App
-      ],
-    }).compileComponents();
+    // App is declared in AppModule, so the test uses the real module —
+    // the same shell, router and providers the browser gets.
+    await TestBed.configureTestingModule({ imports: [AppModule] }).compileComponents();
   });
 
-  it('should create the app', () => {
+  it('creates the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('renders the shell: header, a main region for pages, and the toast outlet', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, poke');
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('app-header .navbar__title')?.textContent).toContain('Poké');
+    expect(root.querySelector('main router-outlet')).not.toBeNull();
+    expect(root.querySelector('app-toast-outlet [aria-live="polite"]')).not.toBeNull();
+  });
+
+  it('links every primary page from the header', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const links = [...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.navbar__link')];
+
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/home', '/search', '/favorites', '/about']);
   });
 });
