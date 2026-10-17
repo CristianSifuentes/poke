@@ -1,0 +1,147 @@
+:host {
+  --poke-ink: #1c1c1e;
+  --poke-gray: #6e6e73;
+  --poke-border: #e5e5ea;
+  --poke-bg: #ffffff;
+  --poke-surface: #f5f5f7;
+
+  display: block;
+}
+
+@keyframes search-bar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.75rem 0 1.25rem;
+  background: var(--poke-bg);
+  border: 1px solid var(--poke-border);
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(28, 28, 30, 0.04);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+
+  // An aura in the selected types' colors (--glow-a / --glow-b, set by the
+  // page), blurred behind the field. It breathes in on focus, so the bar
+  // feels like it's listening.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(110deg, var(--glow-a, #ee1515), var(--glow-b, #3b4cca));
+    filter: blur(18px);
+    opacity: 0.12;
+    transition: opacity 0.4s ease, background 0.6s ease;
+  }
+
+  &:focus-within {
+    border-color: color-mix(in srgb, var(--glow-a, #ee1515) 55%, var(--poke-border));
+    box-shadow: 0 10px 30px -18px var(--glow-a, #ee1515);
+
+    &::before {
+      opacity: 0.38;
+    }
+  }
+
+  &__icon {
+    flex: 0 0 auto;
+    width: 1.25rem;
+    fill: none;
+    stroke: var(--poke-gray);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    height: 3.5rem;
+    padding: 0;
+    font: inherit;
+    font-size: 1.0625rem;
+    color: var(--poke-ink);
+    background: none;
+    border: 0;
+    outline: none;
+
+    &::placeholder {
+      color: #a1a1a6;
+    }
+
+    &::-webkit-search-cancel-button {
+      appearance: none;
+    }
+  }
+
+  &__count {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--poke-gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__kbd,
+  &__clear {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+  }
+
+  &__kbd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    color: var(--poke-gray);
+    background: var(--poke-surface);
+    border: 1px solid var(--poke-border);
+  }
+
+  &__clear {
+    padding: 0;
+    background: var(--poke-surface);
+    border: 0;
+    cursor: pointer;
+
+    svg {
+      width: 0.875rem;
+      fill: none;
+      stroke: var(--poke-ink);
+      stroke-width: 2.25;
+      stroke-linecap: round;
+    }
+
+    &:hover {
+      background: var(--poke-border);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--glow-a, #ee1515);
+      outline-offset: 2px;
+    }
+  }
+
+  &__spinner {
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 2px solid var(--poke-border);
+    border-top-color: var(--glow-a, #ee1515);
+    border-radius: 50%;
+    animation: search-bar-spin 0.7s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-bar,
+  .search-bar::before {
+    transition: none;
+  }
+}

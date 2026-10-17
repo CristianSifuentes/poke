@@ -1,0 +1,32 @@
+<article
+  class="search-card"
+  [appTypeColor]="pokemon.types[0]"
+  [style.--accent-2]="(pokemon.types[1] ?? pokemon.types[0]) | pokemonTypeColor"
+  [style.--enter-delay]="delay + 'ms'"
+  appEntranceReveal
+>
+  <span class="search-card__watermark" aria-hidden="true">{{ pokemon.id | pokedexId }}</span>
+
+  <div class="search-card__art">
+    <img
+      [src]="pokemon.id | pokemonArtwork"
+      [alt]="pokemon.name | pokemonName"
+      width="475"
+      height="475"
+      loading="lazy"
+      decoding="async"
+      appArtworkFallback
+    />
+  </div>
+
+  <div class="search-card__body">
+    <span class="search-card__id">{{ pokemon.id | pokedexId }}</span>
+    <h2 class="search-card__name">{{ pokemon.name | pokemonName }}</h2>
+
+    <ul class="search-card__types">
+      <li *ngFor="let type of pokemon.types" class="search-card__type" [appTypeColor]="type" appTypeColorMode="fill">
+        {{ type }}
+      </li>
+    </ul>
+  </div>
+</article>
