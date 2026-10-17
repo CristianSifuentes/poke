@@ -103,7 +103,7 @@
     img {
       width: 80%;
       height: auto;
-      filter: brightness(0) opacity(0.82);
+      filter: var(--silhouette, brightness(0) opacity(0.82));
       transition: filter 0.45s ease, transform var(--dur-slow) var(--ease-spring);
     }
   }
@@ -127,6 +127,12 @@
       transform: translateY(-4px) scale(1.06);
     }
   }
+}
+
+// On a dark canvas a black silhouette disappears; a pale one reads. Set as
+// a variable, so the hover/focus reveal below still wins in both themes.
+:host-context([data-theme="dark"]) {
+  --silhouette: brightness(0) invert(1) opacity(0.32);
 }
 
 @media (hover: none) {

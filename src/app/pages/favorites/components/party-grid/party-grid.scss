@@ -73,7 +73,7 @@
 
     button {
       @include poke.icon-button(1.75rem, 0.875rem);
-      background: rgba(255, 255, 255, 0.85);
+      background: color-mix(in srgb, var(--poke-bg) 85%, transparent);
       @include poke.focus-ring;
 
       &:disabled {

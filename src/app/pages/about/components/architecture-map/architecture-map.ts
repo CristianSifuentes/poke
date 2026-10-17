@@ -31,7 +31,7 @@ export class ArchitectureMap {
       id: 'core',
       name: 'CoreModule',
       kind: 'Eager · singleton',
-      items: ['Header', 'Toasts', 'PokedexService', 'FavoritesStore', 'Titles & focus'],
+      items: ['Header', 'Toasts', 'Theme', 'PokedexService', 'FavoritesStore', 'Titles & focus'],
       role: 'The shell and app-wide state, imported once.',
       related: [],
     },

@@ -105,16 +105,16 @@
   }
 
   &--active {
-    background: var(--poke-ink);
-    border-color: var(--poke-ink);
+    background: var(--poke-inverse);
+    border-color: var(--poke-inverse);
 
     .gen-pill__numeral {
-      color: #ffffff;
+      color: var(--poke-on-inverse);
     }
 
     .gen-pill__region,
     .gen-pill__count {
-      color: rgba(255, 255, 255, 0.7);
+      color: color-mix(in srgb, var(--poke-on-inverse) 70%, transparent);
     }
 
     // A small red seam under the active region — the Poké Ball's own line.

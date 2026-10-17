@@ -1,0 +1,67 @@
+@use 'poke';
+
+:host {
+  display: block;
+}
+
+// Light: a small sun with eight rays. Dark: the core swells, a shadow disc
+// slides in from the corner to carve a crescent, and the rays fold away
+// with a quarter turn. All transforms, so it's smooth and interruptible.
+.theme-toggle {
+  @include poke.icon-button(2.25rem, 1.25rem);
+  color: var(--poke-ink);
+  background: transparent;
+  border-color: transparent;
+  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+
+  @include poke.hover {
+    &:hover {
+      background: var(--poke-surface);
+    }
+  }
+
+  &__icon {
+    overflow: visible;
+  }
+
+  &__core {
+    fill: currentColor;
+    transform-origin: 12px 12px;
+    transition: transform var(--dur-slow) var(--ease-spring);
+  }
+
+  &__bite {
+    transition: transform var(--dur-slow) var(--ease-spring);
+  }
+
+  &__rays {
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transform-origin: 12px 12px;
+    transition: transform var(--dur-slow) var(--ease-spring), opacity var(--dur-base) ease;
+  }
+
+  &--dark {
+    .theme-toggle__core {
+      transform: scale(1.75);
+    }
+
+    .theme-toggle__bite {
+      transform: translate(-13px, 6px);
+    }
+
+    .theme-toggle__rays {
+      opacity: 0;
+      transform: rotate(-90deg) scale(0.4);
+    }
+  }
+}
+
+@include poke.reduced-motion {
+  .theme-toggle__core,
+  .theme-toggle__bite,
+  .theme-toggle__rays {
+    transition: none;
+  }
+}

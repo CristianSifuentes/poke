@@ -2,10 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Poke</title>
+  <title>Poké</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111113" media="(prefers-color-scheme: dark)">
+  <script>
+    // Apply the saved theme before the first paint, so a dark-mode visitor
+    // never sees a white flash while Angular boots. Mirrors ThemeService.
+    (function () {
+      var root = document.documentElement;
+      try {
+        var saved = localStorage.getItem('poke.theme.v1');
+        var dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) {
+        // Storage blocked: leave it to the prefers-color-scheme fallback in CSS.
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

@@ -47,7 +47,7 @@
   width: 2.125rem;
   height: 2.125rem;
   padding: 0;
-  background: rgba(255, 255, 255, 0.82);
+  background: color-mix(in srgb, var(--poke-bg) 82%, transparent);
   border: 1px solid rgba(28, 28, 30, 0.06);
   border-radius: 50%;
   backdrop-filter: blur(6px);

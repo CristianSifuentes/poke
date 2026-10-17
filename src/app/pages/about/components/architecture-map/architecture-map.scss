@@ -10,13 +10,13 @@
     display: grid;
     justify-items: center;
     padding: 0.875rem 1.5rem;
-    color: #ffffff;
-    background: var(--poke-ink);
+    color: var(--poke-on-emphasis);
+    background: var(--poke-emphasis);
     border-radius: var(--radius-pill);
 
     span {
       font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
+      color: color-mix(in srgb, var(--poke-on-emphasis) 70%, transparent);
     }
   }
 
@@ -81,7 +81,7 @@
   }
 
   &:focus-visible {
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--poke-red);
+    box-shadow: 0 0 0 2px var(--poke-canvas), 0 0 0 4px var(--poke-red);
   }
 
   &__kind {
@@ -147,7 +147,7 @@
     font-size: 3.5rem;
     font-weight: 800;
     color: transparent;
-    -webkit-text-stroke: 1px #d8d8de;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--poke-ink) 16%, transparent);
   }
 
   h3 {

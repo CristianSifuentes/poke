@@ -34,6 +34,7 @@
 8. [Pages: Every Feature in Depth](#8-pages-every-feature-in-depth)
 9. [The Design System](#9-the-design-system)
 10. [Motion, Transitions & View Transitions](#10-motion-transitions--view-transitions)
+    - [10.1 Dark mode](#101-dark-mode)
 11. [Navigation, Focus & Accessibility](#11-navigation-focus--accessibility)
 12. [State Management with Signals and RxJS](#12-state-management-with-signals-and-rxjs)
 13. [Working with PokeAPI](#13-working-with-pokeapi)
@@ -83,6 +84,7 @@ Small touches, everywhere:
 - **Favorites:** the heart bursts in the Pokémon's type color. Removing a favorite *anywhere* shows a toast with **Undo**, and the header badge counts your favorites live.
 - **Navigation:** a card's artwork morphs into the detail page through the View Transitions API. Each tab gets its own title ("Charizard #006 · Poké"), and focus moves to each new page's heading.
 - **Motion and touch:** everything respects `prefers-reduced-motion`, hover effects only appear on devices that can hover, and touch targets are at least ~44px on phones.
+- **Dark mode:** it follows your OS by default, and the header's sun/moon toggle switches it. The new theme spreads from the button as a growing circle, and there's never a white flash on load.
 
 ---
 
@@ -236,7 +238,7 @@ poke/
 ├── tsconfig.json / .app / .spec       # Compiler options; spec config adds vitest/globals types
 ├── .prettierrc / .editorconfig
 └── src/
-    ├── index.html
+    ├── index.html                     # Includes the pre-paint theme script
     ├── main.ts                        # Bootstraps AppModule
     ├── styles.scss                    # Design tokens · global keyframes · view-transition rules · craft rules
     ├── styles/
@@ -251,6 +253,7 @@ poke/
         │   ├── core-module.ts         # Declares/exports Header, ToastOutlet
         │   ├── components/
         │   │   ├── header/            # Sticky translucent nav, favorites badge, "/" shortcut, mobile menu
+        │   │   ├── theme-toggle/      # Sun ⇄ moon switch
         │   │   └── toast-outlet/      # Renders the current toast with a countdown
         │   ├── models/
         │   │   ├── pokedex-entry.ts   # { id, name, types, generation }
@@ -262,6 +265,7 @@ poke/
         │       ├── pokedex-service.ts       # Index + detail, cached
         │       ├── favorites-store.ts       (+ spec)
         │       ├── toast-service.ts         (+ spec)
+        │       ├── theme-service.ts         (+ spec)  # Light / dark / system
         │       └── pokemon-transition.ts    # Which artwork morphs across routes
         │
         ├── shared/                    # ── Reusable, stateless ──────────────────────
@@ -394,6 +398,26 @@ forkJoin({
 - **One toast at a time.** `show({ message, actionLabel?, action?, dismissed?, duration? })` shows a toast, and a **new toast replaces the current one** (dismissing it). If you un-heart three Pokémon quickly, the latest undo is the one offered.
 - **Actions.** `runAction()` runs the action once, and that doesn't count as a dismissal. `dismiss()` calls `dismissed` and is also called by the auto-timer (5 s by default).
 - **Rendering.** The outlet sits in the shell as an `aria-live="polite"` region. A red line at the bottom shrinks over the toast's lifetime: the undo window, visibly running out. Each toast is rendered through a one-item `*ngFor` keyed by id, so every new toast restarts its entrance and countdown animations.
+
+### `ThemeService` and `ThemeToggle`: light, dark or the OS
+
+**Files:** `core/services/theme-service.ts`, `core/components/theme-toggle/`. Storage key: `poke.theme.v1`.
+
+| API | Behavior |
+| --- | -------- |
+| `preference()` | `'light' \| 'dark' \| 'system'` (a read-only signal) |
+| `theme()` / `isDark()` | The resolved theme. With `'system'` it follows `prefers-color-scheme` **live** |
+| `toggle(origin?)` | Flips light ⇄ dark. If the result matches the OS, it stores `'system'`, so the app quietly goes back to following the OS. That's why there's no separate "use system setting" control |
+| `setPreference(p, origin?)` | Sets, persists and applies a preference |
+
+- **How a theme is applied.** The theme is written as `<html data-theme="light|dark">` and every `meta[name="theme-color"]` is updated (the address-bar color on mobile). That's all the CSS needs, because every color in the app is a token the dark palette redefines.
+- **No flash on load.** `index.html` runs a few lines of inline script **before Angular boots** that apply the saved theme (or the OS one), so a dark-mode visitor never sees a white flash. Without JavaScript, CSS falls back to `@media (prefers-color-scheme: dark)`.
+- **Sync and resilience.**
+  - Changes in another tab arrive through the `storage` event.
+  - Changes to the OS setting arrive through a `matchMedia` listener.
+  - Storage access is wrapped in `try/catch`.
+- **The reveal.** `ThemeToggle` passes the button's center to `toggle()`. Inside `document.startViewTransition()`, the new theme grows from that point as a `clip-path: circle()`, sized to reach the farthest corner of the viewport. The DOM update runs **synchronously** inside the transition callback (not in an `effect`), because the "after" snapshot is taken right when the callback returns. During the switch, the header drops its own `view-transition-name`, so it's revealed along with the page.
+- **The toggle.** A sun whose core swells while a shadow disc slides in to carve a crescent, and whose rays fold away with a quarter turn. It's all transforms, so it's smooth and interruptible. It's a `role="switch"` with `aria-checked` and a contextual `title`.
 
 ### `PokemonTransition`: which artwork morphs
 
@@ -642,7 +666,8 @@ A giant outlined **404** sits behind "This route fled!", above a `StatePanel` ("
   // Palette
   --poke-red: #ee1515;  --poke-red-dark: #cc0000;  --poke-blue: #3b4cca;
   --poke-ink: #1c1c1e;  --poke-gray: #6e6e73;      --poke-muted: #a1a1a6;
-  --poke-border: #e5e5ea; --poke-bg: #ffffff;      --poke-surface: #f5f5f7; --poke-surface-hi: #fbfbfd;
+  --poke-border: #e5e5ea; --poke-canvas: #ffffff;  --poke-bg: #ffffff; --poke-surface: #f5f5f7; --poke-surface-hi: #fbfbfd;
+  --poke-inverse: #1c1c1e; --poke-on-inverse: #fff; --poke-emphasis: #1c1c1e; --poke-on-emphasis: #fff;
   // Shape
   --radius-sm: 0.75rem; --radius-md: 1rem; --radius-lg: 1.25rem; --radius-pill: 999px;
   // Elevation
@@ -754,6 +779,41 @@ sequenceDiagram
 | `transform-origin: left` + `scaleX` | Stat bars, toast countdown |
 | Keyed re-creation (`*ngFor` + `trackBy`) to replay animations | Header badge, heart burst, toast |
 
+### 10.1 Dark mode
+
+A theme here is **one token set**. Components never ask "am I dark?". They read `--poke-*` tokens, and `src/styles.scss` redefines the palette for dark:
+
+```scss
+@mixin dark-palette {
+  color-scheme: dark;                         // native scrollbars and form controls follow
+  --poke-canvas: #111113;  --poke-bg: #1c1c1f; // page vs. cards: depth by lightness
+  --poke-ink: #f2f2f7;     --poke-gray: #a1a1a6;  --poke-border: #2e2e33;
+  --poke-surface: #26262b; --poke-surface-hi: #313137;
+  --poke-red: #ff453a;                        // brighter brand red for contrast on dark
+  --poke-inverse: #f2f2f7; --poke-on-inverse: #1c1c1e;
+  --poke-emphasis: #2a2a30; --poke-on-emphasis: #f2f2f7;
+  --shadow-rest: 0 1px 2px rgba(0, 0, 0, .5); /* …deeper shadows, so depth still reads */
+}
+:root[data-theme="dark"] { @include dark-palette; }                     // chosen in the app
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) { @include dark-palette; }                    // no-JS fallback
+}
+```
+
+**Design notes:**
+
+- **Canvas vs. cards.** In light mode both are white, and cards separate by border and shadow. In dark mode cards sit one step *lighter* than the canvas, because on dark, elevation reads as lightness.
+- **Inverse vs. emphasis.** Small "inverted" pieces (the toast, the active generation pill, the Box's "All" chip) swap ink and paper. Large emphasized blocks (About's "In your collection" tile, the architecture map's root) use `--poke-emphasis`. In light mode that's ink, but in dark mode it's only a raised surface, because a big light slab would glare.
+- **Type colors don't change.** The 18 type colors and `color-mix()` spotlights glow naturally on dark, so Pokémon artwork looks even richer.
+- **Fixed colors are rare and deliberate.** White text on type colors and red buttons, and dark text on the gold "Legendary" tag, stay the same in both themes.
+- **Silhouettes adapt through a variable.** About's region silhouettes turn pale on dark via a CSS variable set with `:host-context([data-theme="dark"])`. A variable (instead of an override) keeps the hover reveal winning in both themes.
+
+**Inspiration and what we adapted:**
+
+- **Common tutorials** (a signal-based `ThemeService` with `localStorage`, Tailwind's `darkMode: 'class'` with `dark:` utilities, a `body.dark` class) inspired the service and the class-on-root approach.
+- **This app has no Tailwind.** Its tokens already *are* the theming layer, so instead of `dark:` variants on every element, one attribute on `<html>` swaps the whole palette.
+- **We added** system following, cross-tab sync, a pre-paint script against flashes, `color-scheme` and `theme-color` support, and the View Transitions reveal.
+
 ---
 
 ## 11. Navigation, Focus & Accessibility
@@ -769,7 +829,8 @@ sequenceDiagram
 | **Labels** | Contextual `aria-label`s ("Remove Pikachu from favorites", "Move Charizard earlier in the party"); decorative SVGs and watermarks are `aria-hidden` |
 | **Images** | Meaningful `alt` text for Pokémon; `alt=""` for decorative portraits; explicit `width`/`height` to avoid layout shift |
 | **Touch** | ~44px hit areas on coarse pointers without changing the visuals; `touch-action: manipulation` |
-| **Motion** | `prefers-reduced-motion` honored everywhere |
+| **Motion** | `prefers-reduced-motion` honored everywhere (the theme switches instantly instead of revealing) |
+| **Theme** | Follows `prefers-color-scheme`; the toggle is a `role="switch"` with `aria-checked`; both palettes keep text contrast readable |
 | **Titles** | A unique `document.title` per page |
 | **Scroll** | Restored on back/forward; new pages start at the top; filters don't scroll |
 
@@ -819,12 +880,13 @@ Why this shape:
 
 ## 14. Testing
 
-Tests run with **Vitest + jsdom** through Angular's `@angular/build:unit-test` builder (`npm test`). **27 tests across 8 files**, all green.
+Tests run with **Vitest + jsdom** through Angular's `@angular/build:unit-test` builder (`npm test`). **32 tests across 9 files**, all green.
 
 | Spec | What it proves |
 | ---- | -------------- |
 | `app.spec.ts` | The shell renders (header, `<main>` outlet, toast region) and the nav links to all four pages |
 | `favorites-store.spec.ts` | Toggle on/off, persistence across instances, invalid/duplicate/legacy data in storage, invalid JSON, undo restores the original position, `moveTo` with clamping |
+| `theme-service.spec.ts` | Follows the OS when nothing is saved; a saved choice wins; garbage in storage is ignored; toggle persists and sets `data-theme`; toggling back to the OS theme returns to `'system'` |
 | `toast-service.spec.ts` | Auto-dismiss after the duration, the action runs once and isn't a dismissal, a new toast replaces (and dismisses) the old one |
 | `poke-title-strategy.spec.ts` | Title formatting; the document title follows the active route |
 | `count-up-directive.spec.ts` | Final value without IntersectionObserver, starts at 0 while waiting, later changes write through |
@@ -920,7 +982,10 @@ A map from Angular, TypeScript and CSS concepts to the exact file that demonstra
 | `mask-image` edge fades | `_poke.scss` (`rail-track`) |
 | `scroll-snap` | `_poke.scss` (`rail-track`) |
 | Scroll-driven animations + `@supports` | `about.scss` |
-| View Transitions API | `styles.scss`, `pokemon-link-directive.ts`, `app-routing-module.ts` |
+| View Transitions API | `styles.scss`, `pokemon-link-directive.ts`, `app-routing-module.ts`, `theme-service.ts` |
+| Theming with custom properties, `color-scheme`, `prefers-color-scheme` | `styles.scss`, `theme-service.ts`, `index.html` |
+| `:host-context()` | `region-timeline.scss` |
+| SVG masks | `theme-toggle.html` |
 | `:has()` | `_poke.scss` (`card-focus`) |
 | `text-wrap: balance / pretty` | `styles.scss` |
 | `-webkit-text-stroke` outline numerals | `_poke.scss` (`outline-numeral`) |
@@ -954,6 +1019,8 @@ Each chapter of the course lives on its own branch (`features/one` … `features
 | **Search** | `PokedexService` (19-request index), URL-backed filters, faceted counts, infinite list, responsive generation rail |
 | **Favorites** | `FavoritesStore`, heart button, party lineup with drag & drop, the Box, the type wheel, undo |
 | **About** | Editorial page; `appCountUp`, `appScrollRail`; scroll-driven animations |
+| **Responsive favorites** (`ten`) | Artwork fills its card with `object-fit: contain`; cards read their own shape with size container queries (`cqi`) |
+| **Dark mode** (`eleven`) | `ThemeService`, sun ⇄ moon toggle, a dark token set, inverse/emphasis tokens, pre-paint script, circular View Transitions reveal |
 | **Cohesion pass** (`nine-one`) | Design tokens and mixins; `HomeCard`, `StatePanel`, `stagger`; the `/pokemon/:id` page; view transitions; title strategy; focus management; app-wide toasts; 404; touch targets; copy pass; cleanup and a green test suite |
 
 ---
@@ -1048,7 +1115,6 @@ ng generate component pages/moves
 
 - [ ] HTTP interceptors in `core/interceptors`: retry with backoff, error normalization, a loading indicator
 - [ ] A preloading strategy (hover/viewport-based) for the detail module
-- [ ] A dark theme: the tokens are already centralized, so it's a second token set under `prefers-color-scheme`
 - [ ] Evolution chains and Pokémon forms on the detail page
 - [ ] Compare two Pokémon side by side, using the shared 255-ceiling stat bars
 - [ ] E2E tests (Playwright) for filters, drag-and-drop reordering and the artwork morph

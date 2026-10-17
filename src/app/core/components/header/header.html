@@ -4,17 +4,21 @@
     <span class="navbar__title">{{ title() }}</span>
   </a>
 
-  <button
-    class="navbar__toggle"
-    type="button"
-    aria-label="Toggle navigation menu"
-    [attr.aria-expanded]="isMenuOpen()"
-    (click)="toggleMenu()"
-  >
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
+  <div class="navbar__actions">
+    <app-theme-toggle></app-theme-toggle>
+
+    <button
+      class="navbar__toggle"
+      type="button"
+      aria-label="Toggle navigation menu"
+      [attr.aria-expanded]="isMenuOpen()"
+      (click)="toggleMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
 
   <nav class="navbar__nav" [class.navbar__nav--open]="isMenuOpen()" aria-label="Main navigation" (click)="closeMenu()">
     <a

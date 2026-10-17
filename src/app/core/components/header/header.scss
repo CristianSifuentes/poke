@@ -14,11 +14,12 @@
   gap: 1rem;
   // Full-bleed bar, content aligned to the same column as the pages.
   padding: 0.75rem max(var(--gutter), (100% - var(--page-max)) / 2);
-  background: color-mix(in srgb, var(--poke-bg) 88%, transparent);
+  background: color-mix(in srgb, var(--poke-canvas) 86%, transparent);
   border-bottom: 1px solid var(--poke-border);
   backdrop-filter: saturate(1.4) blur(12px);
 
   &__brand {
+    margin-right: auto;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -66,7 +67,10 @@
     color: var(--poke-ink);
   }
 
+  // Brand on the left; nav then actions on the right (actions come first
+  // in the DOM so the theme toggle sits beside the hamburger on phones).
   &__nav {
+    order: 1;
     display: flex;
     align-items: center;
     gap: 1.75rem;
@@ -113,6 +117,13 @@
     }
   }
 
+  &__actions {
+    order: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   &__toggle {
     display: none;
     flex-direction: column;
@@ -144,6 +155,7 @@
     }
 
     &__nav {
+      order: 3;
       flex-basis: 100%;
       flex-direction: column;
       align-items: flex-start;

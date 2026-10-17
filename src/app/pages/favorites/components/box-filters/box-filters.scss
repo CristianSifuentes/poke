@@ -77,3 +77,8 @@
     transition: none;
   }
 }
+
+// "All" has no type color: it selects onto the inverse surface.
+.box-chip--all.box-chip--selected {
+  color: var(--poke-on-inverse);
+}
