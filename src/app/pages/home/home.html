@@ -23,7 +23,7 @@
           [src]="pokemon.image"
           [alt]="pokemon.name"
           loading="lazy"
-          (error)="onArtworkError($event)"
+          appArtworkFallback
         />
       </div>
 

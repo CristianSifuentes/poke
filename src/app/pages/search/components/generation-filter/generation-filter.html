@@ -1,0 +1,32 @@
+<fieldset class="gen-filter" [disabled]="disabled">
+  <legend class="gen-filter__legend">Generation</legend>
+
+  <div class="gen-filter__track" role="radiogroup" aria-label="Generation">
+    <button
+      type="button"
+      role="radio"
+      class="gen-pill"
+      [class.gen-pill--active]="selected === null"
+      [attr.aria-checked]="selected === null"
+      (click)="generationChange.emit(null)"
+    >
+      <span class="gen-pill__numeral">All</span>
+      <span class="gen-pill__region">{{ counts[0] ?? '–' }}</span>
+    </button>
+
+    <button
+      *ngFor="let gen of generations"
+      type="button"
+      role="radio"
+      class="gen-pill"
+      [class.gen-pill--active]="selected === gen.id"
+      [attr.aria-checked]="selected === gen.id"
+      [attr.aria-label]="'Generation ' + gen.numeral + ', ' + gen.region"
+      (click)="generationChange.emit(selected === gen.id ? null : gen.id)"
+    >
+      <span class="gen-pill__numeral">{{ gen.numeral }}</span>
+      <span class="gen-pill__region">{{ gen.region }}</span>
+      <span class="gen-pill__count" *ngIf="counts[gen.id] !== undefined || !disabled">{{ counts[gen.id] ?? 0 }}</span>
+    </button>
+  </div>
+</fieldset>

@@ -1,1 +1,133 @@
-<p>search works!</p>
+<section class="pokedex" [style.--glow-a]="glowA()" [style.--glow-b]="glowB()">
+  <svg class="pokedex__ornament" viewBox="0 0 200 200" aria-hidden="true">
+    <circle cx="100" cy="100" r="94" />
+    <path d="M6 100h66a28 28 0 0 0 56 0h66" />
+    <circle cx="100" cy="100" r="16" />
+  </svg>
+
+  <header class="pokedex__header">
+    <p class="pokedex__eyebrow">National Pokédex</p>
+    <h1>Find your Pokémon</h1>
+    <p class="pokedex__lede">
+      Search all {{ dexSize | number }} by name or number, then narrow it down by type and
+      generation.
+    </p>
+  </header>
+
+  <app-search-bar
+    [query]="query()"
+    [resultCount]="results().length"
+    [loading]="status() === 'loading'"
+    (queryChange)="query.set($event)"
+  ></app-search-bar>
+
+  <div class="pokedex__filters">
+    <app-type-filter
+      [selected]="types()"
+      [counts]="typeCounts()"
+      [disabled]="status() !== 'ready'"
+      (typeToggle)="toggleType($event)"
+    ></app-type-filter>
+
+    <app-generation-filter
+      [selected]="generation()"
+      [counts]="generationCounts()"
+      [disabled]="status() !== 'ready'"
+      (generationChange)="generation.set($event)"
+    ></app-generation-filter>
+  </div>
+
+  <div class="pokedex__toolbar">
+    <div class="pokedex__summary">
+      <p class="pokedex__count" aria-live="polite">
+        <strong>{{ results().length | number }}</strong>
+        Pokémon
+      </p>
+
+      <ul class="pokedex__active" *ngIf="hasActiveFilters()" aria-label="Active filters">
+        <li *ngIf="query().trim()">
+          <button type="button" class="pokedex__pill" aria-label="Remove search" (click)="query.set('')">
+            &ldquo;{{ query().trim() }}&rdquo; <span aria-hidden="true">&times;</span>
+          </button>
+        </li>
+        <li *ngFor="let type of types()">
+          <button
+            type="button"
+            class="pokedex__pill pokedex__pill--type"
+            [appTypeColor]="type"
+            [attr.aria-label]="'Remove ' + type + ' type filter'"
+            (click)="removeType(type)"
+          >
+            {{ type }} <span aria-hidden="true">&times;</span>
+          </button>
+        </li>
+        <li *ngIf="selectedGeneration() as gen">
+          <button type="button" class="pokedex__pill" aria-label="Remove generation filter" (click)="generation.set(null)">
+            Gen {{ gen.numeral }} · {{ gen.region }} <span aria-hidden="true">&times;</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="pokedex__clear" (click)="clearAll()">Clear all</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="pokedex__sort" role="radiogroup" aria-label="Sort results">
+      <button
+        *ngFor="let option of sortOptions"
+        type="button"
+        role="radio"
+        class="pokedex__sort-option"
+        [class.pokedex__sort-option--active]="sort() === option.value"
+        [attr.aria-checked]="sort() === option.value"
+        (click)="sort.set(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    </div>
+  </div>
+
+  <div class="pokedex__grid" *ngIf="status() === 'loading'" aria-busy="true" aria-label="Loading Pokédex">
+    <div class="pokedex__skeleton" *ngFor="let i of skeletons" [style.--i]="i"></div>
+  </div>
+
+  <div class="pokedex__state" *ngIf="status() === 'error'" role="alert">
+    <h2>The Pokédex couldn't connect</h2>
+    <p>PokeAPI didn't answer this time. It's usually a short hiccup.</p>
+    <button type="button" class="pokedex__action" (click)="load()">Try again</button>
+  </div>
+
+  <ng-container *ngIf="status() === 'ready'">
+    <div class="pokedex__grid" *ngIf="results().length; else empty">
+      <app-search-card
+        *ngFor="let pokemon of visibleResults(); let i = index; trackBy: trackByPokemonId"
+        [pokemon]="pokemon"
+        [delay]="(i % pageSize) * 28"
+      ></app-search-card>
+    </div>
+
+    <button
+      *ngIf="hasMore()"
+      type="button"
+      class="pokedex__more"
+      (appScrollSentinel)="showMore()"
+      (click)="showMore()"
+    >
+      Show more
+      <span>{{ visibleResults().length }} of {{ results().length | number }}</span>
+    </button>
+  </ng-container>
+
+  <ng-template #empty>
+    <div class="pokedex__state">
+      <svg class="pokedex__empty-ball" viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="48" cy="48" r="44" />
+        <path d="M4 48h34a10 10 0 0 0 20 0h34" />
+        <circle cx="48" cy="48" r="8" />
+      </svg>
+      <h2>No wild Pokémon appeared</h2>
+      <p>Nothing matches these filters. Try a shorter name or loosen a filter.</p>
+      <button type="button" class="pokedex__action" (click)="clearAll()">Clear filters</button>
+    </div>
+  </ng-template>
+</section>
