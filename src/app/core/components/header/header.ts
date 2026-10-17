@@ -26,7 +26,7 @@ export class Header {
     { initialValue: false },
   );
 
-  protected readonly title = signal('poke');
+  protected readonly title = signal('Poké');
 
   protected readonly isMenuOpen = signal(false);
 

@@ -10,8 +10,8 @@
   margin: 0 auto;
   isolation: isolate;
 
-  // A Poké Ball drawn in a single hairline, turning slower than you'd
-  // notice — texture for the header, never competing with it.
+  // A Poké Ball drawn in a single hairline — texture for the header,
+  // still, so it never competes with results changing below it.
   &__ornament {
     position: absolute;
     top: -3rem;
@@ -21,7 +21,7 @@
     fill: none;
     stroke: var(--poke-border);
     stroke-width: 1.5;
-    animation: poke-spin 120s linear infinite;
+    transform: rotate(-18deg);
   }
 
   &__header {
@@ -148,7 +148,6 @@
 }
 
 @include poke.reduced-motion {
-  .pokedex__ornament,
   .pokedex__skeleton {
     animation: none;
   }

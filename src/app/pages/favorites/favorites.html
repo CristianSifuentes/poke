@@ -2,7 +2,7 @@
   <header class="favorites__hero">
     <div class="favorites__intro">
       <p class="favorites__eyebrow">Trainer's collection</p>
-      <h1>Your Party</h1>
+      <h1>Your party</h1>
       <p class="favorites__lede">
         Six lead the way; everyone else waits in the Box. Drag a Pokémon onto a slot, or use the arrows,
         to change who's up front.
@@ -34,7 +34,7 @@
     <ng-container *ngIf="allPokemon().length; else empty">
       <section class="favorites__section" aria-labelledby="party-heading">
         <div class="favorites__section-head">
-          <h2 id="party-heading">The Party <span>{{ party().length }}/{{ partySize }}</span></h2>
+          <h2 id="party-heading">Lineup <span>{{ party().length }}/{{ partySize }}</span></h2>
           <p>The first slot leads.</p>
         </div>
 
@@ -71,7 +71,7 @@
     <app-state-panel
       motion="float"
       heading="Your party is empty"
-      text="Tap the heart on any Pokémon to bring it here. Not sure where to start? These three are looking for a trainer."
+      [text]="suggestions().length ? emptyTextWithSuggestions : emptyText"
       actionLabel="Explore the Pokédex"
       actionLink="/search"
     >

@@ -23,6 +23,8 @@ export class Favorites {
 
   protected readonly partySize = PARTY_SIZE;
   protected readonly skeletons = Array.from({ length: PARTY_SIZE }, (_, i) => i);
+  protected readonly emptyText = 'Tap the heart on any Pokémon to bring it here.';
+  protected readonly emptyTextWithSuggestions = `${this.emptyText} Not sure where to start? These three are looking for a trainer.`;
 
   protected readonly status = signal<LoadStatus>('loading');
   private readonly entriesById = signal(new Map<number, PokedexEntry>());
