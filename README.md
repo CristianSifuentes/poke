@@ -23,6 +23,7 @@
 - [UI Pattern Spotlight: The Home Bento Grid](#ui-pattern-spotlight-the-home-bento-grid)
 - [Shared Directives: Behavior That Doesn't Belong in a Component](#shared-directives-behavior-that-doesnt-belong-in-a-component)
 - [Shared Pipes: Pure Transformations, Not Template Methods](#shared-pipes-pure-transformations-not-template-methods)
+- [Feature Spotlight: Search & Favorites](#feature-spotlight-search--favorites)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -237,6 +238,14 @@ This is a small change with an outsized architectural payoff:
 - **`pokemonTypeColor` isn't dead code, even though `home.html` no longer calls it.** `home` moved to the `appTypeColor` [directive](#shared-directives-behavior-that-doesnt-belong-in-a-component) for its own template bindings, but the pipe stays: both it and the directive delegate to the same `resolvePokemonTypeColor()`, so the pipe remains the way to get a plain color *value* (in a test, in a future non-template context) rather than a host binding. One lookup, two thin adapters over it — not two competing implementations.
 
 **A second, `core`-scoped pipe exists too, and it's a useful contrast.** `core/pipes/custom-pipe-pipe.ts` declares `customPipe`, generated as a scaffold and registered directly in `CoreModule` — its `transform()` currently just returns `null` and it isn't referenced from any template yet. Its location is the tell: `core/` is for the app shell and singleton concerns ([Guiding Principle #2](#guiding-principles)), so a pipe declared there is implicitly saying "this only ever makes sense wrapped around shell-level UI, not feature data." Neither `pokedexId` nor `pokemonTypeColor` fit that description — they're Pokémon-domain transforms any feature might need — which is exactly why they live in `shared/`, not `core/`, instead. Until `customPipe` is implemented and given a real, shell-specific job, treat it the same as the empty `home-card` / `home-card-container` folders: a placeholder marking an intention, not a pattern to copy.
+
+## Feature Spotlight: Search & Favorites
+
+Both features read from one client-side index, `PokedexService.loadIndex()` (`core/services/`). It makes 19 small PokeAPI requests (the species list plus one list per type), shares the result with `shareReplay`, and resolves artwork by id through the same jsDelivr mirror that Home uses.
+
+- **`/search`.** Matches a name or Pokédex number, filters by up to two types and by generation, and sorts. The filters live in the URL (`?q=&types=&gen=&sort=`). Each type chip and generation pill shows how many results it would leave.
+- **`/favorites`.** Built on `FavoritesStore` (`core/services/favorites-store.ts`): a signal persisted to `localStorage`, validated on read and synced across tabs. The first six favorites form the **Party**, a bento layout you can reorder by drag and drop or with the arrow buttons. Everyone else waits in the **Box**, which you can filter and sort. A type-wheel summary, an undo toast and an empty state with suggestions complete the page.
+- **`<app-heart-button>`** (`shared/components/`) is the single way in. It sits on Home, Search and Favorites cards, and the header shows a live count.
 
 ## Getting Started
 

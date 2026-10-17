@@ -16,6 +16,12 @@
         '--enter-shift': i % 2 === 0 ? '-1' : '1'
       }"
     >
+      <app-heart-button
+        [pokemonId]="pokemon.id"
+        [label]="pokemon.name"
+        [type]="pokemon.types[0]"
+      ></app-heart-button>
+
       <span class="dex-card__id">{{ pokemon.id | pokedexId }}</span>
 
       <div class="dex-card__art">

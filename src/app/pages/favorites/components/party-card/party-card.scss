@@ -1,0 +1,237 @@
+:host {
+  --poke-ink: #1c1c1e;
+  --poke-gray: #6e6e73;
+  --poke-border: #e5e5ea;
+
+  display: block;
+  height: 100%;
+  cursor: grab;
+}
+
+@keyframes party-card-bloom {
+  from {
+    opacity: 0;
+    filter: grayscale(1) brightness(0.9);
+    transform: translateY(16px) scale(0.97);
+  }
+}
+
+.party-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 0.875rem 1rem 1rem;
+  background: #ffffff;
+  border: 1px solid var(--poke-border);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(28, 28, 30, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+  &.pending-reveal {
+    animation: party-card-bloom 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 1;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2, var(--accent)));
+  }
+
+  &__slot {
+    position: absolute;
+    top: 0.875rem;
+    right: 1rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  &__watermark {
+    position: absolute;
+    right: -0.5rem;
+    bottom: -0.75rem;
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 26%, transparent);
+    pointer-events: none;
+  }
+
+  &__art {
+    position: relative;
+    display: grid;
+    flex: 1;
+    place-items: center;
+    min-height: 0;
+
+    &::before {
+      content: "";
+      position: absolute;
+      width: min(80%, 100% - 1rem);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--accent) 30%, transparent),
+        color-mix(in srgb, var(--accent-2, var(--accent)) 10%, transparent) 55%,
+        transparent 72%
+      );
+    }
+
+    img {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 10px rgba(28, 28, 30, 0.14));
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  &__body {
+    position: relative;
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  &__role {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  &__id {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--poke-gray);
+  }
+
+  &__name {
+    margin: 0 0 0.25rem;
+    overflow: hidden;
+    font-size: 1rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--poke-ink);
+  }
+
+  &__types {
+    display: flex;
+    gap: 0.3125rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      padding: 0.1875rem 0.5rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: #ffffff;
+      text-transform: capitalize;
+      border-radius: 999px;
+    }
+  }
+
+  &__moves {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.25rem;
+
+    button {
+      display: grid;
+      place-items: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--poke-border);
+      border-radius: 50%;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+    }
+
+    svg {
+      width: 0.875rem;
+      fill: none;
+      stroke: var(--poke-ink);
+      stroke-width: 2.25;
+      stroke-linecap: round;
+    }
+  }
+
+  // The lead: bigger type, a bigger stage, and a holographic sheen that
+  // follows the pointer (appMagneticTilt's --glow-x/--glow-y), like a
+  // foil card catching the light.
+  &--lead {
+    padding: 1.25rem 1.5rem 1.5rem;
+
+    .party-card__name {
+      font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    }
+
+    .party-card__watermark {
+      font-size: clamp(6rem, 4rem + 6vw, 10rem);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(255, 255, 255, 0.55), transparent 45%),
+        linear-gradient(115deg, transparent 30%, rgba(255, 0, 128, 0.12), rgba(0, 200, 255, 0.12), rgba(255, 220, 0, 0.12), transparent 70%);
+      mix-blend-mode: soft-light;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .party-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--poke-border));
+    box-shadow: 0 18px 32px -20px color-mix(in srgb, var(--accent) 70%, #1c1c1e);
+
+    .party-card__art img {
+      transform: translateY(-4px) scale(1.05);
+    }
+  }
+
+  .party-card--lead:hover {
+    transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .party-card,
+  .party-card__art img,
+  .party-card::after {
+    transition: none;
+    animation: none !important;
+  }
+}

@@ -1,4 +1,7 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { HeartButton } from './components/heart-button/heart-button';
 
 import { ArtworkFallbackDirective } from './directives/artwork-fallback-directive';
 import { EntranceRevealDirective } from './directives/entrance-reveal-directive';
@@ -12,6 +15,7 @@ import { PokemonTypeColorPipe } from './pipes/pokemon-type-color-pipe';
 
 @NgModule({
   declarations: [
+    HeartButton,
     PokedexIdPipe,
     PokemonTypeColorPipe,
     PokemonNamePipe,
@@ -22,7 +26,9 @@ import { PokemonTypeColorPipe } from './pipes/pokemon-type-color-pipe';
     ArtworkFallbackDirective,
     ScrollSentinelDirective,
   ],
+  imports: [CommonModule],
   exports: [
+    HeartButton,
     PokedexIdPipe,
     PokemonTypeColorPipe,
     PokemonNamePipe,
