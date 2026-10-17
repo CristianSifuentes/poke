@@ -1,0 +1,134 @@
+// Sits in a card's top-left corner by default; every card that hosts it is
+// already position: relative.
+:host {
+  --poke-red: #ee1515;
+  --poke-gray: #6e6e73;
+
+  position: absolute;
+  top: 0.625rem;
+  left: 0.625rem;
+  z-index: 2;
+}
+
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.72); }
+  60% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heart-ring {
+  from {
+    opacity: 0.6;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+// Eight sparks fly out along evenly spaced spokes (--p × 45°), alternating
+// Poké Ball red with the Pokémon's own type color.
+@keyframes heart-spark {
+  from {
+    opacity: 1;
+    transform: rotate(calc(var(--p) * 45deg)) translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: rotate(calc(var(--p) * 45deg)) translateY(-1.25rem) scale(0.3);
+  }
+}
+
+.heart {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(28, 28, 30, 0.06);
+  border-radius: 50%;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+
+  &__icon {
+    width: 1.0625rem;
+    fill: transparent;
+    stroke: var(--poke-gray);
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+    transition: fill 0.2s ease, stroke 0.2s ease;
+  }
+
+  &__burst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 2px solid var(--accent, var(--poke-red));
+      border-radius: 50%;
+      animation: heart-ring 0.5s ease-out both;
+    }
+
+    i {
+      position: absolute;
+      top: calc(50% - 2px);
+      left: calc(50% - 2px);
+      width: 4px;
+      height: 4px;
+      background: var(--poke-red);
+      border-radius: 50%;
+      animation: heart-spark 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+      &:nth-child(even) {
+        background: var(--accent, var(--poke-red));
+      }
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--poke-red);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    .heart__icon {
+      fill: var(--poke-red);
+      stroke: var(--poke-red);
+      animation: heart-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .heart:hover {
+    transform: scale(1.08);
+    background: #ffffff;
+
+    .heart__icon {
+      stroke: var(--poke-red);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart,
+  .heart__icon {
+    transition: none;
+    animation: none !important;
+  }
+
+  .heart__burst {
+    display: none;
+  }
+}

@@ -34,7 +34,12 @@
       routerLink="/favorites"
       routerLinkActive="navbar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
-    >Favorites</a>
+    >Favorites<span
+        class="navbar__badge"
+        *ngFor="let count of [favorites.count()]"
+        [hidden]="!count"
+        [attr.aria-label]="count + ' favorites'"
+      >{{ count }}</span></a>
     <a
       class="navbar__link"
       routerLink="/about"

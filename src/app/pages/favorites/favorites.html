@@ -1,11 +1,97 @@
 <section class="favorites">
-  <header class="favorites__header">
-    <h1>Favorites</h1>
-    <p>Pokémon you've caught and starred will show up here.</p>
+  <header class="favorites__hero">
+    <div class="favorites__intro">
+      <p class="favorites__eyebrow">Trainer's collection</p>
+      <h1>Your Party</h1>
+      <p class="favorites__lede">
+        Six lead the way; everyone else waits in the Box. Drag a Pokémon onto a slot, or use the arrows,
+        to change who's up front.
+      </p>
+    </div>
+
+    <app-collection-summary
+      *ngIf="status() === 'ready' && allPokemon().length"
+      [pokemon]="allPokemon()"
+    ></app-collection-summary>
   </header>
 
-  <div class="favorites__empty">
-    <span class="favorites__empty-icon" aria-hidden="true">★</span>
-    <p>No favorites yet. Head over to the Pokédex and tap the star on any Pokémon.</p>
+  <!-- Loading: a party-shaped skeleton, so the layout doesn't jump when data lands -->
+  <div class="favorites__skeleton" *ngIf="status() === 'loading' && favorites.count()" aria-busy="true">
+    <span *ngFor="let i of skeletons" [style.--i]="i"></span>
   </div>
+
+  <div class="favorites__state" *ngIf="status() === 'error'" role="alert">
+    <h2>The Pokédex couldn't connect</h2>
+    <p>Your favorites are safe — we just couldn't load their details from PokeAPI.</p>
+    <button type="button" class="favorites__action" (click)="load()">Try again</button>
+  </div>
+
+  <ng-container *ngIf="status() === 'ready' || (status() === 'loading' && !favorites.count())">
+    <ng-container *ngIf="allPokemon().length; else empty">
+      <section class="favorites__section" aria-labelledby="party-heading">
+        <div class="favorites__section-head">
+          <h2 id="party-heading">The Party <span>{{ party().length }}/{{ partySize }}</span></h2>
+          <p>The first slot leads.</p>
+        </div>
+
+        <app-party-grid [party]="party()" (move)="moveInParty($event)"></app-party-grid>
+      </section>
+
+      <section class="favorites__section" *ngIf="boxCount()" aria-labelledby="box-heading">
+        <div class="favorites__section-head">
+          <h2 id="box-heading">The Box <span>{{ boxCount() }}</span></h2>
+          <p>Waiting for their turn.</p>
+        </div>
+
+        <app-box-filters
+          [types]="boxTypeCounts()"
+          [selectedType]="activeBoxType()"
+          [sort]="boxSort()"
+          (typeChange)="boxType.set($event)"
+          (sortChange)="boxSort.set($event)"
+        ></app-box-filters>
+
+        <div class="favorites__box">
+          <app-box-card
+            *ngFor="let pokemon of box(); let i = index; trackBy: trackByPokemonId"
+            [pokemon]="pokemon"
+            [delay]="i * 30"
+            (toParty)="sendToParty($event)"
+          ></app-box-card>
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+
+  <ng-template #empty>
+    <div class="favorites__state favorites__state--empty">
+      <svg class="favorites__ball" viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="48" cy="48" r="44" />
+        <path d="M4 48h34a10 10 0 0 0 20 0h34" />
+        <circle cx="48" cy="48" r="8" />
+      </svg>
+      <h2>Your party is empty</h2>
+      <p>Tap the heart on any Pokémon to bring it here. Not sure where to start? These three are looking for a trainer.</p>
+
+      <div class="favorites__box favorites__box--suggestions" *ngIf="suggestions().length">
+        <app-box-card
+          *ngFor="let pokemon of suggestions(); let i = index; trackBy: trackByPokemonId"
+          [pokemon]="pokemon"
+          [delay]="i * 90"
+          [draggable]="false"
+          [showPartyAction]="false"
+        ></app-box-card>
+      </div>
+
+      <a class="favorites__action" routerLink="/search">Explore the Pokédex <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </ng-template>
+
+  <app-undo-toast
+    *ngFor="let removed of undoQueue()"
+    [name]="removedName(removed) | pokemonName"
+    [duration]="undoWindowMs"
+    (undo)="favorites.undoRemove()"
+    (dismiss)="favorites.dismissUndo()"
+  ></app-undo-toast>
 </section>

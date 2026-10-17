@@ -1,0 +1,8 @@
+<div class="toast" role="status" [style.--duration]="duration + 'ms'">
+  <p class="toast__message"><strong>{{ name }}</strong> left your collection.</p>
+  <button type="button" class="toast__undo" (click)="undo.emit()">Undo</button>
+  <button type="button" class="toast__close" aria-label="Dismiss" (click)="dismiss.emit()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+  </button>
+  <span class="toast__timer" aria-hidden="true"></span>
+</div>

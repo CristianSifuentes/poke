@@ -1,0 +1,28 @@
+<aside class="summary" aria-label="Collection summary">
+  <div class="summary__wheel" [style.background]="wheel" role="img"
+    [attr.aria-label]="typesCovered + ' of ' + typeTotal + ' types in your collection'">
+    <div class="summary__core">
+      <strong>{{ total }}</strong>
+      <span>caught</span>
+    </div>
+  </div>
+
+  <dl class="summary__stats">
+    <div>
+      <dt>Types</dt>
+      <dd>{{ typesCovered }}<small>/{{ typeTotal }}</small></dd>
+    </div>
+    <div *ngIf="topRegion">
+      <dt>Home region</dt>
+      <dd>{{ topRegion.region }}</dd>
+    </div>
+  </dl>
+
+  <ul class="summary__legend" aria-label="Most common types">
+    <li *ngFor="let item of legend" [appTypeColor]="item.type">
+      <span class="summary__swatch" aria-hidden="true"></span>
+      {{ item.type }}
+      <em>{{ item.count }}</em>
+    </li>
+  </ul>
+</aside>
