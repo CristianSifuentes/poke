@@ -172,6 +172,12 @@ body {
   animation-timing-function: var(--ease-out);
 }
 
+// The header's active-page line glides from one nav link to the next.
+::view-transition-group(nav-indicator) {
+  animation-duration: 0.4s;
+  animation-timing-function: var(--ease-out);
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -237,8 +243,11 @@ html {
 }
 
 .theme-switching {
-  app-header {
-    view-transition-name: none;
+  // The header and its nav line join the page snapshot for the theme
+  // reveal, so they're uncovered along with everything else.
+  app-header,
+  .navbar__indicator {
+    view-transition-name: none !important;
   }
 
   &::view-transition-old(root) {

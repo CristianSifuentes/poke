@@ -1,3 +1,5 @@
+@use 'poke';
+
 :host {
   position: sticky;
   top: 0;
@@ -27,8 +29,14 @@
     color: inherit;
   }
 
+  // "The catch": pointing at (or focusing) the brand makes the ball rock
+  // three times, like one that's just been thrown, then its button blinks
+  // red — caught. Under a second, and only when you interact; at rest
+  // nothing moves. `rotate` is used instead of `transform`, so it never
+  // fights the button's centering transform.
   &__logo {
     display: inline-block;
+    transform-origin: 50% 85%;
     width: 1.25rem;
     height: 1.25rem;
     border-radius: 50%;
@@ -59,11 +67,32 @@
     }
   }
 
+  // The é answers too: it lifts a pixel and takes the brand red.
+  &__accent {
+    display: inline-block;
+    transition: color var(--dur-base) ease, translate var(--dur-slow) var(--ease-spring);
+  }
+
+  &__brand:hover,
+  &__brand:focus-visible {
+    .navbar__accent {
+      color: var(--poke-red);
+      translate: 0 -1px;
+    }
+
+    .navbar__logo {
+      animation: navbar-catch 0.9s var(--ease-out);
+
+      &::after {
+        animation: navbar-caught 0.35s ease 0.75s;
+      }
+    }
+  }
+
   &__title {
     font-size: 1.125rem;
     font-weight: 600;
     letter-spacing: -0.01em;
-    text-transform: capitalize;
     color: var(--poke-ink);
   }
 
@@ -77,13 +106,13 @@
   }
 
   &__link {
+    position: relative;
     font-size: 0.9375rem;
     font-weight: 500;
     color: var(--poke-gray);
     text-decoration: none;
     padding-block: 0.25rem;
-    border-bottom: 2px solid transparent;
-    transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+    transition: color var(--dur-fast) ease;
 
     &:hover {
       color: var(--poke-ink);
@@ -92,7 +121,36 @@
     &--active,
     &--section {
       color: var(--poke-ink);
-      border-color: var(--poke-red);
+    }
+  }
+
+  // One red line under the page you're on. Hovering another link sketches
+  // a faint one growing from its center — "you could go here" — and on
+  // navigation the active line *travels* to the new link: it carries a
+  // view-transition-name, so the router's view transition slides it
+  // across instead of letting it blink out and back in.
+  &__indicator {
+    position: absolute;
+    inset: auto 0 -2px;
+    height: 2px;
+    background: var(--poke-red);
+    border-radius: 2px;
+    opacity: 0;
+    scale: 0 1;
+    transition: scale var(--dur-base) var(--ease-out), opacity var(--dur-base) ease;
+    pointer-events: none;
+  }
+
+  &__link:is(.navbar__link--active, .navbar__link--section) .navbar__indicator {
+    opacity: 1;
+    scale: 1 1;
+    view-transition-name: nav-indicator;
+  }
+
+  @include poke.hover {
+    &__link:hover:not(.navbar__link--active, .navbar__link--section) .navbar__indicator {
+      opacity: 0.35;
+      scale: 0.6 1;
     }
   }
 
@@ -178,8 +236,33 @@
   100% { transform: scale(1); }
 }
 
+@keyframes navbar-catch {
+  0%, 100% { rotate: 0deg; }
+  20% { rotate: -18deg; }
+  40% { rotate: 14deg; }
+  60% { rotate: -8deg; }
+  80% { rotate: 3deg; }
+}
+
+@keyframes navbar-caught {
+  50% {
+    background: var(--poke-red);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .navbar__badge {
-    animation: none;
+  .navbar__badge,
+  .navbar__brand .navbar__logo,
+  .navbar__brand .navbar__logo::after {
+    animation: none !important;
+  }
+
+  .navbar__accent {
+    transition: none;
+    translate: none !important;
+  }
+
+  .navbar__indicator {
+    transition: none;
   }
 }

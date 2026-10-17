@@ -1,7 +1,8 @@
 <header class="navbar">
   <a class="navbar__brand" routerLink="/home" aria-label="{{ title() }} home">
     <span class="navbar__logo" aria-hidden="true"></span>
-    <span class="navbar__title">{{ title() }}</span>
+    <!-- The accent gets its own span: it's the one letter that answers back. -->
+    <span class="navbar__title">{{ title() | slice: 0 : -1 }}<span class="navbar__accent">{{ title() | slice: -1 }}</span></span>
   </a>
 
   <div class="navbar__actions">
@@ -26,14 +27,14 @@
       routerLink="/home"
       routerLinkActive="navbar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
-    >Home</a>
+    >Home<span class="navbar__indicator" aria-hidden="true"></span></a>
     <a
       class="navbar__link"
       routerLink="/search"
       routerLinkActive="navbar__link--active"
       [routerLinkActiveOptions]="{ exact: false }"
       [class.navbar__link--section]="inPokedex()"
-    >Pokédex</a>
+    >Pokédex<span class="navbar__indicator" aria-hidden="true"></span></a>
     <a
       class="navbar__link"
       routerLink="/favorites"
@@ -44,13 +45,13 @@
         *ngFor="let count of [favorites.count()]"
         [hidden]="!count"
         [attr.aria-label]="count + ' favorites'"
-      >{{ count }}</span></a>
+      >{{ count }}</span><span class="navbar__indicator" aria-hidden="true"></span></a>
     <a
       class="navbar__link"
       routerLink="/about"
       routerLinkActive="navbar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
-    >About</a>
+    >About<span class="navbar__indicator" aria-hidden="true"></span></a>
   </nav>
 </header>
 
