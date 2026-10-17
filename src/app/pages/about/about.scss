@@ -85,6 +85,29 @@
     margin-bottom: 0.375rem;
   }
 
+  // Two groups of three: what the app shows, and what it's built with.
+  &__credit-group + &__credit-group {
+    margin-top: 1.75rem;
+  }
+
+  &__credit-label {
+    @include poke.label;
+    margin: 0 0 0.75rem;
+  }
+
+  &__credit-also {
+    margin: 0.875rem 0 0;
+    font-size: var(--text-sm);
+    color: var(--poke-gray);
+
+    a {
+      color: var(--poke-ink);
+      font-weight: 600;
+      text-decoration-color: var(--poke-red);
+      text-underline-offset: 0.2em;
+    }
+  }
+
   &__credit-list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
