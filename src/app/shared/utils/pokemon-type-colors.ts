@@ -1,6 +1,7 @@
 // The single source of truth for Pokémon type → brand color. Any feature
-// that renders a type badge or accent (home today; search/favorites once
-// they have real data) reads from here instead of keeping its own copy.
+// that renders a type badge or accent (every page, the type wheel, the
+// About palette and the hero ring) reads from here instead of keeping its
+// own copy.
 // Consumed by both PokemonTypeColorPipe (interpolation) and TypeColorDirective
 // (host style bindings) so the two never drift apart.
 export const POKEMON_TYPE_COLORS: Readonly<Record<string, string>> = {

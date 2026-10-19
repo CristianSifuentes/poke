@@ -12,7 +12,7 @@ import { POKEMON_GENERATIONS } from '../../../../shared/utils/pokemon-generation
 export class GenerationFilter {
   @Input() selected: number | null = null;
   // Keyed by generation id; key 0 holds the total across all generations.
-  @Input() counts: Record<number, number> = {};
+  @Input() counts: Partial<Record<number, number>> = {};
   @Input() disabled = false;
   @Output() readonly generationChange = new EventEmitter<number | null>();
 

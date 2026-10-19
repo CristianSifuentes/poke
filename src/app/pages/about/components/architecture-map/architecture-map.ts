@@ -35,6 +35,7 @@ export class ArchitectureMap {
         'Header',
         'ThemeToggle',
         'ToastOutlet',
+        'ScrollTop',
         'PokedexService',
         'FavoritesStore',
         'ThemeService',

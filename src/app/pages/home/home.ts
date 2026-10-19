@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PokedexEntry } from '../../core/models/pokedex-entry';
-import { FavoritesStore } from '../../core/services/favorites-store';
+import { FavoritesStore, PARTY_SIZE } from '../../core/services/favorites-store';
 import { PokedexService } from '../../core/services/pokedex-service';
 import { PokemonNamePipe } from '../../shared/pipes/pokemon-name-pipe';
 import { NATIONAL_DEX_SIZE } from '../../shared/utils/pokemon-generations';
@@ -30,7 +30,6 @@ const PARTY_LAYOUTS: Readonly<Record<number, BentoSize[]>> = {
   6: ['hero', 'wide', 'wide', 'regular', 'regular', 'hero'],
 };
 
-const PARTY_SIZE = 6;
 const displayName = new PokemonNamePipe();
 
 @Component({

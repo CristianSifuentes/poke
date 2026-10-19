@@ -1,6 +1,6 @@
 import { PokedexEntry } from '../../core/models/pokedex-entry';
 
-export const PARTY_SIZE = 6;
+export { PARTY_SIZE } from '../../core/services/favorites-store';
 
 export type BoxSort = 'recent' | 'id' | 'name';
 

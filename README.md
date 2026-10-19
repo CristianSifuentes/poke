@@ -93,7 +93,7 @@ Small touches, everywhere:
 | Layer | Technology | Version | How it's used |
 | ----- | ---------- | ------- | ------------- |
 | Framework | **Angular** | 22.0.5 | NgModules (`standalone: false`), signals, `linkedSignal`, router features, View Transitions, `provideAppInitializer`, `TitleStrategy` |
-| Language | **TypeScript** | 6.0.3 | `noImplicitOverride`, `noImplicitReturns`, `noPropertyAccessFromIndexSignature`, `strictInjectionParameters`, `strictInputAccessModifiers` |
+| Language | **TypeScript** | 6.0.3 | `strict`, `strictTemplates`, `noImplicitOverride`, `noImplicitReturns`, `noPropertyAccessFromIndexSignature`, `strictInjectionParameters`, `strictInputAccessModifiers` |
 | Reactivity | **Angular Signals** | built-in | All component and service state |
 | Async | **RxJS** | 7.8.2 | HTTP composition (`forkJoin`, `shareReplay`, `switchMap`, `catchError`), debouncing, timers |
 | Interop | `@angular/core/rxjs-interop` | built-in | `toSignal`, `toObservable`, `takeUntilDestroyed` |
@@ -101,7 +101,7 @@ Small touches, everywhere:
 | Styling | **SCSS** (Dart Sass, module system) | via `@angular/build` | `@use 'poke'`, mixins, design tokens as CSS custom properties |
 | Build | **@angular/build** (esbuild + Vite dev server) | 22.0.5 | `application` builder, lazy chunks, budgets |
 | Unit tests | **Vitest** + **jsdom** | 4.1 / 28 | Via the `@angular/build:unit-test` builder |
-| Formatting | **Prettier** | 3.8 | `printWidth: 100`, single quotes, Angular parser for HTML |
+| Formatting | **Prettier** | 3.9 | `printWidth: 100`, single quotes, Angular parser for HTML |
 | Data | **PokeAPI** | v2 REST | Species, types, details |
 | Images | **PokeAPI/sprites** via **jsDelivr** | CDN | Official artwork by Pokédex id |
 | CI | **GitHub Actions** | — | Claude Code Review and Claude PR Assistant workflows |
@@ -115,7 +115,7 @@ Small touches, everywhere:
 ### 4.1 Guiding principles
 
 1. **Feature isolation, fully lazy.** Every routed page is its own `NgModule` under `pages/`, loaded with `loadChildren`. `AppModule` never imports a feature, so each page ships as its own JavaScript chunk and could be deleted without touching its siblings.
-2. **Core holds singletons.** `CoreModule` holds the shell UI (`Header`, `ToastOutlet`). `core/` also holds the app-wide services and routing helpers. It is imported **once**, eagerly, by `AppModule`.
+2. **Core holds singletons.** `CoreModule` holds the shell UI (`Header` with its `ThemeToggle`, `ToastOutlet`, `ScrollTop`). `core/` also holds the app-wide services and routing helpers. It is imported **once**, eagerly, by `AppModule`.
 3. **Shared is stateless and reusable.** Pipes, directives and small presentational components used by **two or more pages** live in `SharedModule`. They never mention a specific page.
 4. **Page-local first, promote later.** A component used by one page lives in `pages/<page>/components/`. It moves to `shared/` only when a second page needs it.
 5. **One design system.** Colors, radii, shadows, motion and type are tokens on `:root`. Recurring visual patterns are SCSS mixins, and a component's stylesheet holds only what is genuinely its own.
@@ -129,8 +129,8 @@ flowchart TD
     main["main.ts<br/>platformBrowser().bootstrapModule(AppModule)"] --> App
 
     subgraph AppModule["AppModule (eager)"]
-      App["App (shell)<br/>header · main · toast outlet"]
-      Core["CoreModule<br/>Header · ToastOutlet"]
+      App["App (shell)<br/>header · main · toast outlet · back-to-top"]
+      Core["CoreModule<br/>Header · ThemeToggle · ToastOutlet · ScrollTop"]
       Routing["AppRoutingModule<br/>provideRouter(routes, …features)"]
     end
 
@@ -150,7 +150,7 @@ flowchart TD
     NotFound --> Shared
 ```
 
-`CoreModule`'s **services** (`PokedexService`, `FavoritesStore`, `ToastService`, `PokemonTransition`, `NavigationFocus`) are `providedIn: 'root'`. They're tree-shakable singletons that need no module registration. `CoreModule` only declares and exports the two shell components.
+`CoreModule`'s **services** (`PokedexService`, `FavoritesStore`, `ToastService`, `ThemeService`, `PokemonTransition`, `NavigationFocus`) are `providedIn: 'root'`. They're tree-shakable singletons that need no module registration. `CoreModule` only declares the four shell components (`Header`, `ThemeToggle`, `ToastOutlet`, `ScrollTop`) and exports the three the shell template uses; `ThemeToggle` stays private because only `Header` renders it. `PokeTitleStrategy` is the one exception: it isn't `providedIn: 'root'`, because `AppRoutingModule` provides it as the `TitleStrategy`.
 
 ### 4.3 Route table
 
@@ -222,6 +222,7 @@ flowchart LR
    <app-header></app-header>
    <main class="app-main"><router-outlet/></main>
    <app-toast-outlet></app-toast-outlet>
+   <app-scroll-top></app-scroll-top>
    ```
 4. The router resolves the URL, lazy-loads the matching feature chunk, and renders it into `<router-outlet>`. On the first navigation the view transition is skipped (`skipInitialTransition`), so the page simply appears.
 
@@ -232,6 +233,7 @@ flowchart LR
 ```
 poke/
 ├── .github/workflows/                 # Claude Code Review + Claude PR Assistant
+├── .vscode/                           # Recommended extensions, launch and task configs
 ├── public/                            # Static assets (favicon)
 ├── angular.json                       # Builders, budgets, schematics (standalone: false), SCSS includePaths
 ├── package.json
@@ -250,7 +252,7 @@ poke/
         ├── app.spec.ts                # Shell tests
         │
         ├── core/                      # ── Singletons ───────────────────────────────
-        │   ├── core-module.ts         # Declares/exports Header, ToastOutlet
+        │   ├── core-module.ts         # Declares Header, ThemeToggle, ToastOutlet, ScrollTop
         │   ├── components/
         │   │   ├── header/            # Sticky translucent nav, favorites badge, "/" shortcut, mobile menu
         │   │   ├── theme-toggle/      # Sun ⇄ moon switch
@@ -314,7 +316,7 @@ poke/
             │       └── pokemon-pager/
             ├── favorites/
             │   ├── favorites-module.ts · favorites-routing-module.ts · favorites.ts/.html/.scss
-            │   ├── favorites-model.ts             # PARTY_SIZE, drag payload helpers, types
+            │   ├── favorites-model.ts             # Drag payload helpers, types (re-exports PARTY_SIZE)
             │   └── components/
             │       ├── party-grid/                # Lineup + drag & drop + move buttons
             │       ├── party-card/
@@ -377,7 +379,7 @@ forkJoin({
 
 ### `FavoritesStore`: a persisted, validated, cross-tab signal store
 
-**File:** `core/services/favorites-store.ts`. Storage key: `poke.favorites.v1`.
+**File:** `core/services/favorites-store.ts`. Storage key: `poke.favorites.v1`. It also exports `PARTY_SIZE` (6), the one definition of how many favorites form the party, shared by Home and Favorites.
 
 | API | Behavior |
 | --- | -------- |
@@ -408,7 +410,7 @@ forkJoin({
 | --- | -------- |
 | `preference()` | `'light' \| 'dark' \| 'system'` (a read-only signal) |
 | `theme()` / `isDark()` | The resolved theme. With `'system'` it follows `prefers-color-scheme` **live** |
-| `toggle(origin?)` | Flips light ⇄ dark. If the result matches the OS, it stores `'system'`, so the app quietly goes back to following the OS. That's why there's no separate "use system setting" control |
+| `toggle(origin?)` | Flips light ⇄ dark. If the result matches the OS, the preference becomes `'system'` (the saved key is removed), so the app quietly goes back to following the OS. That's why there's no separate "use system setting" control |
 | `setPreference(p, origin?)` | Sets, persists and applies a preference |
 
 - **How a theme is applied.** The theme is written as `<html data-theme="light|dark">` and every `meta[name="theme-color"]` is updated (the address-bar color on mobile). That's all the CSS needs, because every color in the app is a token the dark palette redefines.
@@ -462,13 +464,17 @@ A `view-transition-name` must be unique on the page, so only **one** card's artw
 **File:** `core/components/header/`
 
 - **Appearance.** A sticky, translucent bar (`color-mix` + `backdrop-filter`). It spans the full width while its content aligns to the page column.
+- **The brand "catch".** Pointing at (or focusing) the brand makes the little Poké Ball rock three times and blink its button red, while the final "é" lifts a pixel into the brand red. The title is rendered as `title() | slice: 0 : -1` plus an accent span, so the full text stays "Poké" for screen readers. It lasts under a second, only on interaction, and uses `rotate`/`translate` so it never fights other transforms.
+- **The nav line.** The active page's red underline is its own element (`.navbar__indicator`) with `view-transition-name: nav-indicator`, so on navigation the router's view transition **slides it** from link to link. On hover devices, other links sketch a faint line growing from their center.
+- **Actions.** The `ThemeToggle` sits beside the hamburger (`.navbar__actions`), so on phones both stay visible.
 - **Navigation.**
   - `routerLink` + `routerLinkActive` for Home, Pokédex, Favorites and About.
   - **Pokédex** uses `exact: false`, so it stays lit on filtered searches (`/search?types=fire`).
   - An extra `inPokedex` signal (`toSignal` over `NavigationEnd`) keeps it lit on `/pokemon/:id` too.
 - **Favorites badge.** It's rendered through `*ngFor="let count of [favorites.count()]"`. The one-item array is a trick: a new value recreates the element, which replays its "pop" animation.
 - **Shortcut.** <kbd>/</kbd> navigates to `/search` with `state: { focusSearch: true }`, ignoring keystrokes typed into inputs.
-- **Mobile.** A hamburger toggles the menu with an `isMenuOpen` signal. It also has its own `view-transition-name: site-header`, so it **never cross-fades** between routes.
+- **Mobile.** A hamburger toggles the menu with an `isMenuOpen` signal, and clicking any link closes it.
+- **Transitions.** The header has its own `view-transition-name: site-header`, so it **never cross-fades** between routes. During a theme switch it (and its nav line) drop their names and are revealed with the page.
 
 ### Models
 
@@ -597,7 +603,7 @@ interface PokemonDetail { id; height /* m */; weight /* kg */; stats: { name; va
 | `SearchBar` | A quiet pill input, like every other control. On focus only the edge answers: the border and the magnifier take a tint of the first selected type (or the brand red) with a thin 3px ring. A result count appears while typing. <kbd>/</kbd> focuses it, and so does arriving through the header shortcut (`history.state.focusSearch`). The first <kbd>Esc</kbd> clears, the second blurs. The native WebKit clear button is hidden in favor of its own. |
 | `TypeFilter` | 18 chips inside a `<fieldset>`/`<legend>`. Selecting a chip floods it with its type color through an animated `clip-path: circle()` that grows from the dot. Each chip shows its facet count and uses `aria-pressed`. |
 | `GenerationFilter` | A `role="radiogroup"` timeline of 9 regions, built on `appScrollRail`. Arrows and edge fades appear **only** on the side where more is hidden, pills snap into place, and choosing a half-hidden pill scrolls it into view. The active pill turns ink-black with a red "seam" underneath. |
-| `SearchCard` | An outlined id watermark behind the art, a type-colored spotlight, and a hairline running from the primary to the secondary type. On hover the Pokémon "steps forward" while the watermark drifts the other way (parallax). The whole card links to the detail page. |
+| `SearchCard` | A quiet outlined id in the top-right corner, level with the heart; the card is a container (`container-type: inline-size`), so the number is sized by the card's own width (`clamp(1.5rem, 15cqi, 2.25rem)`). Behind the art, a type-colored spotlight; on top, a hairline running from the primary to the secondary type. On hover the Pokémon "steps forward" while the number drifts slightly the other way (parallax). The whole card links to the detail page. |
 
 **States:** a shimmer skeleton grid, an error panel with **Try again**, and an empty panel "No wild Pokémon appeared" with **Clear filters**.
 
@@ -637,6 +643,9 @@ interface PokemonDetail { id; height /* m */; weight /* kg */; stats: { name; va
   - **HTML5 drag & drop.** A custom MIME type (`application/x-poke-id`, plus `text/plain`) lets a Box card be dropped straight onto a party slot. `dragleave` uses `relatedTarget` checks, so crossing into child elements doesn't flicker the highlight. The dragged slot fades and shrinks, and the target gets a dashed red outline.
   - **Move buttons** (‹ ›) on every member are the keyboard- and touch-friendly twin of drag & drop.
 - **`PartyCard`** is purely presentational. The lead gets bigger type and a **holographic sheen**: a radial light at the tilt glow position plus a faint rainbow band, blended with `mix-blend-mode: soft-light`, like a foil card catching the light.
+  - **It reads its own shape.** The card is a size container (`container-type: size`). Landscape cards (`@container (min-aspect-ratio: 3 / 2)`: the lead, desktop members) put the text left and the art right at full height; square and portrait cards keep the art on top.
+  - **The art always fits.** The artwork fills a flexible area with `object-fit: contain`: always whole, never cropped, never over the text. The outlined id watermark scales with the card (`min(5rem, 30cqi)`).
+  - Only the type row reserves room for the move buttons, so names keep the full width.
 - **`BoxCard`** is a compact "PC box" tile with its hairline on the *bottom* edge (a quieter tier than the party). It's draggable and has a **↑ Send to party** button, which joins as the last member and, if the party is full, swaps the sixth back into the Box.
 - **`BoxFilters`.** Type chips list only the types present in the Box, with counts. Sort is a segmented control: **Recent** (by `addedAt`), **No.**, **A–Z**. A type filter whose last Pokémon leaves the Box quietly resets itself (`activeBoxType`).
 - **`CollectionSummary`, the type wheel.**
@@ -657,10 +666,12 @@ A red **"thread"**, the Poké Ball's seam, runs down the left edge and stitches 
 | 01 · By the numbers | `StatGrid` | Live figures from `summarizePokedex()`: total, types, regions, dual-type count, the **most common type** (linked, in its color) and **your favorites** (live). Each number uses `appCountUp`. The layout is a 4×2 bento with a red feature tile. |
 | 02 · The 18 types | `TypeGallery` | A **Swiss-style specimen sheet**: 18 cells set edge to edge, with 1px hairlines (the sheet's own color showing through 1px gaps) under a labeled ruler. Each cell has its number and hex on top, a color swatch in the middle, and the name and count at the bottom. The type's first Pokémon sits centered and whole in its swatch as a soft silhouette. On hover or focus the color floods the cell (an animated `clip-path`) and the Pokémon grows slightly into full color. It's 6 columns on wide screens and 3 on phones, and narrow cells restack the count under the name, so nothing is cut or hidden. Links go to `/search?types=…`. |
 | 03 · Nine regions | `RegionTimeline` | A horizontal timeline on `appScrollRail`: numeral, region, id range, species count and the grass starter as a "Who's that Pokémon?" silhouette. Unova uses Snivy (#495), because #494 is the mythical Victini. Links go to `/search?gen=…`. It's static data, so it renders without the index. |
-| 04 · How it's built | `ArchitectureMap` | `AppModule` wired to Core, Shared and Pages with SVG curves (`vector-effect: non-scaling-stroke` keeps them crisp at any width). Hovering or focusing a module lights its wire, highlights related modules (Shared ↔ Pages) and dims the rest. Four "design decision" cards sit below. |
+| 04 · How it's built | `ArchitectureMap` | `AppModule` wired to Core, Shared and Pages with SVG curves (`vector-effect: non-scaling-stroke` keeps them crisp at any width). Each module lists its real contents (Core's classes, Shared's pipes/directives/components/utils, the six pages). Hovering or focusing a module lights its wire, highlights related modules (Shared ↔ Pages) and dims the rest. Eight "design decision" cards sit below: *19 requests, not 1,025*; *Pipes over template methods*; *Directives for the DOM*; *Keyframes over transitions*; *The URL holds the search*; *Signals for state, RxJS for time*; *A theme is a token set*; *Components measure themselves*. |
 | 05 · Credits | — | Two groups of three: **Data & images** (PokeAPI, PokeAPI/sprites, jsDelivr) and **Built with** (Angular, RxJS, TypeScript), plus a line for Sass, Vitest and Prettier, and a notice covering the trademarks and the official artwork. No official logos. |
 
 Sections **rise in as you scroll** using `animation-timeline: view()` inside `@supports`. Browsers without support simply show everything, never hidden.
+
+**Responsive by container, not viewport.** The red thread takes width from every section, so the About components respond to their own width with container queries: the stat grid goes 4 → 2 columns (`@container (max-width: 50rem)`), the architecture map and its decisions 4 → 2 → 1, and the type gallery 6 → 3 columns with cells that restack their text (`@container specimen` / `spec-cell`). In the stat grid every tile is a container and the template passes the formatted number's length as `--chars`, so each figure is sized `tile width / digits` and always fits its tile. The credits go from 3 columns to 1 on narrow screens.
 
 ### 8.6 Not found: `**`
 
@@ -675,7 +686,7 @@ A giant outlined **404** sits behind "This route fled!", above a `StatePanel` ("
 ```scss
 :root {
   // Palette
-  --poke-red: #ee1515;  --poke-red-dark: #cc0000;  --poke-blue: #3b4cca;
+  --poke-red: #ee1515;  --poke-red-dark: #cc0000;  --poke-red-on-inverse: #ff6b6b;  --poke-blue: #3b4cca;
   --poke-ink: #1c1c1e;  --poke-gray: #6e6e73;      --poke-muted: #a1a1a6;
   --poke-border: #e5e5ea; --poke-canvas: #ffffff;  --poke-bg: #ffffff; --poke-surface: #f5f5f7; --poke-surface-hi: #fbfbfd;
   --poke-inverse: #1c1c1e; --poke-on-inverse: #fff; --poke-emphasis: #1c1c1e; --poke-on-emphasis: #fff;
@@ -721,6 +732,7 @@ Angular **scopes** `@keyframes` declared inside a component. A pattern used by m
 | `poke-shimmer` | Every skeleton |
 | `poke-spin` | Spinners, the About hero ring |
 | `poke-fade-up` | Hero copy |
+| `poke-theme-reveal` | The theme switch: the new theme grows as a `clip-path: circle()` from the toggle (`--reveal-x/-y/-r`) |
 
 ### 9.4 Global craft rules
 
@@ -733,10 +745,12 @@ Angular **scopes** `@keyframes` declared inside a component. A pattern used by m
 
 - **Width and gutters.** `.app-main` owns horizontal gutters, and every page centers its content at `--page-max`.
 - **Header.** It spans the full width, but its padding `max(var(--gutter), (100% - var(--page-max)) / 2)` aligns its content with the page column.
+- **Breakpoints vs. containers.** Page grids use viewport media queries (Home 4 → 2 → 1 at 900/560 px, `--gutter` shrinks at 560 px). Components whose size depends on *where* they sit use **container queries** instead: `SearchCard` and `PartyCard` (`cqi` units), and About's `StatGrid`, `TypeGallery` and `ArchitectureMap`.
+- **Back-to-top vs. toast.** On phones (≤ 640 px) `body:has(.toast) app-scroll-top` lifts the button above a showing toast.
 
 ### 9.6 Budgets
 
-Each component stylesheet is limited to **4 kB warning / 8 kB error** (and the initial bundle to 500 kB / 1 MB). When a stylesheet grows past that, it's **split into subcomponents** (that's how `HomeCard`, `PokemonPager`, `ExploreLinks` and the party grid's move buttons came to be) rather than trimmed in quality.
+Each component stylesheet is limited to **4 kB warning / 8 kB error** (and the initial bundle to 500 kB / 1 MB; today it's ~325 kB raw, ~87 kB transferred, and the build is warning-free). When a stylesheet grows past that, it's **split into subcomponents** (that's how `HomeCard`, `PokemonPager`, `ExploreLinks` and the party grid's move buttons came to be) rather than trimmed in quality.
 
 ---
 
@@ -774,8 +788,9 @@ sequenceDiagram
   ```css
   ::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--dur-base); }
   ::view-transition-group(pokemon-art) { animation-duration: .45s; animation-timing-function: var(--ease-out); }
+  ::view-transition-group(nav-indicator) { animation-duration: .4s; animation-timing-function: var(--ease-out); }
   ```
-- **The header** has its own `view-transition-name`, so it holds still.
+- **The header** has its own `view-transition-name`, so it holds still, and its active-page line (`nav-indicator`) glides to the new link.
 - **Unsupported browsers** simply navigate without animation.
 
 **Other motion techniques used**
@@ -789,6 +804,9 @@ sequenceDiagram
 | Particle burst with `calc(var(--p) * 45deg)` | Heart button |
 | `transform-origin: left` + `scaleX` | Stat bars, toast countdown |
 | Keyed re-creation (`*ngFor` + `trackBy`) to replay animations | Header badge, heart burst, toast |
+| A named view transition that travels between elements | Header nav line (`nav-indicator`) |
+| Interaction-only keyframes (`rotate`, `translate`) | Header brand "catch" |
+| SVG `pathLength="1"` progress ring | Back-to-top button |
 
 ### 10.1 Dark mode
 
@@ -800,7 +818,8 @@ A theme here is **one token set**. Components never ask "am I dark?". They read 
   --poke-canvas: #111113;  --poke-bg: #1c1c1f; // page vs. cards: depth by lightness
   --poke-ink: #f2f2f7;     --poke-gray: #a1a1a6;  --poke-border: #2e2e33;
   --poke-surface: #26262b; --poke-surface-hi: #313137;
-  --poke-red: #ff453a;                        // brighter brand red for contrast on dark
+  --poke-red: #ff453a; --poke-red-dark: #ff6961; --poke-red-on-inverse: #d70015; // brighter reds for contrast on dark
+  --poke-blue: #6e7bff; --poke-muted: #6e6e73;
   --poke-inverse: #f2f2f7; --poke-on-inverse: #1c1c1e;
   --poke-emphasis: #2a2a30; --poke-on-emphasis: #f2f2f7;
   --shadow-rest: 0 1px 2px rgba(0, 0, 0, .5); /* …deeper shadows, so depth still reads */
@@ -922,7 +941,7 @@ Tests run with **Vitest + jsdom** through Angular's `@angular/build:unit-test` b
 | File | Notable settings |
 | ---- | ---------------- |
 | `angular.json` | `@angular/build:application` builder; schematics default **`standalone: false`** for components, directives and pipes; `inlineStyleLanguage: scss`; `stylePreprocessorOptions.includePaths: ["src/styles"]`; budgets (initial 500 kB/1 MB, component styles 4 kB/8 kB); `@angular/build:unit-test` for tests |
-| `tsconfig.json` | `target: ES2022`, `module: preserve`, `noImplicitOverride`, `noPropertyAccessFromIndexSignature`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `isolatedModules`; Angular: `strictInjectionParameters`, `strictInputAccessModifiers` |
+| `tsconfig.json` | `target: ES2022`, `module: preserve`, `strict`, `noImplicitOverride`, `noPropertyAccessFromIndexSignature`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `isolatedModules`; Angular: `strictInjectionParameters`, `strictInputAccessModifiers`, `strictTemplates` |
 | `tsconfig.spec.json` | Adds `vitest/globals` types (`describe`, `it`, `expect`, `vi` without imports) |
 | `.prettierrc` | `printWidth: 100`, `singleQuote: true`, Angular parser for `*.html` |
 | `.editorconfig` | Consistent indentation and line endings |
@@ -955,7 +974,7 @@ A map from Angular, TypeScript and CSS concepts to the exact file that demonstra
 | `HttpClient` + `withFetch()` | `app-module.ts`, `pokedex-service.ts` |
 | `@Input` (incl. `required`, `alias`, setters), `@Output` + `EventEmitter` | `search-bar.ts`, `count-up-directive.ts`, `collection-summary.ts`, `party-grid.ts` |
 | `@ViewChild` | `search-bar.ts` |
-| `@HostBinding`, `@HostListener` (incl. `document:keydown`) | all directives, `header.ts`, `pokemon-page.ts` |
+| `@HostBinding`, `@HostListener` (incl. `document:keydown`) | all directives, `header.ts`, `search-bar.ts`, `pokemon-page.ts` |
 | `ElementRef` | `magnetic-tilt`, `count-up`, `scroll-rail`, `scroll-sentinel`, `artwork-fallback` |
 | Directive `exportAs` + template reference variables | `scroll-rail-directive.ts` → `generation-filter.html`, `region-timeline.html` |
 | Attribute directives | `shared/directives/*` |
@@ -964,10 +983,10 @@ A map from Angular, TypeScript and CSS concepts to the exact file that demonstra
 | Content projection `<ng-content>` | `state-panel.html` |
 | `[class.x]`, `[style.--var]`, `[attr.aria-*]` | everywhere |
 | `ngClass`/`ngStyle` (earlier chapters; replaced by class/style bindings) | project history |
-| Pure pipes (built-in `number`, `titlecase`, and custom ones) | `shared/pipes/*`, templates |
+| Pure pipes (built-in `number`, `titlecase`, `slice`, and custom ones) | `shared/pipes/*`, templates, `header.html` |
 | Signals: `signal`, `computed`, `effect`, `linkedSignal`, `asReadonly` | `search.ts`, `favorites-store.ts`, `pokemon-page.ts` |
 | RxJS interop: `toSignal`, `toObservable`, `takeUntilDestroyed` | `header.ts`, `search.ts`, `pokemon-page.ts` |
-| `DestroyRef` | `favorites-store.ts`, `favorites.ts` |
+| `DestroyRef` | `favorites-store.ts`, `theme-service.ts`, `scroll-top.ts`, `search.ts`, `favorites.ts`, `about.ts` |
 | Zoneless change detection | `package.json` (no `zone.js`), signal-driven templates |
 | `TestBed`, component fixtures, NgModule test hosts | `*.spec.ts` |
 
@@ -998,19 +1017,21 @@ A map from Angular, TypeScript and CSS concepts to the exact file that demonstra
 | Theming with custom properties, `color-scheme`, `prefers-color-scheme` | `styles.scss`, `theme-service.ts`, `index.html` |
 | `:host-context()` | `region-timeline.scss` |
 | SVG masks | `theme-toggle.html` |
-| `:has()` | `_poke.scss` (`card-focus`) |
+| `:has()` | `_poke.scss` (`card-focus`), `styles.scss` (`body:has(.toast)`) |
 | `text-wrap: balance / pretty` | `styles.scss` |
 | `-webkit-text-stroke` outline numerals | `_poke.scss` (`outline-numeral`) |
 | `backdrop-filter` | `header.scss`, `heart-button.scss` |
 | `mix-blend-mode` | `party-card.scss` |
-| `aspect-ratio`, `object-fit` | cards, stage |
+| `aspect-ratio`, `object-fit` | cards, stage, `party-card.scss` |
+| Container queries (`container-type`, `@container`, `cqi`, `min-aspect-ratio`) | `search-card.scss`, `party-card.scss`, `stat-grid.scss`, `type-gallery.scss`, `architecture-map.scss` |
+| Passive scroll/resize listeners throttled with `requestAnimationFrame` | `scroll-top.ts` |
 | Media queries for capability: `hover`, `pointer`, `prefers-reduced-motion` | everywhere |
 | `IntersectionObserver` | `count-up-directive.ts`, `scroll-sentinel-directive.ts` |
 | `ResizeObserver` | `scroll-rail-directive.ts` |
 | HTML5 Drag & Drop with custom MIME types | `favorites-model.ts`, `party-grid.ts`, `box-card.ts` |
 | `localStorage` + the `storage` event | `favorites-store.ts` |
-| `requestAnimationFrame` | `count-up-directive.ts`, `navigation-focus.ts` |
-| `matchMedia` with change listeners | `magnetic-tilt-directive.ts` |
+| `requestAnimationFrame` | `count-up-directive.ts`, `navigation-focus.ts`, `scroll-top.ts` |
+| `matchMedia` with change listeners | `magnetic-tilt-directive.ts`, `theme-service.ts` |
 | SVG `pathLength`, `vector-effect` | `about-hero.html`, `architecture-map.scss` |
 | Sass module system (`@use`), mixins with arguments and `@content` | `_poke.scss` |
 
@@ -1018,7 +1039,7 @@ A map from Angular, TypeScript and CSS concepts to the exact file that demonstra
 
 ## 17. Project History: How It Grew
 
-Each chapter of the course lives on its own branch (`features/one` … `features/nine-one`), merged through `develop` into `main`.
+Each chapter of the course lives on its own branch (`features/one` … `features/seventeen`, plus `features/nine-one`), merged through `develop` into `main`. The table follows the order in which they were merged.
 
 | Chapter | What was learned / built |
 | ------- | ------------------------ |
@@ -1031,11 +1052,15 @@ Each chapter of the course lives on its own branch (`features/one` … `features
 | **Search** | `PokedexService` (19-request index), URL-backed filters, faceted counts, infinite list, responsive generation rail |
 | **Favorites** | `FavoritesStore`, heart button, party lineup with drag & drop, the Box, the type wheel, undo |
 | **About** | Editorial page; `appCountUp`, `appScrollRail`; scroll-driven animations |
-| **Header personality** (`thirteen`) | The brand "catch" on hover and the nav line that travels between pages |
-| **Back to top** (`fourteen`) | A floating button with a reading-progress ring |
+| **Cohesion pass** (`nine-one`) | Design tokens and mixins; `HomeCard`, `StatePanel`, `stagger`; the `/pokemon/:id` page; view transitions; title strategy; focus management; app-wide toasts; 404; touch targets; copy pass; cleanup and a green test suite |
 | **Responsive favorites** (`ten`) | Artwork fills its card with `object-fit: contain`; cards read their own shape with size container queries (`cqi`) |
 | **Dark mode** (`eleven`) | `ThemeService`, sun ⇄ moon toggle, a dark token set, inverse/emphasis tokens, pre-paint script, circular View Transitions reveal |
-| **Cohesion pass** (`nine-one`) | Design tokens and mixins; `HomeCard`, `StatePanel`, `stagger`; the `/pokemon/:id` page; view transitions; title strategy; focus management; app-wide toasts; 404; touch targets; copy pass; cleanup and a green test suite |
+| **Responsive About** (`twelve`) | Container queries per section; numbers sized to fit their tiles (`--chars`); the Swiss-style type specimen sheet; `label`/`id-label` mixins; an architecture map with the real classes and eight design decisions |
+| **Header personality** (`thirteen`) | The brand "catch" on hover and the nav line that travels between pages |
+| **Back to top** (`fourteen`) | A floating button with a reading-progress ring |
+| **Quiet search bar** (`fifteen`) | A focus tint of the first selected type instead of a glowing aura |
+| **Quiet card index** (`sixteen`) | The search card's id watermark becomes a small corner index sized with `cqi` |
+| **Credits** (`seventeen`) | About credits in two groups (data & images, built with) and a fuller trademark notice |
 
 ---
 
@@ -1059,7 +1084,7 @@ Each chapter of the course lives on its own branch (`features/one` … `features
 
 ## 19. Getting Started
 
-**Prerequisites:** Node.js ≥ 20 (developed on 26) and npm ≥ 11.
+**Prerequisites:** Node.js `^22.22.3`, `^24.15.0` or `≥ 26` (the range Angular 22 requires; developed on 26) and npm ≥ 11.
 
 ```bash
 git clone https://github.com/CristianSifuentes/poke.git

@@ -1,8 +1,8 @@
 import { Directive, HostBinding } from '@angular/core';
 
-// Marks a grid item for the bento mosaic's entrance bloom. The actual
-// animation lives in CSS as a @keyframes rule (see .pending-reveal in
-// home.scss) rather than a class-toggling transition driven from here —
+// Marks a card for the app-wide entrance bloom. The actual animation lives
+// in CSS: the `bloom` mixin in src/styles/_poke.scss styles .pending-reveal
+// with the global poke-bloom @keyframes, rather than a class-toggling transition driven from here —
 // keyframe animations play their whole timeline the instant the class
 // exists in the DOM, so there is no "did the browser paint the before-state
 // in time" race to lose against page bootstrap, image loads, or anything

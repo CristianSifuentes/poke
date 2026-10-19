@@ -10,7 +10,7 @@ import { POKEMON_TYPE_COLORS } from '../../../../shared/utils/pokemon-type-color
 })
 export class TypeFilter {
   @Input() selected: string[] = [];
-  @Input() counts: Record<string, number> = {};
+  @Input() counts: Partial<Record<string, number>> = {};
   @Input() disabled = false;
   @Output() readonly typeToggle = new EventEmitter<string>();
 

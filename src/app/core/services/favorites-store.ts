@@ -14,6 +14,9 @@ export interface RemovedFavorite {
 
 export const FAVORITES_STORAGE_KEY = 'poke.favorites.v1';
 
+// How many favorites form the party; the rest wait in the box.
+export const PARTY_SIZE = 6;
+
 // The array order *is* the user's arrangement: the first six records are
 // the party, the rest the box. New favorites join at the end.
 @Injectable({ providedIn: 'root' })

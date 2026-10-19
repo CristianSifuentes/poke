@@ -2,10 +2,9 @@ import { Directive, ElementRef, HostBinding, HostListener, Input, OnDestroy, OnI
 
 // A quiet 3D tilt + light-follows-cursor glow for the grid's largest cells
 // (hero/wide), where there's enough surface area for the effect to read as
-// craft rather than gimmick. ElementRef is required here for the same
-// reason as EntranceRevealDirective: turning a raw PointerEvent into a
-// tilt angle needs the host's own bounding rect, which only the DOM node
-// itself can provide.
+// craft rather than gimmick. ElementRef is required here: turning a raw
+// PointerEvent into a tilt angle needs the host's own bounding rect, which
+// only the DOM node itself can provide.
 @Directive({
   selector: '[appMagneticTilt]',
   standalone: false,
